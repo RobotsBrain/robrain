@@ -1,0 +1,9 @@
+
+
+all:
+	./configure --disable-opencl
+	make -f Makefile
+	cp libx264.a $(TOP_DIR)/lib/.libs
+
+clean:
+	make -f Makefile clean
