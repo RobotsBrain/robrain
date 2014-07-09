@@ -6,13 +6,19 @@
 
 #include "rb_log.h"
 
+
+	
 char *log_info[] = {
 	[RB_LOG_MIN] = "",
-	[RB_LOG_INFO] = "Info",
-	[RB_LOG_TRACE] = "Trace",
 	[RB_LOG_DEBUG] = "Debug",
-	[RB_LOG_WARN] = "Warn",
+	[RB_LOG_INFO] = "Info",
+	[RB_LOG_NOTICE] = "Notice",
+	[RB_LOG_DEBUG] = "Debug",
+	[RB_LOG_WARNING] = "Warning",
 	[RB_LOG_ERROR] = "Error",
+	[RB_LOG_CRIT] = "Crit",
+	[RB_LOG_ALERT] = "Alert",
+	[RB_LOG_EMERG] = "Emerg",
 	[RB_LOG_MAX] = "",
 };
 
@@ -86,7 +92,7 @@ void rb_log_printf(log_level level, const char *prefix, const char *fmt, ...)
 	time(&t_secs);
 	t_info = gmtime(&t_secs);
 
-	fprintf(fp, "%d-%d-%d %d:%d:%d, %s, %s: ", t_info->tm_year + 1900, t_info->tm_mon + 1, 
+	fprintf(fp, "%d-%d-%d %d:%d:%d %s %s: ", t_info->tm_year + 1900, t_info->tm_mon + 1, 
 				t_info->tm_mday, t_info->tm_hour, t_info->tm_min, t_info->tm_sec, prefix, log_info[level]);
 
 	va_start(args, fmt);

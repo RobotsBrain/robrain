@@ -18,5 +18,5 @@ $(RB_VIDEO_TEST): $(VIDEO_SRC)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(RB_LDLIBS) $(LDLIBS) -static
 
 clean:
-	rm -f $(RB_LOG_TEST) $(RB_VIDEO_TEST)
+	rm -f $(RB_LOG_TEST) $(RB_VIDEO_TEST) *.log *.h264
 
