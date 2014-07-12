@@ -9,6 +9,12 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+
+
+#define container_of(ptr, type, member) ({	\
+    const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
+    (type *)( (char *)__mptr - offsetof(type,member) );})
+
 typedef struct dlist_elem_st dlist_elem;
 
 /* Double list element. */
@@ -35,13 +41,11 @@ void rb_dlist_push_front(dlist *list, dlist_elem *elem);
 
 void rb_dlist_push_back(dlist *list, dlist_elem *elem);
 
-dlist_elem *rb_dlist_remove(dlist_elem *elem);
-
-char rb_dlist_empty(dlist *list);
-
 dlist_elem *rb_dlist_pop_front (dlist *list);
 
 dlist_elem *rb_dlist_pop_back (dlist *list);
+
+char rb_dlist_empty(dlist *list);
 
 size_t rb_dlist_size(dlist *list);
 

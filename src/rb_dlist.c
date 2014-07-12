@@ -16,12 +16,7 @@ static inline char elem_is_tail(dlist_elem *elem)
 	return elem != NULL && elem->prev != NULL && elem->next == NULL;
 }
 
-char rb_dlist_empty(dlist *list)
-{
-	return rb_dlist_begin(list) == rb_dlist_end(list);
-}
-
-dlist_elem *dlist_front(dlist *list)
+static dlist_elem *dlist_front(dlist *list)
 {
 	if(rb_dlist_empty(list))
 		return NULL;
@@ -29,7 +24,7 @@ dlist_elem *dlist_front(dlist *list)
 	return list->head.next;
 }
 
-dlist_elem *dlist_back(dlist *list)
+static dlist_elem *dlist_back(dlist *list)
 {
 	if(rb_dlist_empty(list))
 		return NULL;
@@ -37,7 +32,7 @@ dlist_elem *dlist_back(dlist *list)
 	return list->tail.prev;
 }
 
-static void dlist_insert(dlist *list, dlist_elem *before, dlist_elem *elem)
+static void dlist_insert(dlist_elem *before, dlist_elem *elem)
 {
 	if(before == NULL || elem == NULL)
 		return;
@@ -47,8 +42,6 @@ static void dlist_insert(dlist *list, dlist_elem *before, dlist_elem *elem)
 		elem->next = before;
 		before->prev->next = elem;
 		before->prev = elem;
-	} else {
-		dlist_insert(list, rb_dlist_end(list), elem);
 	}
 
 	return;
@@ -91,17 +84,22 @@ dlist_elem * rb_dlist_end(dlist *list)
   	return &list->tail;
 }
 
+char rb_dlist_empty(dlist *list)
+{
+	return rb_dlist_begin(list) == rb_dlist_end(list);
+}
+
 void rb_dlist_push_front(dlist *list, dlist_elem *elem)
 {
-	dlist_insert(list, rb_dlist_begin(list), elem);
+	dlist_insert(rb_dlist_begin(list), elem);
 }
 
 void rb_dlist_push_back(dlist *list, dlist_elem *elem)
 {
-	dlist_insert(list, rb_dlist_end(list), elem);
+	dlist_insert(rb_dlist_end(list), elem);
 }
 
-dlist_elem *rb_dlist_remove(dlist_elem *elem)
+static dlist_elem *rb_dlist_remove(dlist_elem *elem)
 {
 	if(!elem_is_interior(elem))
 		return NULL;
