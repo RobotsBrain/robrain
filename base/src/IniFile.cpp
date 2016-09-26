@@ -42,14 +42,14 @@ int CIniFile::SetValue(const string &section, const string &key, const string &v
     return m_pImpl->setValue(section, key, value, comment);
 }
 
-int CIniFile::GetValue(const string &section, const string &key, string &value, string &comment)
+int CIniFile::GetValue(const string &section, const string &key, string &value)
 {
     assert(m_pImpl != NULL);
 
-    return m_pImpl->getValue(section, key, value, comment);
+    return m_pImpl->getValue(section, key, value);
 }
 
 
-}
+} // end namespace Base
 
 

@@ -251,8 +251,7 @@ int IniFilePimpl::save(const string &bfname)
     return 0;
 }
 
-int IniFilePimpl::getValue(const string &section, const string &key, 
-                           string &value, string &comment)
+int IniFilePimpl::getValue(const string &section, const string &key, string &value)
 {
     Section *sect = getSection(section);
 
@@ -263,7 +262,7 @@ int IniFilePimpl::getValue(const string &section, const string &key,
     for (vector<Item>::iterator it = sect->items.begin(); it != sect->items.end(); ++it) {
         if (it->key == key) {
             value = it->value;
-            comment = it->comment;
+            // comment = it->comment;
             return 0;
         }
     }
@@ -430,7 +429,7 @@ bool IniFilePimpl::isComment(const string &str)
 }
 
 
-}
+}   // end namespace Base
 
 
 

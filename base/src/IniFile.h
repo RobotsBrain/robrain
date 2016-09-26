@@ -20,8 +20,7 @@ public:
 
     int SetValue(const std::string &section, const std::string &key,
     			 const std::string &value, const std::string &comment = "");
-    int GetValue(const std::string &section, const std::string &key, 
-    			 std::string &value, std::string &comment);
+    int GetValue(const std::string &section, const std::string &key, std::string &value);
 
 private:
     IniFilePimpl   *m_pImpl;

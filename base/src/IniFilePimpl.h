@@ -1,12 +1,14 @@
 #ifndef __INIFILEPIMPL_H__
 #define __INIFILEPIMPL_H__
 
-#include <map>
+#include <string.h>
 #include <vector>
 #include <string>
-#include <string.h>
+#include <map>
 
 using namespace std;
+
+
 
 namespace Base {
 
@@ -33,7 +35,7 @@ public:
     int save(const string &bfname = "");
 
     int setValue(const string &section, const string &key, const string &value, const string &comment = "");
-    int getValue(const string &section, const string &key, string &value, string &comment);
+    int getValue(const string &section, const string &key, string &value);
 
 private:
     Section *getSection(const string &section = "");
@@ -48,7 +50,7 @@ private:
     map<string, Section *>  m_sections;
 };
 
-}
+} // end namespace Base
 
 #endif
 
