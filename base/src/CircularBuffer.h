@@ -18,7 +18,7 @@ public:
   	size_t read(char *data, size_t bytes);
 
 private:
-  	size_t beg_index_, end_index_, size_, capacity_;
+  	size_t m_beg_index, m_end_index, size_, capacity_;
   	char *data_;
 };
 
