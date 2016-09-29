@@ -2,6 +2,8 @@
 
 #include "MemoryPool.h"  
 
+#if 0
+
 /************************************************************************/  
 /* 内存池起始地址对齐到ADDR_ALIGN字节 
 /************************************************************************/  
@@ -386,5 +388,5 @@ void FreeMemory(void *ptrMemoryBlock, PMEMORYPOOL pMem)
     pMem->mem_used_size -= size;  
 }  
 
-
+#endif
 

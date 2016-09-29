@@ -18,12 +18,13 @@ public:
   	size_t read(char *data, size_t bytes);
 
 private:
-  	size_t 	m_beg_index;
-  	size_t 	m_end_index;
-  	size_t 	m_size;
-  	size_t 	m_capacity;
-  	char 	*data_;
+  	size_t 	 m_beg_index;
+  	size_t 	 m_end_index;
+  	size_t 	 m_size;
+  	size_t 	 m_capacity;
+  	char 	   *m_data;
 };
 
+} // end namespace Base
 
 #endif
