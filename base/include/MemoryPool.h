@@ -1,10 +1,11 @@
 #ifndef __MEMORYPOOL_H__
 #define __MEMORYPOOL_H__
 
+#include <stdlib.h>
+
 
 namespace Base {
 
-#include <stdlib.h>
 
 #define MINUNITSIZE 64  
 #define ADDR_ALIGN 8  

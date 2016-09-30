@@ -1,11 +1,12 @@
 #include "MemoryPool.h"  
-#include <iostream>  
-#include <windows.h>  
-#include <vector>  
-#include <time.h>  
-#include <math.h>  
-#include <fstream>  
+#include <cstdint>
+#include <iostream>
+#include <vector>
+#include <time.h>
+#include <math.h>
+#include <fstream>
 
+#if 0
 using namespace std;  
 int break_time = 0;  
 // 检测内存池相关参数  
@@ -617,10 +618,11 @@ void rand_test_2()
     delete ratio;  
     free(pBuf);  
 }  
+#endif
 
-int main(int argc, int* argv[])  
+int main(int argc, char* argv[])
 {  
-    rand_test();  
+    //rand_test();  
 //  rand_test_2();  
       
     return 0;  

@@ -31,8 +31,8 @@ int main(int argc, char* argv[])
     pthread_t thread1, thread2;  
     pthread_attr_t attr1, attr2;  
   
-    char *pMsg1 = "First print thread.";  
-    char *pMsg2 = "Second print thread.";  
+    char pMsg1[] = "First print thread.";
+    char pMsg2[] = "Second print thread.";
 
     pthread_attr_init(&attr1);  
     pthread_attr_setdetachstate(&attr1, PTHREAD_CREATE_JOINABLE);  
