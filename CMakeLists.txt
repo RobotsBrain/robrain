@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9)
 
 set(TOPDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(OUTDIR ${TOPDIR}/out/)
-set(BUILDDIR ${TOPDIR}/build-cmake/cam)
+set(BUILDDIR ${TOPDIR}/build-cmake/camera)
 
 #include(${TOPDIR}/)
 #include(${BOARDDIR}/)
@@ -17,3 +17,5 @@ set(BUILDDIR ${TOPDIR}/build-cmake/cam)
 
 add_subdirectory(${TOPDIR}/base/src ${BUILDDIR}/base/src)
 add_subdirectory(${TOPDIR}/base/test ${BUILDDIR}/base/test)
+
+add_subdirectory(${TOPDIR}/platform/linux ${BUILDDIR}/platform/linux)

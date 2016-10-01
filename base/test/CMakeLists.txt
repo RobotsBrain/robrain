@@ -1,12 +1,9 @@
 set(EXECUTABLE_OUTPUT_PATH ${OUTDIR}/base/test)
 
-INCLUDE_DIRECTORIES(
-    ../include
+include_directories(
+    ${TOPDIR}/base/include
 )
 
-LINK_DIRECTORIES(
-    ${VENDOR_LIBDIRS}
-)
 
 
 #################################
