@@ -23,4 +23,10 @@ target_link_libraries(TestLock base pthread)
 #################################
 add_executable(TestMemoryPool TestMemoryPool.cpp)
 
-target_link_libraries( base)
+target_link_libraries(TestMemoryPool base)
+
+
+#################################
+add_executable(TestLog TestLog.cpp)
+
+target_link_libraries(TestLog base)
