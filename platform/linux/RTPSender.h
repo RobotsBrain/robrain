@@ -5,14 +5,16 @@
 #include "rtptimeutilities.h"
 #include "rtpaddress.h"
 #include "rtpsourcedata.h"
+#include "rtpsession.h"
 
 
+using namespace jrtplib;
 
-class CRTPSender : public RTPSession  
+class CRTPSender: public RTPSession
 {  
 public:  
-    CRTPSender(void);  
-    ~CRTPSender(void);  
+    CRTPSender();  
+    ~CRTPSender();  
   
 protected:  
     void OnAPPPacket(RTCPAPPPacket *apppacket, const RTPTime &receivetime, const RTPAddress *senderaddress);  

@@ -1,13 +1,21 @@
+#include <stdio.h>
+
+#include "rtcpapppacket.h"
+#include "rtpsourcedata.h"
 #include "rtperrors.h"
 
 #include "RTPSender.h"
+
+
+#define MAX_RTP_PKT_LENGTH 1360  
+#define H264               96
 
 
 
 bool CheckError(int rtperr)  
 {  
     if (rtperr < 0) {  
-        std::cout<<"ERROR: "<<RTPGetErrorString(rtperr)<<std::endl;  
+        printf("error: %s\n", RTPGetErrorString(rtperr).c_str());  
         return false;  
     }
 
@@ -26,9 +34,9 @@ CRTPSender::~CRTPSender(void)
   
 void CRTPSender::OnAPPPacket(RTCPAPPPacket *apppacket,const RTPTime &receivetime,const RTPAddress *senderaddress)  
 {//收到RTCP APP数据  
-    std::cout<<"Got RTCP packet from: "<<senderaddress<<std::endl;  
-    std::cout<<"Got RTCP subtype: "<<apppacket->GetSubType()<<std::endl;  
-    std::cout<<"Got RTCP data: "<<(char *)apppacket->GetAPPData()<<std::endl;
+    // std::cout<<"Got RTCP packet from: "<<senderaddress<<std::endl;  
+    // std::cout<<"Got RTCP subtype: "<<apppacket->GetSubType()<<std::endl;  
+    // std::cout<<"Got RTCP data: "<<(char *)apppacket->GetAPPData()<<std::endl;
 
     return ;  
 }  
