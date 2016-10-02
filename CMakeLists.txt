@@ -14,6 +14,7 @@ set(BUILDDIR ${TOPDIR}/build-cmake/camera)
 #add_definitions(-DBUILD_SSL)
 #add_compile_options(-DBUILD_SSL)
 
+add_definitions(-DBUILD_DUMP_H264FILE)
 
 add_subdirectory(${TOPDIR}/base/src ${BUILDDIR}/base/src)
 add_subdirectory(${TOPDIR}/base/test ${BUILDDIR}/base/test)

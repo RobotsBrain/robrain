@@ -45,7 +45,10 @@ private:
 	struct v4l2_format 		m_v4l2_fmt;
 	struct v4l2_crop 		m_v4l2_crop;
 
+#ifdef BUILD_DUMP_H264FILE
 	CDumpH264File			m_h264file;
+#endif
+	
 	CX264Encoder			m_x264encoder;
 };
 

@@ -246,7 +246,9 @@ void CVideoCapture::ReadAndEncodeFrame()
 
 	uint8_t *h264_buf = (uint8_t *) malloc(sizeof(uint8_t) * 640 * 480 * 3);
 
+#ifdef BUILD_DUMP_H264FILE
 	m_h264file.Open("test.h264");
+#endif
 
 	m_x264encoder.Start(640, 480);
 
@@ -290,23 +292,10 @@ void CVideoCapture::ReadAndEncodeFrame()
 
 		if (yuv_frame[0] != '\0') {
 			int h264_length = m_x264encoder.CompressFrame(-1, yuv_frame, h264_buf);
+#ifdef BUILD_DUMP_H264FILE
 			m_h264file.Write(h264_buf, h264_length);
+#endif
 		}
-	
-		// camera_encode_frame(cam, m_buffers[buf.index].start, buf.length);
-		// {
-		// 	 0;
-
-		// 	//这里有一个问题，通过测试发现前6帧都是0，所以这里我跳过了为0的帧
-		// 	
-		// 		return;
-
-		// 	h264_length = h264_compress_frame(&cam->en, -1, yuv_frame, cam->h264_buf);
-		// 	if (h264_length > 0) {
-		// 		//写h264文件
-		// 		fwrite(cam->h264_buf, h264_length, 1, cam->h264_fp);
-		// 	}
-		// }
 
 		if (camera_ioctl(m_vfd, VIDIOC_QBUF, &buf) < 0) {
 			printf("VIDIOC_DQBUF\n");
@@ -317,7 +306,11 @@ void CVideoCapture::ReadAndEncodeFrame()
 	free(h264_buf);
 
 	m_x264encoder.Stop();
+	
+#ifdef BUILD_DUMP_H264FILE
 	m_h264file.Close();
+#endif
+
 	Close();
 
 	return;
