@@ -17,5 +17,5 @@ make
 make install
 cd ..
 
-#cp ${CURDIR}/include/jrtplib3/*.h ${CURDIR}/../prebuild/include/jrtplib
-#cp ${CURDIR}/lib/libjrtp.a ${CURDIR}/../prebuild/libs
+cp ${CURDIR}/include/jthread/*.h ${CURDIR}/../prebuild/include/jthread
+cp ${CURDIR}/lib/libjthread.a ${CURDIR}/../prebuild/libs
