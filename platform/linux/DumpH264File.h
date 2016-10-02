@@ -1,6 +1,7 @@
 #ifndef __DUMPH264FILE_H__
 #define __DUMPH264FILE_H__
 
+#include <stdint.h>
 #include <stdio.h>
 #include <string>
 
@@ -14,11 +15,11 @@ public:
 	
 public:
 	void Open(std::string filename);
-	void Stop();
+	void Close();
 	void Write(uint8_t *buf, int length);
 
 private:
-	File *m_fp;
+	FILE *m_fp;
 };
 
 #endif

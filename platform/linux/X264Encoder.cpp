@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "CX264Encoder.h"
+#include "X264Encoder.h"
 
 
 
@@ -86,9 +86,9 @@ int CX264Encoder::CompressFrame(int type, uint8_t *in, uint8_t *out)
 	int i = 0;
 	uint8_t *p_out = out;
 
-	char *y = m_picture->img.plane[0];
-	char *u = m_picture->img.plane[1];
-	char *v = m_picture->img.plane[2];
+	uint8_t *y = m_picture->img.plane[0];
+	uint8_t *u = m_picture->img.plane[1];
+	uint8_t *v = m_picture->img.plane[2];
 
 	int is_y = 1, is_u = 1;
 	int y_index = 0, u_index = 0, v_index = 0;

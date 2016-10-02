@@ -11,6 +11,6 @@ link_directories(
 
 
 #################################
-add_executable(robrain main.c rb_h264encode.c rb_video.c)
+add_executable(robrain main.cpp VideoCapture.cpp X264Encoder.cpp DumpH264File.cpp)
 
 target_link_libraries(robrain base x264 pthread)

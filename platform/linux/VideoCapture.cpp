@@ -44,14 +44,22 @@ CVideoCapture::~CVideoCapture()
 
 }
 
-
 bool CVideoCapture::Start()
 {
+    pthread_attr_init(&m_attr);  
+     
+    if(pthread_create(&m_tid, &m_attr, ThreadProc, this) == -1) {  
+ 		printf("can not create thread\n");
+    }
+
 	return true;
 }
 
 bool CVideoCapture::Stop()
 {
+	pthread_join(m_tid, NULL);  
+    pthread_attr_destroy(&m_attr); 
+
 	return true;
 }
 
@@ -90,7 +98,7 @@ int CVideoCapture::Open(std::string devname, int width, int height)
 	}
 
 	printf("\nVIDOOC_QUERYCAP\n");
-	printf("driver: %s, card: %s, bus info: %s, version: %s\n", 
+	printf("driver: %s, card: %s, bus info: %s, version: %d\n", 
 			cap->driver, cap->card, cap->bus_info, cap->version);
 
 	/* Select video input, video standard and tune here. */
@@ -159,7 +167,7 @@ void CVideoCapture::InitMmap()
 
 	m_buff_num = req.count;
 
-	m_buffers = calloc(req.count, sizeof(struct Buffer));
+	m_buffers = (struct Buffer *)calloc(req.count, sizeof(struct Buffer));
 	if (!m_buffers) {
 		printf("Out of memory\n");
 		return;
@@ -192,7 +200,7 @@ void CVideoCapture::InitMmap()
 	return;
 }
 
-void CVideoCapture::Close(struct camera *cam)
+void CVideoCapture::Close()
 {
 	uint32_t i;
 	enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -211,16 +219,36 @@ void CVideoCapture::Close(struct camera *cam)
 
 	free(m_buffers);
 
-	close(m_vfd)
+	close(m_vfd);
 
 	return;
 }
 
-void camera_capturing_start(struct camera *cam)
+void *CVideoCapture::ThreadProc(void *argv)
+{
+	CVideoCapture *thiz = (CVideoCapture *)argv;
+
+	if(thiz != NULL) {
+		thiz->ReadAndEncodeFrame();
+	}
+
+	return NULL;
+}
+
+void CVideoCapture::ReadAndEncodeFrame()
 {
 	uint32_t i;
 	struct v4l2_buffer buf;
 	enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+	Open("/dev/video0", 640, 480);
+	InitMmap();
+
+	uint8_t *h264_buf = (uint8_t *) malloc(sizeof(uint8_t) * 640 * 480 * 3);
+
+	m_h264file.Open("test.h264");
+
+	m_x264encoder.Start(640, 480);
 
 	memset(&buf, 0, sizeof(struct v4l2_buffer));
 	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -231,62 +259,68 @@ void camera_capturing_start(struct camera *cam)
 
 		if (camera_ioctl(m_vfd, VIDIOC_QBUF, &buf) < 0) {
 			printf("VIDIOC_DQBUF\n");
-			return;
 		}
 	}
 
 	if (camera_ioctl(m_vfd, VIDIOC_STREAMON, &type) < 0) {
 		printf("VIDIOC_STREAMON\n");
-		return;
 	}
 
-	return;
-}
+	while(1) {
+		memset(&buf, 0, sizeof(struct v4l2_buffer));
 
-int CVideoCapture::ReadAndEncodeFrame(struct camera *cam)
-{
-	struct v4l2_buffer buf;
+		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		buf.memory = V4L2_MEMORY_MMAP;
 
-	memset(&buf, 0, sizeof(struct v4l2_buffer));
+		//this operator below will change buf.index(0 <= buf.index <= 3)
+		if (camera_ioctl(m_vfd, VIDIOC_DQBUF, &buf) < 0) {
+			switch (errno) {
+			case EAGAIN:
+				break;
+			case EIO:
+				/* Could ignore EIO, see spec. */
+				/* fall through */
+			default:
+				printf("VIDIOC_DQBUF\n");
+				break;
+			}
+		}
 
-	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	buf.memory = V4L2_MEMORY_MMAP;
+		uint8_t *yuv_frame = (uint8_t *)m_buffers[buf.index].start;
 
-	//this operator below will change buf.index(0 <= buf.index <= 3)
-	if (camera_ioctl(m_vfd, VIDIOC_DQBUF, &buf) < 0) {
-		switch (errno) {
-		case EAGAIN:
-			return 0;
-		case EIO:
-			/* Could ignore EIO, see spec. */
-			/* fall through */
-		default:
+		if (yuv_frame[0] != '\0') {
+			int h264_length = m_x264encoder.CompressFrame(-1, yuv_frame, h264_buf);
+			m_h264file.Write(h264_buf, h264_length);
+		}
+	
+		// camera_encode_frame(cam, m_buffers[buf.index].start, buf.length);
+		// {
+		// 	 0;
+
+		// 	//这里有一个问题，通过测试发现前6帧都是0，所以这里我跳过了为0的帧
+		// 	
+		// 		return;
+
+		// 	h264_length = h264_compress_frame(&cam->en, -1, yuv_frame, cam->h264_buf);
+		// 	if (h264_length > 0) {
+		// 		//写h264文件
+		// 		fwrite(cam->h264_buf, h264_length, 1, cam->h264_fp);
+		// 	}
+		// }
+
+		if (camera_ioctl(m_vfd, VIDIOC_QBUF, &buf) < 0) {
 			printf("VIDIOC_DQBUF\n");
-			return -1;
+			break;
 		}
 	}
+	
+	free(h264_buf);
 
-	// camera_encode_frame(cam, m_buffers[buf.index].start, buf.length);
-	// {
-	// 	int h264_length = 0;
+	m_x264encoder.Stop();
+	m_h264file.Close();
+	Close();
 
-	// 	//这里有一个问题，通过测试发现前6帧都是0，所以这里我跳过了为0的帧
-	// 	if (yuv_frame[0] == '\0')
-	// 		return;
-
-	// 	h264_length = h264_compress_frame(&cam->en, -1, yuv_frame, cam->h264_buf);
-	// 	if (h264_length > 0) {
-	// 		//写h264文件
-	// 		fwrite(cam->h264_buf, h264_length, 1, cam->h264_fp);
-	// 	}
-	// }
-
-	if (camera_ioctl(m_vfd, VIDIOC_QBUF, &buf) < 0) {
-		printf("VIDIOC_DQBUF\n");
-		return -1;
-	}
-
-	return 0;
+	return;
 }
 
 
