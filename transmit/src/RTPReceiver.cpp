@@ -1,7 +1,7 @@
 #include "RTPReceiver.h"
 
 
-
+#if 0 
 void CRTPReceiver::InitBufferSize()  
 {  
     m_ReceiveArray.SetMemberSize(BUFFER_SIZE);  
@@ -70,7 +70,7 @@ void CRTPReceiver::ProcessRTPPacket(const RTPSourceData &srcdat,const RTPPacket 
     return; 
 }
   
-  
+
 void StartReceive()  
 {  
     /*CRTPReceiver sess;*/  
@@ -110,4 +110,4 @@ int main(int argc, char* argv[])
     return 0;  
 }
 
-
+#endif

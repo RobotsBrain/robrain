@@ -1,5 +1,5 @@
-#ifndef __DUMPH264FILE_H__
-#define __DUMPH264FILE_H__
+#ifndef __DUMPFILE_H__
+#define __DUMPFILE_H__
 
 #include <stdint.h>
 #include <stdio.h>
@@ -7,11 +7,11 @@
 
 
 
-class CDumpH264File
+class CDumpFile
 {
 public:
-	CDumpH264File();
-	~CDumpH264File();
+	CDumpFile();
+	~CDumpFile();
 	
 public:
 	void Open(std::string filename);

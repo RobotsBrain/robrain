@@ -19,4 +19,6 @@ add_definitions(-DBUILD_DUMP_H264FILE)
 add_subdirectory(${TOPDIR}/base/src ${BUILDDIR}/base/src)
 add_subdirectory(${TOPDIR}/base/test ${BUILDDIR}/base/test)
 
+add_subdirectory(${TOPDIR}/transmit/src ${BUILDDIR}/transmit/src)
+
 add_subdirectory(${TOPDIR}/platform/linux ${BUILDDIR}/platform/linux)

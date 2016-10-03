@@ -1,19 +1,19 @@
-#include "DumpH264File.h"
+#include "DumpFile.h"
 
 
 
-CDumpH264File::CDumpH264File()
+CDumpFile::CDumpFile()
 : m_fp(NULL)
 {
 
 }
 
-CDumpH264File::~CDumpH264File()
+CDumpFile::~CDumpFile()
 {
 
 }
 
-void CDumpH264File::Open(std::string filename)
+void CDumpFile::Open(std::string filename)
 {
 	if ((m_fp = fopen(filename.c_str(), "wa+")) == NULL) {
 		printf("open file error!\n");
@@ -23,7 +23,7 @@ void CDumpH264File::Open(std::string filename)
 	return;
 }
 
-void CDumpH264File::Close()
+void CDumpFile::Close()
 {
 	if (m_fp != NULL) {
 		fclose(m_fp);
@@ -33,7 +33,7 @@ void CDumpH264File::Close()
 	return;
 }
 
-void CDumpH264File::Write(char *buf, int length)
+void CDumpFile::Write(char *buf, int length)
 {
 	fwrite(buf, length, 1, m_fp);
 }

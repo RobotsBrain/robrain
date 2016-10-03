@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <alsa/asoundlib.h>
 
-#include "DumpH264File.h"
+#include "DumpFile.h"
 
 
 
@@ -31,7 +31,7 @@ private:
 	snd_pcm_hw_params_t *m_params;   
 	snd_pcm_uframes_t 	m_frames;
 
-	CDumpH264File		m_pcmfile;
+	CDumpFile			m_pcmfile;
 };
 
 #endif
