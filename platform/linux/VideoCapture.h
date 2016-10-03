@@ -33,7 +33,7 @@ private:
 	static void *ThreadProc(void *argv);
 
 private:
-	pthread_t 				m_tid;  
+	pthread_t 				m_tid;
     pthread_attr_t 			m_attr;
 
 	int						m_vfd;

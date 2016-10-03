@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 	snd_pcm_uframes_t frames;  
 	char *buffer;  
 
-	if((fp =fopen("sound.wav","w")) < 0) {
+	if((fp = fopen("sound.wav","w")) < 0) {
 		printf("open sound.wav fial\n");
 	}
 
@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 	snd_pcm_hw_params_set_channels(handle, params, 2);  
 	/* 44100 bits/second sampling rate (CD quality) */  
 	val = 44100;  
-	snd_pcm_hw_params_set_rate_near(handle, params,  &val, &dir);  
+	snd_pcm_hw_params_set_rate_near(handle, params, &val, &dir);  
 	/* Set period size to 32 frames. */  
 	frames = 32;  
 	snd_pcm_hw_params_set_period_size_near(handle,  params, &frames, &dir);  
@@ -131,12 +131,11 @@ int main(int argc, char **argv) {
 	/*******************************************************************/
 
 	snd_pcm_drain(handle);  
-	snd_pcm_close(handle); 
+	snd_pcm_close(handle);
 	fclose(fp); 
 	free(buffer);
 
 	return 0;
 }
-
 
 

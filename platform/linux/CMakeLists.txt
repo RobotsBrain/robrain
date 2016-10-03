@@ -12,6 +12,6 @@ link_directories(
 
 
 #################################
-add_executable(robrain main.cpp VideoCapture.cpp X264Encoder.cpp DumpH264File.cpp RTPSender.cpp)
+add_executable(robrain main.cpp VideoCapture.cpp X264Encoder.cpp AudioManage.cpp DumpH264File.cpp RTPSender.cpp)
 
-target_link_libraries(robrain base x264 jrtp pthread)
+target_link_libraries(robrain base x264 asound jrtp pthread)

@@ -16,7 +16,7 @@ public:
 public:
 	void Open(std::string filename);
 	void Close();
-	void Write(uint8_t *buf, int length);
+	void Write(char *buf, int length);
 
 private:
 	FILE *m_fp;

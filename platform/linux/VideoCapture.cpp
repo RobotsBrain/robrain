@@ -57,8 +57,8 @@ bool CVideoCapture::Start()
 
 bool CVideoCapture::Stop()
 {
-	pthread_join(m_tid, NULL);  
-    pthread_attr_destroy(&m_attr); 
+	pthread_join(m_tid, NULL);
+    pthread_attr_destroy(&m_attr);
 
 	return true;
 }
@@ -293,7 +293,7 @@ void CVideoCapture::ReadAndEncodeFrame()
 		if (yuv_frame[0] != '\0') {
 			int h264_length = m_x264encoder.CompressFrame(-1, yuv_frame, h264_buf);
 #ifdef BUILD_DUMP_H264FILE
-			m_h264file.Write(h264_buf, h264_length);
+			m_h264file.Write((char *)h264_buf, h264_length);
 #endif
 		}
 

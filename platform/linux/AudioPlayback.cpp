@@ -3,7 +3,8 @@
 #include <stdio.h>
 
 
-int main() {  
+int main(int argc, char **argv) 
+{  
 	long loops;  
 	int rc,j = 0;  
 	int size;  
@@ -15,17 +16,15 @@ int main() {
 	char *buffer;  
 	FILE *fp ;
 
-	if( (fp = fopen("sound.wav","r")) < 0) {
+	if((fp = fopen("audio.pcm", "r")) < 0) {
 		printf("open sound.wav fial\n");
 	}
-	//if(fseek(fp,0,SEEK_SET) < 0)
-	// printf("put fp start to first error\n ");
 
 	/* Open PCM device for playback. */  
 	rc = snd_pcm_open(&handle, "default", SND_PCM_STREAM_PLAYBACK, 0);  
 	if (rc < 0) {  
-		fprintf(stderr,  "unable to open pcm device: %s/n", snd_strerror(rc));  
-		exit(1);  
+		fprintf(stderr,  "unable to open pcm device: %s\n", snd_strerror(rc));  
+		exit(1);
 	}
 
 	/* Allocate a hardware parameters object. */  
@@ -34,17 +33,14 @@ int main() {
 	snd_pcm_hw_params_any(handle, params);  
 	/* Set the desired hardware parameters. */  
 	/* Interleaved mode */  
-	snd_pcm_hw_params_set_access(handle, params,  
-	SND_PCM_ACCESS_RW_INTERLEAVED);  
+	snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);  
 	/* Signed 16-bit little-endian format */  
-	snd_pcm_hw_params_set_format(handle, params,  
-	SND_PCM_FORMAT_S16_LE);  
+	snd_pcm_hw_params_set_format(handle, params, SND_PCM_FORMAT_S16_LE);  
 	/* Two channels (stereo) */  
 	snd_pcm_hw_params_set_channels(handle, params, 2);  
 	/* 44100 bits/second sampling rate (CD quality) */  
 	val = 44100;  
-	snd_pcm_hw_params_set_rate_near(handle, params,  
-	&val, &dir);  
+	snd_pcm_hw_params_set_rate_near(handle, params, &val, &dir);  
 	/* Set period size to 32 frames. */  
 	frames = 16;  //设置的值没有反应
 	snd_pcm_hw_params_set_period_size_near(handle,  params, &frames, &dir); // 
@@ -52,7 +48,7 @@ int main() {
 	/* Write the parameters to the driver */  
 	rc = snd_pcm_hw_params(handle, params);  
 	if (rc < 0) {  
-		fprintf(stderr,  "unable to set hw parameters: %s/n",  snd_strerror(rc));  
+		fprintf(stderr,  "unable to set hw parameters: %s\n", snd_strerror(rc));  
 		exit(1);  
 	}  
 	/* Use a buffer large enough to hold one period */  
@@ -76,7 +72,7 @@ int main() {
 			fprintf(stderr, "end of file on input\n");  
 			break;  
 		} else if (rc != size) {  
-			fprintf(stderr,  "short read: read %d bytes\n", rc);  
+			fprintf(stderr,  "short read: read %d bytes\n", rc);
 		}  
 		//else printf("fread to buffer success\n");
 
@@ -88,9 +84,9 @@ int main() {
 		} else if (rc < 0) {  
 			fprintf(stderr,  "error from writei: %s\n", snd_strerror(rc));  
 		}  else if (rc != (int)frames) {  
-			fprintf(stderr,  "short write, write %d frames\n", rc);  
-		}  
-	}  
+			fprintf(stderr, "short write, write %d frames\n", rc);  
+		}
+	}
 
 	/******************打印参数*********************/
 	snd_pcm_hw_params_get_channels(params, &val);  
@@ -141,8 +137,8 @@ int main() {
 	/*******************************************************************/
 
 	snd_pcm_drain(handle);  
-	snd_pcm_close(handle);  
-	free(buf);
+	snd_pcm_close(handle);
+	free(buffer);
 
 	fclose(fp);
 

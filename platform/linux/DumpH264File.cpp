@@ -33,7 +33,7 @@ void CDumpH264File::Close()
 	return;
 }
 
-void CDumpH264File::Write(uint8_t *buf, int length)
+void CDumpH264File::Write(char *buf, int length)
 {
 	fwrite(buf, length, 1, m_fp);
 }
