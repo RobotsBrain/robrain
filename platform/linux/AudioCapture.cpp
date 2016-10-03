@@ -33,8 +33,7 @@ int main(int argc, char **argv) {
 	snd_pcm_hw_params_any(handle, params);  
 	/* Set the desired hardware parameters. */  
 	/* Interleaved mode */  
-	snd_pcm_hw_params_set_access(handle, params,  
-	SND_PCM_ACCESS_RW_INTERLEAVED);  
+	snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);  
 	/* Signed 16-bit little-endian format */  
 	snd_pcm_hw_params_set_format(handle, params, SND_PCM_FORMAT_S16_LE);  
 	/* Two channels (stereo) */  
@@ -44,7 +43,7 @@ int main(int argc, char **argv) {
 	snd_pcm_hw_params_set_rate_near(handle, params, &val, &dir);  
 	/* Set period size to 32 frames. */  
 	frames = 32;  
-	snd_pcm_hw_params_set_period_size_near(handle,  params, &frames, &dir);  
+	snd_pcm_hw_params_set_period_size_near(handle,  params, &frames, &dir);
 	/* Write the parameters to the driver */  
 	rc = snd_pcm_hw_params(handle, params);  
 	if (rc < 0) {  
@@ -52,7 +51,7 @@ int main(int argc, char **argv) {
 		exit(1);  
 	}  
 	/* Use a buffer large enough to hold one period */  
-	snd_pcm_hw_params_get_period_size(params,  &frames, &dir);  
+	snd_pcm_hw_params_get_period_size(params, &frames, &dir);  
 	size = frames * 4; /* 2 bytes/sample, 2 channels */  
 	printf("size = %d\n",size);
 	buffer = (char *) malloc(size);  
