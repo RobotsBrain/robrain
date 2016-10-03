@@ -6,6 +6,7 @@
 #include <string>
 
 
+namespace Base {
 
 class CDumpFile
 {
@@ -21,6 +22,8 @@ public:
 private:
 	FILE *m_fp;
 };
+
+} // end namespace Base
 
 #endif
 

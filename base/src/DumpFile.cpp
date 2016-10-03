@@ -2,6 +2,8 @@
 
 
 
+namespace Base {
+
 CDumpFile::CDumpFile()
 : m_fp(NULL)
 {
@@ -38,4 +40,4 @@ void CDumpFile::Write(char *buf, int length)
 	fwrite(buf, length, 1, m_fp);
 }
 
-
+} // end namespace Base

@@ -31,7 +31,7 @@ private:
 	snd_pcm_hw_params_t *m_params;   
 	snd_pcm_uframes_t 	m_frames;
 
-	CDumpFile			m_pcmfile;
+	Base::CDumpFile		m_pcmfile;
 };
 
 #endif
