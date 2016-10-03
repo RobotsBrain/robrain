@@ -10,6 +10,9 @@ fi
 
 unzip ${FILENAME}
 
+mkdir include
+mkdir lib
+
 # build lib
 cd ${DIRNAME}
 # dos2unix configure
@@ -18,13 +21,11 @@ cat configure | tr -d '\r' > temp.sh
 mv temp.sh configure
 chmod +x configure
 
-./configure
+./configure --enable-shared --enable-static --prefix=${CURDIR}
 make
+make install-lib
+make install-headers
 cd ..
 
-cp ${DIRNAME}/jpegint.h ${CURDIR}/../prebuild/include/jpeg
-cp ${DIRNAME}/jerror.h ${CURDIR}/../prebuild/include/jpeg
-cp ${DIRNAME}/jconfig.h ${CURDIR}/../prebuild/include/jpeg
-cp ${DIRNAME}/jmorecfg.h ${CURDIR}/../prebuild/include/jpeg
-cp ${DIRNAME}/jpeglib.h ${CURDIR}/../prebuild/include/jpeg
-cp ${DIRNAME}/libjpeg.a ${CURDIR}/../prebuild/libs
+cp ${CURDIR}/*.h ${CURDIR}/../prebuild/include/jpeg
+cp ${CURDIR}/libjpeg.a ${CURDIR}/../prebuild/libs
