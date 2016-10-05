@@ -1,6 +1,7 @@
 include_directories(
 	${TOPDIR}/image/include
 	${TOPDIR}/opensource/prebuild/include/jpeg
+	${TOPDIR}/opensource/prebuild/include/zbar
 )
 
 file(GLOB_RECURSE HEADERFILES "../include/*")
