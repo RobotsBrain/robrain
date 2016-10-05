@@ -27,3 +27,9 @@ target_link_libraries(TestMemoryPool base)
 add_executable(TestLog TestLog.cpp)
 
 target_link_libraries(TestLog base)
+
+
+#################################
+add_executable(TestDumpFile TestDumpFile.cpp)
+
+target_link_libraries(TestDumpFile base)
