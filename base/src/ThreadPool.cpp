@@ -17,12 +17,10 @@ typedef struct thread_st {
 
 CThreadPool::CThreadPool()
 {
-	memset(m_pool, 0, sizeof(m_pool));
 }
 
 CThreadPool::~CThreadPool()
 {
-
 }
 
 int CThreadPool::Create(int nthreads)
@@ -33,8 +31,10 @@ int CThreadPool::Create(int nthreads)
 	pthread_mutex_init(&m_pool.lock, NULL);
 	pthread_cond_init(&m_pool.condition, NULL);
 
+	pthread_mutex_lock(&m_pool.lock);
+
 	for (int i = 0; i < nthreads; i++) {
-		thread *tempThread = (Thread *)malloc(sizeof(Thread));
+		Thread *tempThread = (Thread *)malloc(sizeof(Thread));
 		if(tempThread == NULL) {
 			continue;
 		}
@@ -43,6 +43,8 @@ int CThreadPool::Create(int nthreads)
 
 		m_pool.thread_list.PushBack(&tempThread->elem);
 	}
+
+	pthread_mutex_unlock(&m_pool.lock);
 
 	return 0;
 }
@@ -59,11 +61,10 @@ void CThreadPool::Destroy()
 
 	DLListElem *e = NULL;
 
-	
-    for (e = rb_dlist_begin(&pool->thread_list); e != rb_dlist_end(&pool->thread_list); e = rb_dlist_next(e)) {
-		thread *joinThread = container_of(e, thread, elem);
+	while((e = m_pool.thread_list.PopFront()) != NULL) {
+		Thread *joinThread = container_of(e, Thread, elem);
 		pthread_join(joinThread->tid, NULL);
-    }
+	}
 
     pthread_mutex_unlock(&m_pool.lock);
     
@@ -77,18 +78,18 @@ void CThreadPool::EventProcess()
 {
 	while(1) {
 
-		pthread_mutex_lock(&pool->lock);
+		pthread_mutex_lock(&m_pool.lock);
 
-		while(rb_dlist_empty(&pool->task_list)) {
-			pthread_cond_wait(&pool->condition, &pool->lock);
-			
-			if (pool->shutdown) {
-				pthread_mutex_unlock(&pool->lock);
+		while(m_pool.task_list.Empty()) {
+			pthread_cond_wait(&m_pool.condition, &m_pool.lock);
+		
+			if (m_pool.shutdown) {
+				pthread_mutex_unlock(&m_pool.lock);
 				pthread_exit(NULL);
 			}
 		}
 
-		threadpool_task *initTask = container_of(m_pool.task_list.PopFront(), threadpool_task, elem);
+		Task *initTask = container_of(m_pool.task_list.PopFront(), Task, elem);
 
 		pthread_mutex_unlock(&m_pool.lock);
 
@@ -102,7 +103,7 @@ void CThreadPool::EventProcess()
     return;
 }
 
-void *CThreadPool::ThreadProc(void *argv) 
+void *CThreadPool::ThreadProc(void *argv)
 {    
 	CThreadPool *thiz = (CThreadPool *)argv;
 
@@ -113,21 +114,21 @@ void *CThreadPool::ThreadProc(void *argv)
     return NULL;
 }
 
-void CThreadPool::AddTask(thread_pool_callback_func function, void * data) 
+void CThreadPool::AddTask(THREADPOOLCBKFUNC function, void * data) 
 {
-    pthread_mutex_lock(&pool->lock);
+    pthread_mutex_lock(&m_pool.lock);
 
-    if (pool->shutdown) {
-		pthread_mutex_unlock(&pool->lock);
+    if (m_pool.shutdown) {
+		pthread_mutex_unlock(&m_pool.lock);
 		return;
 	}
-    
-    threadpool_task *newTask = (threadpool_task *)malloc(sizeof(threadpool_task));
+   
+    Task *newTask = (Task *)malloc(sizeof(Task));
     newTask->function = function;
     newTask->data = data;
-    rb_dlist_push_back(&pool->task_list, &newTask->elem);
-    pthread_cond_signal(&pool->condition);
-    pthread_mutex_unlock(&pool->lock);
+    m_pool.task_list.PushBack(&newTask->elem);
+    pthread_cond_signal(&m_pool.condition);
+    pthread_mutex_unlock(&m_pool.lock);
 
     return;
 }

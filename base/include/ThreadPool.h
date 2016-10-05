@@ -28,12 +28,16 @@ public:
 	void AddTask(THREADPOOLCBKFUNC func, void * argv);
 
 private:
+	void EventProcess();
+	static void *ThreadProc(void *argv);
+
+private:
 	typedef struct threadpool_st {
 		int num;	/*number of threads*/
 	    int shutdown;
 
-		DDLlist thread_list;
-		DDList task_list;
+		CDoubleLinkList thread_list;
+		CDoubleLinkList task_list;
 
 		pthread_mutex_t lock;
 	    pthread_cond_t condition;

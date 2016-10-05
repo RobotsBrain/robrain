@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 	dump.Open("test.txt");
 
 	for(int i = 0; i < 5; i++) {
-		dump.Write("just test", 9);
+		dump.Write((char *)"just test", 9);
 	}
 
 	dump.Close();

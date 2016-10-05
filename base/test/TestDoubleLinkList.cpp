@@ -30,7 +30,7 @@ void dlist_push_pop_test(push_method push, pop_method pop)
 	int i = 0;
 	Base::CDoubleLinkList dllist;
 	
-	printf("push: %d, pop: %d\n", push, pop);
+	printf("push: %d, pop: %d, %s\n", push, pop, dllist.Empty() ? "empty":"no empty");
 
 	for(i = 0; i < DLIST_MAX_LEN; i++) {
 		dlist_test * ltest = NULL;
@@ -49,7 +49,7 @@ void dlist_push_pop_test(push_method push, pop_method pop)
 		}
 	}
 
-	printf("double list size: %lu\n", dllist.Size());
+	printf("double list size: %u\n", dllist.Size());
 
 	for(i = 0; i < DLIST_MAX_LEN; i++) {
 		Base::DLListElem * elem = NULL;

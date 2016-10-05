@@ -21,7 +21,11 @@ typedef struct dlist_elem_st {
     DLListElem *next; /* Next list element. */
 } DLListElem;
 
-
+/* Double list. */
+typedef struct dlist_st {
+	DLListElem head; /* List head. */
+	DLListElem tail; /* List tail. */
+} DLList;
 
 class CDoubleLinkList
 {
@@ -39,12 +43,6 @@ public:
 	size_t Size();
 
 private:
-	/* Double list. */
-	typedef struct dlist_st {
-		DLListElem head; /* List head. */
-		DLListElem tail; /* List tail. */
-	} DLList;
-
 	DLList m_dllist;
 };
 

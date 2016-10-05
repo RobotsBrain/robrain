@@ -97,7 +97,6 @@ CDoubleLinkList::CDoubleLinkList()
 
 CDoubleLinkList::~CDoubleLinkList()
 {
-	
 }
 
 void CDoubleLinkList::PushFront(DLListElem *elem)
