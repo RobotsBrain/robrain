@@ -6,6 +6,8 @@
 #include "rtpaddress.h"
 #include "rtpsourcedata.h"
 #include "rtpsession.h"
+#include "rtpudpv4transmitter.h"
+#include "rtpsessionparams.h"
 
 
 using namespace jrtplib;
@@ -16,14 +18,20 @@ public:
     CRTPSender();  
     ~CRTPSender();  
   
+  	void Start();
+  	void Stop();
+
+  	void SendH264Nalu(unsigned char *h264Buf, int buflen);  
+    void SetParamsForSendingH264();
+
 protected:  
     void OnAPPPacket(RTCPAPPPacket *apppacket, const RTPTime &receivetime, const RTPAddress *senderaddress);  
     void OnBYEPacket(RTPSourceData *srcdat);
     void OnBYETimeout(RTPSourceData *srcdat);
 
-public:  
-    void SendH264Nalu(unsigned char *h264Buf, int buflen);  
-    void SetParamsForSendingH264();  
+private:  
+    RTPUDPv4TransmissionParams  m_transparams;  
+    RTPSessionParams 			m_sessparams;  
 };  
 
 #endif

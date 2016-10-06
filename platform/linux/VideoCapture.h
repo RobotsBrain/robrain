@@ -8,7 +8,7 @@
 #include "DumpFile.h"
 #include "X264Encoder.h"
 
-
+#include "RTPSender.h"
 
 struct Buffer {
 	void 	*start;
@@ -50,6 +50,8 @@ private:
 #endif
 	
 	CX264Encoder			m_x264encoder;
+
+	CRTPSender				m_rtpsender;
 };
 
 #endif

@@ -1,8 +1,10 @@
 #include <stdio.h>
+#include <string>
 
 #include "rtcpapppacket.h"
 #include "rtpsourcedata.h"
 #include "rtperrors.h"
+#include "rtpipv4address.h"
 
 #include "RTPSender.h"
 
@@ -10,7 +12,9 @@
 #define MAX_RTP_PKT_LENGTH 1360  
 #define H264               96
 
-
+#define SSRC                100
+#define DEST_PORT           1234  
+#define BASE_PORT           2222
 
 bool CheckError(int rtperr)  
 {  
@@ -32,6 +36,40 @@ CRTPSender::~CRTPSender(void)
 {  
 }  
   
+void CRTPSender::Start()
+{
+    int status;
+    std::string destip_str = "192.168.0.105";  
+    uint32_t destip = inet_addr(destip_str.c_str());  
+
+    //RTP+RTCP库初始化SOCKET环境
+    m_sessparams.SetOwnTimestampUnit(1.0/9000.0); //时间戳单位  
+    m_sessparams.SetAcceptOwnPackets(true);   //接收自己发送的数据包  
+    m_sessparams.SetUsePredefinedSSRC(true);  //设置使用预先定义的SSRC  
+    m_sessparams.SetPredefinedSSRC(SSRC);     //定义SSRC  
+
+    m_transparams.SetPortbase(BASE_PORT);  
+
+    status = this->Create(m_sessparams, &m_transparams);
+    CheckError(status);  
+  
+    destip = ntohl(destip);  
+    RTPIPv4Address addr(destip, DEST_PORT);  
+    status = this->AddDestination(addr);  
+    CheckError(status);
+
+    this->SetDefaultPayloadType(96);
+    this->SetDefaultMark(false);
+    this->SetDefaultTimestampIncrement(160);
+
+    return;
+}
+
+void CRTPSender::Stop()
+{
+    return;
+}
+
 void CRTPSender::OnAPPPacket(RTCPAPPPacket *apppacket,const RTPTime &receivetime,const RTPAddress *senderaddress)  
 {//收到RTCP APP数据  
     // std::cout<<"Got RTCP packet from: "<<senderaddress<<std::endl;  
@@ -140,104 +178,4 @@ void CRTPSender::OnBYETimeout(RTPSourceData *srcdat)
 {
 }
   
-#if 0
-#define SSRC           100
-#define DEST_PORT     1234  
-#define BASE_PORT     2222  
-  
-int iNal   = 0;  
-x264_nal_t* pNals = NULL;  
-  
-  
-void SetRTPParams(CRTPSender& sess,uint32_t destip,uint16_t destport,uint16_t baseport)  
-{  
-    int status;    
-    //RTP+RTCP库初始化SOCKET环境  
-    RTPUDPv4TransmissionParams transparams;  
-    RTPSessionParams sessparams;  
-    sessparams.SetOwnTimestampUnit(1.0/9000.0); //时间戳单位  
-    sessparams.SetAcceptOwnPackets(true);   //接收自己发送的数据包  
-    sessparams.SetUsePredefinedSSRC(true);  //设置使用预先定义的SSRC  
-    sessparams.SetPredefinedSSRC(SSRC);     //定义SSRC  
-     
-    transparams.SetPortbase(baseport);  
-  
-    status = sess.Create(sessparams,&transparams);    
-    CheckError(status);  
-  
-    destip = ntohl(destip);  
-    RTPIPv4Address addr(destip,destport);  
-    status = sess.AddDestination(addr);  
-    CheckError(status);  
-      
-    //为发送H264包设置参数  
-    //sess.SetParamsForSendingH264();
-}  
-
-bool InitSocket()  
-{  
-    int Error;  
-    WORD VersionRequested;  
-    WSADATA WsaData;  
-    VersionRequested=MAKEWORD(2,2);  
-    Error=WSAStartup(VersionRequested,&WsaData); //启动WinSock2  
-    if(Error!=0) {  
-        printf("Error:Start WinSock failed!\n");  
-        return false;  
-    } else {  
-        if(LOBYTE(WsaData.wVersion)!=2||HIBYTE(WsaData.wHighVersion)!=2) {  
-            printf("Error:The version is WinSock2!\n");  
-            WSACleanup();  
-            return false;  
-        }
-    }
-
-    return true;  
-}  
-  
-void CloseSocket(CRTPSender sess)  
-{  
-    //发送一个BYE包离开会话最多等待秒钟超时则不发送  
-    sess.BYEDestroy(RTPTime(3,0),0,0);  
-    WSACleanup();  
-}  
-  
-int main(int argc, char** argv)  
-{  
-    InitSocket();  
-    CRTPSender sender;  
-    string destip_str = "127.0.0.1";  
-    uint32_t dest_ip = inet_addr(destip_str.c_str());             
-  
-    SetRTPParams(sender,dest_ip,DEST_PORT,BASE_PORT);  
-    sender.SetParamsForSendingH264();  
-  
-    //…x264设置参数等步骤，具体参见上篇博客  
-    for(int i = 0; i < nFrames ; i++ ) {  
-        //读取一帧  
-        read_frame_y4m(pPicIn,(hnd_t*)y4m_hnd,i);  
-        if( i ==0 )  
-            pPicIn->i_pts = i;  
-        else  
-            pPicIn->i_pts = i - 1;  
-          
-        //编码  
-        int frame_size = x264_encoder_encode(pX264Handle,&pNals,&iNal,pPicIn,pPicOut);  
-  
-        if(frame_size >0) {
-            for (int i = 0; i < iNal; ++i) {//将编码数据写入文件t  
-                //fwrite(pNals[i].p_payload, 1, pNals[i].i_payload, pFile);  
-                //发送编码文件  
-                sender.SendH264Nalu(pNals[i].p_payload,pNals[i].i_payload);  
-                RTPTime::Wait(RTPTime(1,0));  
-            }  
-        }  
-    }  
-  
-    CloseSocket(sender);  
-    //一些清理工作…  
-}
-
-#endif
-
 

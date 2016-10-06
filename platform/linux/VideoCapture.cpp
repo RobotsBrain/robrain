@@ -51,7 +51,7 @@ bool CVideoCapture::Start()
     if(pthread_create(&m_tid, &m_attr, ThreadProc, this) == -1) {  
  		printf("can not create thread\n");
     }
-
+    m_rtpsender.Start();
 	return true;
 }
 
@@ -59,7 +59,7 @@ bool CVideoCapture::Stop()
 {
 	pthread_join(m_tid, NULL);
     pthread_attr_destroy(&m_attr);
-
+m_rtpsender.Stop();
 	return true;
 }
 
@@ -292,6 +292,7 @@ void CVideoCapture::ReadAndEncodeFrame()
 
 		if (yuv_frame[0] != '\0') {
 			int h264_length = m_x264encoder.CompressFrame(-1, yuv_frame, h264_buf);
+			m_rtpsender.SendH264Nalu(h264_buf, h264_length);
 #ifdef BUILD_DUMP_H264FILE
 			m_h264file.Write((char *)h264_buf, h264_length);
 #endif
