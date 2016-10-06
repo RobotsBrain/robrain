@@ -10,22 +10,31 @@ fi
 
 unzip ${FILENAME}
 
-mkdir include
-mkdir lib
+mkdir -p out/include
+mkdir -p out/lib
 
 # build lib
 cd ${DIRNAME}
 # dos2unix configure
-# sed -i 's/\r//' filename
-cat configure | tr -d '\r' > temp.sh
-mv temp.sh configure
-chmod +x configure
+#cat configure | tr -d '\r' > temp.sh
+#mv temp.sh configure
 
-./configure --enable-shared --enable-static --prefix=${CURDIR}
+FILES="configure ltconfig config.sub config.guess"
+
+for file in ${FILES};
+do
+	sed -i 's/\r//' $file
+	chmod +x $file
+done
+
+./configure --enable-shared --enable-static --host=linux --prefix=${CURDIR}/out
+
+cp /usr/bin/libtool ./
+
 make
 make install-lib
 make install-headers
 cd ..
 
-cp ${CURDIR}/*.h ${CURDIR}/../prebuild/include/jpeg
-cp ${CURDIR}/libjpeg.a ${CURDIR}/../prebuild/libs
+cp ${CURDIR}/out/include/*.h ${CURDIR}/../prebuild/include/jpeg
+cp ${CURDIR}/out/lib/libjpeg.a ${CURDIR}/../prebuild/libs

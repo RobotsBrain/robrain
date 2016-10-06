@@ -165,9 +165,9 @@ static void YUV420p_to_RGB24(unsigned char *yuv420[3], unsigned char *rgb24, int
  	}
 }
 
-#if 0
 int Yuv422ToJpeg(unsigned char *data, int image_width, int image_height, FILE *fp, int quality)
 {
+#if 0
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
     JSAMPROW row_pointer[1];  /* pointer to JSAMPLE row[s] */
@@ -228,10 +228,12 @@ int Yuv422ToJpeg(unsigned char *data, int image_width, int image_height, FILE *f
 
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
+#endif
 
     return 0;
 }
 
+#if 0
 /*
 Function: I420 to jpeg
 Filename：jpg文件名字
@@ -328,3 +330,5 @@ int write_JPEG_file(char * filename, unsigned char* yuvData, int quality, int im
 #endif
 
 } // end namespace
+
+
