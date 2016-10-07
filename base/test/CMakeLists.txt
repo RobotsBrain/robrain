@@ -43,3 +43,8 @@ target_link_libraries(TestThreadPool base pthread)
 #################################
 add_executable(TestThreadLoop TestThreadLoop.cpp)
 target_link_libraries(TestThreadLoop base pthread)
+
+
+#################################
+add_executable(TestSmartPtr TestSmartPtr.cpp)
+target_link_libraries(TestSmartPtr base)
