@@ -3,6 +3,7 @@
 
 
 CAudioManage::CAudioManage()
+: Base::CThreadLoop("AudioManage")
 {
 }
 
@@ -10,7 +11,7 @@ CAudioManage::~CAudioManage()
 {
 }
 
-void CAudioManage::Start()
+bool CAudioManage::Start()
 {
 	snd_pcm_t *handle = NULL;  
 	snd_pcm_hw_params_t *params = NULL;  
@@ -22,7 +23,7 @@ void CAudioManage::Start()
 	rc = snd_pcm_open(&handle, "default", SND_PCM_STREAM_CAPTURE, 0);  
 	if (rc < 0) {  
 		fprintf(stderr, "unable to open pcm device: %s\n", snd_strerror(rc));  
-		return;
+		return false;
 	}
 
 	/* Allocate a hardware parameters object. */  
@@ -46,7 +47,7 @@ void CAudioManage::Start()
 	rc = snd_pcm_hw_params(handle, params);  
 	if (rc < 0) {  
 		fprintf(stderr, "unable to set hw parameters: %s\n", snd_strerror(rc));  
-		return;  
+		return false;  
 	}  
 	/* Use a buffer large enough to hold one period */  
 	snd_pcm_hw_params_get_period_size(params,  &frames, &dir);
@@ -57,38 +58,18 @@ void CAudioManage::Start()
 	m_params = params;
 	m_frames = frames;
 
-	pthread_attr_init(&m_attr);  
-     
-    if(pthread_create(&m_tid, &m_attr, ThreadProc, this) == -1) {  
- 		printf("can not create thread\n");
-    }
-
-	return;
+	return StartThread();
 }
 
-void CAudioManage::Stop()
+bool CAudioManage::Stop()
 {
 	snd_pcm_drain(m_handle);
 	snd_pcm_close(m_handle);
 
-	pthread_join(m_tid, NULL);  
-    pthread_attr_destroy(&m_attr);
-
-	return;
+	return StartThread();
 }
 
-void *CAudioManage::ThreadProc(void *argv)
-{
-	CAudioManage *thiz = (CAudioManage *)argv;
-
-	if(thiz != NULL) {
-		thiz->ReadAndEncodeFrame();
-	}
-
-	return NULL;
-}
-
-void CAudioManage::ReadAndEncodeFrame()
+void CAudioManage::EventHandleLoop()
 {
 	int rc = 0;
 	int size = m_frames * 4; /* 2 bytes/sample, 2 channels */
@@ -109,6 +90,10 @@ void CAudioManage::ReadAndEncodeFrame()
 		}
 
 		m_pcmfile.Write(buffer, size);
+
+		if(WaitForSleep(10) < 0) {
+			break;
+		}
 	}
 
 	m_pcmfile.Close();

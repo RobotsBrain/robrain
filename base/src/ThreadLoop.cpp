@@ -90,6 +90,10 @@ int CThreadLoop::WaitForSleep(int timeout_ms)
 
 void CThreadLoop::EventHandleLoop()
 {
+	while(1) {
+		WaitForSleep(0);
+	}
+	
 	return;
 }
 
