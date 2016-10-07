@@ -4,7 +4,6 @@
 #include <linux/videodev2.h>
 #include <string>
 
-#include "DumpFile.h"
 #include "X264Encoder.h"
 #include "ThreadLoop.h"
 #include "RTPSender.h"
@@ -42,12 +41,7 @@ private:
 	struct v4l2_format 		m_v4l2_fmt;
 	struct v4l2_crop 		m_v4l2_crop;
 
-#ifdef BUILD_DUMP_H264FILE
-	Base::CDumpFile			m_h264file;
-#endif
-	
 	CX264Encoder			m_x264encoder;
-
 	CRTPSender				m_rtpsender;
 };
 

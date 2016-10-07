@@ -4,18 +4,18 @@
 
 namespace Base {
 
-class CircularBuffer
+class CCircularBuffer
 {
 public:
-  	CircularBuffer(size_t capacity);
-  	~CircularBuffer();
+  	CCircularBuffer(size_t capacity);
+  	~CCircularBuffer();
 
-  	size_t size() const { return m_size; }
-  	size_t capacity() const { return m_capacity; }
+  	size_t Size() const { return m_size; }
+  	size_t Capacity() const { return m_capacity; }
   	// Return number of bytes written.
-  	size_t write(const char *data, size_t bytes);
+  	size_t Write(const char *data, size_t bytes);
   	// Return number of bytes read.
-  	size_t read(char *data, size_t bytes);
+  	size_t Read(char *data, size_t bytes);
 
 private:
   	size_t 	 m_beg_index;

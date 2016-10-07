@@ -133,6 +133,8 @@ int CX264Encoder::CompressFrame(int type, uint8_t *in, uint8_t *out)
 		break;
 	}
 
+	m_picture->i_pts++; 
+
 	//printf("en->handle->param.i_csp:%08x\n", en->handle->param.i_csp);
 	if (x264_encoder_encode(m_handle, &(m_nal), &nNal, m_picture, &pic_out) < 0) {
 		printf("x264 encode error, type: %08x!\n", m_picture->img.i_csp);

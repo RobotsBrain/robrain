@@ -1,3 +1,5 @@
+#include "AvPacket.h"
+#include "AvFrameRingBuffer.h"
 #include "AudioManage.h"
 
 
@@ -75,8 +77,6 @@ void CAudioManage::EventHandleLoop()
 	int size = m_frames * 4; /* 2 bytes/sample, 2 channels */
 	char *buffer = (char *)malloc(size);
 
-	m_pcmfile.Open("audio.pcm");
-
 	while (1) {
 		rc = snd_pcm_readi(m_handle, buffer, m_frames);
 		if (rc == -EPIPE) {
@@ -89,14 +89,17 @@ void CAudioManage::EventHandleLoop()
 			fprintf(stderr, "short read, read %d frames\n", rc);
 		}
 
-		m_pcmfile.Write(buffer, size);
+		AvPacket packet;
+
+		packet.type = AV_TYPE_AUDIO;
+		packet.len = size;
+
+		CAvFrameRingBuffer::Instance()->WriteFrame(packet, buffer, size);
 
 		if(WaitForSleep(10) < 0) {
 			break;
 		}
 	}
-
-	m_pcmfile.Close();
 
 	free(buffer);
 	buffer = NULL;

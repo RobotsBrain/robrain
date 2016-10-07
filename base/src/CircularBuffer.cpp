@@ -7,7 +7,7 @@
 
 namespace Base {
 
-CircularBuffer::CircularBuffer(size_t capacity)
+CCircularBuffer::CCircularBuffer(size_t capacity)
 : m_beg_index(0)
 , m_end_index(0)
 , m_size(0)
@@ -16,12 +16,12 @@ CircularBuffer::CircularBuffer(size_t capacity)
 	m_data = new char[capacity];
 }
 
-CircularBuffer::~CircularBuffer()
+CCircularBuffer::~CCircularBuffer()
 {
 	delete [] m_data;
 }
 
-size_t CircularBuffer::write(const char *data, size_t bytes)
+size_t CCircularBuffer::Write(const char *data, size_t bytes)
 {
 	size_t capacity = m_capacity;
 	size_t bytes_to_write = std::min(bytes, capacity - m_size);
@@ -50,7 +50,7 @@ size_t CircularBuffer::write(const char *data, size_t bytes)
   	return bytes_to_write;
 }
 
-size_t CircularBuffer::read(char *data, size_t bytes)
+size_t CCircularBuffer::Read(char *data, size_t bytes)
 {
   	size_t capacity = m_capacity;
   	size_t bytes_to_read = std::min(bytes, m_size);

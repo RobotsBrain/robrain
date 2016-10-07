@@ -15,6 +15,8 @@
 #include <asm/types.h>			/* for videodev2.h */
 #include <linux/videodev2.h>
 
+#include "AvPacket.h"
+#include "AvFrameRingBuffer.h"
 #include "VideoCapture.h"
 
 
@@ -231,10 +233,6 @@ void CVideoCapture::EventHandleLoop()
 
 	uint8_t *h264_buf = (uint8_t *) malloc(sizeof(uint8_t) * 640 * 480 * 3);
 
-#ifdef BUILD_DUMP_H264FILE
-	m_h264file.Open("test.h264");
-#endif
-
 	m_x264encoder.Start(640, 480);
 
 	memset(&buf, 0, sizeof(struct v4l2_buffer));
@@ -277,10 +275,15 @@ void CVideoCapture::EventHandleLoop()
 
 		if (yuv_frame[0] != '\0') {
 			int h264_length = m_x264encoder.CompressFrame(-1, yuv_frame, h264_buf);
-			m_rtpsender.SendH264Nalu(h264_buf, h264_length);
-#ifdef BUILD_DUMP_H264FILE
-			m_h264file.Write((char *)h264_buf, h264_length);
-#endif
+			// m_rtpsender.SendH264Nalu(h264_buf, h264_length);
+			if(h264_length > 0) {
+				AvPacket packet;
+
+				packet.type = AV_TYPE_VIDEO;
+				packet.len = h264_length;
+
+				CAvFrameRingBuffer::Instance()->WriteFrame(packet, (char *)h264_buf, h264_length);
+			}
 		}
 
 		if (camera_ioctl(m_vfd, VIDIOC_QBUF, &buf) < 0) {
@@ -297,10 +300,6 @@ void CVideoCapture::EventHandleLoop()
 
 	m_x264encoder.Stop();
 	
-#ifdef BUILD_DUMP_H264FILE
-	m_h264file.Close();
-#endif
-
 	Close();
 
 	return;

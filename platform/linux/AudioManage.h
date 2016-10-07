@@ -4,7 +4,6 @@
 #include <alsa/asoundlib.h>
 
 #include "ThreadLoop.h"
-#include "DumpFile.h"
 
 
 
@@ -25,8 +24,6 @@ private:
 	snd_pcm_t 			*m_handle;  
 	snd_pcm_hw_params_t *m_params;   
 	snd_pcm_uframes_t 	m_frames;
-
-	Base::CDumpFile		m_pcmfile;
 };
 
 #endif
