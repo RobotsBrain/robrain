@@ -9,9 +9,8 @@
 #include "RTPSender.h"
 
 
-#define MAX_RTP_PKT_LENGTH 1360  
-#define H264               96
-
+#define MAX_RTP_PKT_LENGTH  1360  
+#define H264                96
 #define SSRC                100
 #define DEST_PORT           1234  
 #define BASE_PORT           2222
@@ -26,12 +25,12 @@ bool CheckError(int rtperr)
     return true;  
 }  
   
+/**********************************************************************************************/
   
 CRTPSender::CRTPSender(void)  
 {  
 }  
-  
-  
+
 CRTPSender::~CRTPSender(void)  
 {  
 }  

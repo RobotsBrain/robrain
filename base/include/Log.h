@@ -1,7 +1,8 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 
-
+#include <sys/types.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdio.h>
 

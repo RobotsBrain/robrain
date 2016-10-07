@@ -1,21 +1,22 @@
 #ifndef __VIDEOCAPTURE_H__
 #define __VIDEOCAPTURE_H__
 
-#include <pthread.h>
 #include <linux/videodev2.h>
 #include <string>
 
 #include "DumpFile.h"
 #include "X264Encoder.h"
-
+#include "ThreadLoop.h"
 #include "RTPSender.h"
+
+
 
 struct Buffer {
 	void 	*start;
 	size_t 	length;
 };
 
-class CVideoCapture
+class CVideoCapture: public Base::CThreadLoop
 {
 public:
 	CVideoCapture();
@@ -28,14 +29,10 @@ private:
 	int Open(std::string devname, int width, int height);
 	void InitMmap();
 	void Close();
-	void ReadAndEncodeFrame();
-
-	static void *ThreadProc(void *argv);
+	
+	virtual void EventHandleLoop();
 
 private:
-	pthread_t 				m_tid;
-    pthread_attr_t 			m_attr;
-
 	int						m_vfd;
 	int 					m_buff_num;
 	struct Buffer 			*m_buffers;

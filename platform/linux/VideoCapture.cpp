@@ -32,7 +32,8 @@ static inline int camera_ioctl(int fd, int request, void *arg)
 /*****************************************************************************************/
 
 CVideoCapture::CVideoCapture()
-: m_vfd(-1)
+: Base::CThreadLoop("VideoCapture")
+, m_vfd(-1)
 , m_buff_num(0)
 , m_buffers(NULL)
 {
@@ -46,21 +47,16 @@ CVideoCapture::~CVideoCapture()
 
 bool CVideoCapture::Start()
 {
-    pthread_attr_init(&m_attr);  
-     
-    if(pthread_create(&m_tid, &m_attr, ThreadProc, this) == -1) {  
- 		printf("can not create thread\n");
-    }
     m_rtpsender.Start();
-	return true;
+
+	return StartThread();
 }
 
 bool CVideoCapture::Stop()
 {
-	pthread_join(m_tid, NULL);
-    pthread_attr_destroy(&m_attr);
-m_rtpsender.Stop();
-	return true;
+	m_rtpsender.Stop();
+
+	return StopThread();
 }
 
 int CVideoCapture::Open(std::string devname, int width, int height)
@@ -224,18 +220,7 @@ void CVideoCapture::Close()
 	return;
 }
 
-void *CVideoCapture::ThreadProc(void *argv)
-{
-	CVideoCapture *thiz = (CVideoCapture *)argv;
-
-	if(thiz != NULL) {
-		thiz->ReadAndEncodeFrame();
-	}
-
-	return NULL;
-}
-
-void CVideoCapture::ReadAndEncodeFrame()
+void CVideoCapture::EventHandleLoop()
 {
 	uint32_t i;
 	struct v4l2_buffer buf;
@@ -300,6 +285,10 @@ void CVideoCapture::ReadAndEncodeFrame()
 
 		if (camera_ioctl(m_vfd, VIDIOC_QBUF, &buf) < 0) {
 			printf("VIDIOC_DQBUF\n");
+			break;
+		}
+
+		if(WaitForSleep(10) < 0) {
 			break;
 		}
 	}

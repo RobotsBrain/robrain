@@ -1,12 +1,13 @@
 #include "RTPReceiver.h"
 
 
-#if 0 
+
+#if 0
 void CRTPReceiver::InitBufferSize()  
 {  
     m_ReceiveArray.SetMemberSize(BUFFER_SIZE);  
     m_pVideoData = new CVideoData();  
-    memset(m_buffer,0,BUFFER_SIZE);  
+    memset(m_buffer, 0, BUFFER_SIZE);  
     m_current_size = 0;  
 }  
   
@@ -28,7 +29,7 @@ void CRTPReceiver::OnPollThreadStep()
             srcdat = GetCurrentSourceInfo();  
               
             while ((pack = GetNextPacket()) != NULL) {  
-                ProcessRTPPacket(*srcdat,*pack);  
+                ProcessRTPPacket(*srcdat, *pack);  
                 DeletePacket(pack);  
             }  
         } while (GotoNextSourceWithData());  
@@ -52,7 +53,7 @@ void CRTPReceiver::ProcessRTPPacket(const RTPSourceData &srcdat,const RTPPacket 
         //std::cout<<"Got H264 packet：êo " << rtppack.GetExtendedSequenceNumber() << " from SSRC " << srcdat.GetSSRC() <<std::endl;  
         if(rtppack.HasMarker()) {//如果是最后一包则进行组包  
             m_pVideoData->m_lLength = m_current_size + rtppack.GetPayloadLength();//得到数据包总的长度  
-            memcpy(m_pVideoData->m_pBuffer,m_buffer,m_current_size);  
+            memcpy(m_pVideoData->m_pBuffer, m_buffer, m_current_size);  
             memcpy(m_pVideoData->m_pBuffer + m_current_size ,rtppack.GetPayloadData(),rtppack.GetPayloadLength());  
               
             m_ReceiveArray.Add(m_pVideoData);//添加到接收队列  
@@ -69,7 +70,6 @@ void CRTPReceiver::ProcessRTPPacket(const RTPSourceData &srcdat,const RTPPacket 
 
     return; 
 }
-  
 
 void StartReceive()  
 {  
@@ -99,15 +99,5 @@ void StartReceive()
       
     checkerror(status);  
 }  
-  
-int main(int argc, char* argv[])  
-{  
-    WSADATA dat;  
-    WSAStartup(MAKEWORD(2,2),&dat);  
-    StartReceive();  
-    RTPTime::Wait(RTPTime(3,0));  
-
-    return 0;  
-}
 
 #endif
