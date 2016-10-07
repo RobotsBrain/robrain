@@ -1,10 +1,10 @@
 #include "MemoryPool.h"  
 // #include <cstdint>
-// #include <iostream>
-// #include <vector>
-// #include <time.h>
-// #include <math.h>
-// #include <fstream>
+#include <iostream>
+#include <vector>
+#include <time.h>
+#include <math.h>
+#include <fstream>
 
 #if 0
 using namespace std;  
@@ -18,13 +18,12 @@ void check_mem_pool(int& max_chunk_size, int& free_chunk_count, int& min_chunk_s
     total_free_mem = 0;  
     max_chunk_size = 0;  
     min_chunk_size = 500*1024*1024;  
-    if (head == NULL)  
-    {  
+    if (head == NULL) {  
         min_chunk_size = 0;  
         return;  
-    }  
-    while (tmp->next != head)  
-    {  
+    }
+
+    while (tmp->next != head) {  
         free_chunk_count++;  
         total_free_mem += tmp->pfree_mem_addr->count * MINUNITSIZE;  
         if (tmp->pfree_mem_addr->count * MINUNITSIZE > max_chunk_size )  
@@ -88,7 +87,8 @@ double test_mem_pool_perf_1(PMEMORYPOOL mem_pool, int iter, int* sizes)
     cout << "time: " << t << endl;  
     cout << "*********************test_mem_pool_perf_1*********************" <<  endl << endl << endl;  
     return t;  
-}  
+}
+
 double test_std_perf_1(int iter, int* sizes)  
 {  
     cout << "*********************test_std_perf_1*********************" << endl;  
@@ -118,7 +118,8 @@ double test_std_perf_1(int iter, int* sizes)
     cout << "time: " << t << endl;  
     cout << "*********************test_std_perf_1*********************" <<  endl << endl << endl;  
     return t;  
-}  
+}
+
 // 连续申请iter/2次，然后释放所有申请内存；再重复一次  
 double test_mem_pool_perf_2(PMEMORYPOOL mem_pool, int iter, int size)  
 {  
@@ -202,7 +203,8 @@ double test_mem_pool_perf_2(PMEMORYPOOL mem_pool, int iter, int size)
     delete []p;  
     cout << "*********************test_mem_pool_perf_2*********************" <<  endl << endl << endl;  
     return t;  
-}  
+}
+
 // 连续申请inner_iter次，释放；重复iter/inner_iter次  
 double test_mem_pool_perf_3(PMEMORYPOOL mem_pool, int iter, int size)  
 {  
@@ -257,7 +259,8 @@ double test_mem_pool_perf_3(PMEMORYPOOL mem_pool, int iter, int size)
     cout << "time: " << t << endl;  
     cout << "*********************test_mem_pool_perf_3*********************" <<  endl << endl << endl;  
     return t;  
-}  
+}
+
 // 随机内存大小，随机释放操作  
 double test_mem_pool_perf_rand(PMEMORYPOOL mem_pool, int iter, int* sizes, int* instruction)  
 {  
@@ -314,7 +317,8 @@ double test_mem_pool_perf_rand(PMEMORYPOOL mem_pool, int iter, int* sizes, int* 
     cout << "time: " << t << endl << endl;  
     delete []p;  
     return t;  
-}  
+}
+
 double test_std_perf(int iter, int* sizes, int* instruction)  
 {  
     cout << "test_std_perf" << endl;  
@@ -361,7 +365,8 @@ double test_std_perf(int iter, int* sizes, int* instruction)
         free(p[k]);  
     }  
     return t;  
-}  
+}
+
 double test_std_perf_fix_size(int iter, int size)  
 {  
     cout << "******************* test_std_perf_fix_size *******************" << endl;  
@@ -393,7 +398,8 @@ double test_std_perf_fix_size(int iter, int size)
     cout << "time: " << t << endl;  
     cout << "******************* test_std_perf_fix_size *******************" << endl << endl << endl;  
     return t;  
-}  
+}
+
 void test_correct_1(PMEMORYPOOL mem_pool, int iter, int size)  
 {  
     vector<void*>vec;  
