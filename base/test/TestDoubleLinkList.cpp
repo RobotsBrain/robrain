@@ -49,7 +49,7 @@ void dlist_push_pop_test(push_method push, pop_method pop)
 		}
 	}
 
-	printf("double list size: %u\n", dllist.Size());
+	printf("double list size: %lu\n", dllist.Size());
 
 	for(i = 0; i < DLIST_MAX_LEN; i++) {
 		Base::DLListElem * elem = NULL;

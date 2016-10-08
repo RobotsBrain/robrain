@@ -26,7 +26,6 @@ private:
 private:
 	std::string				m_name;
 	pthread_t 				m_tid;
-    pthread_attr_t 			m_attr;
 
     pthread_mutex_t 		m_lock;
 	pthread_cond_t 			m_condition;

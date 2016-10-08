@@ -33,15 +33,21 @@ bool CThreadLoop::StartThread()
 	pthread_mutex_init(&m_lock, NULL);
 	pthread_cond_init(&m_condition, NULL);
 
-	pthread_attr_init(&m_attr);  
+	pthread_attr_t attr;
+
+	pthread_attr_init(&attr);  
      
-    if(pthread_create(&m_tid, &m_attr, ThreadProc, this) == -1) {  
+    pthread_attr_setstacksize(&attr, 1024 * 1024);
+
+    if(pthread_create(&m_tid, &attr, ThreadProc, this) == -1) {  
  		ERROR("can not create thread\n");
  		res = false;
     } else {
     	m_start = true;
     	INFO("start thread(%s) success!\n", m_name.c_str());
     }
+
+    pthread_attr_destroy(&attr);
 
     return res;
 }
@@ -56,7 +62,6 @@ bool CThreadLoop::StopThread()
 	pthread_cond_broadcast(&m_condition);
 
 	pthread_join(m_tid, NULL);
-    pthread_attr_destroy(&m_attr);
 
     pthread_mutex_destroy(&m_lock);
     pthread_cond_destroy(&m_condition);
