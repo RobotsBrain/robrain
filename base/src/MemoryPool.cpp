@@ -11,12 +11,12 @@ namespace Base {
 /************************************************************************/  
 size_t check_align_addr(void*& pBuf)  
 {  
-    size_t align = 0;  
-    size_t addr = (int)pBuf;  
-    align = (ADDR_ALIGN - addr % ADDR_ALIGN) % ADDR_ALIGN;  
-    pBuf = (char*)pBuf + align;
+    // size_t align = 0;  
+    // size_t addr = (int)pBuf;  
+    // align = (ADDR_ALIGN - addr % ADDR_ALIGN) % ADDR_ALIGN;  
+    // pBuf = (char*)pBuf + align;
 
-    return align;  
+    // return align;  
 } 
 
 /************************************************************************/  

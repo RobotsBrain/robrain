@@ -1,3 +1,3 @@
-FILENAME=jpegsr6.zip
-DIRNAME=jpeg-6b
-DOWNLOADURL=http://nchc.dl.sourceforge.net/project/libjpeg/libjpeg/6b/jpegsr6.zip
+FILENAME=jpegsrc.v9b.tar.gz
+DIRNAME=jpeg-9b
+DOWNLOADURL=http://www.ijg.org/files/jpegsrc.v9b.tar.gz

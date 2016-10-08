@@ -167,7 +167,6 @@ static void YUV420p_to_RGB24(unsigned char *yuv420[3], unsigned char *rgb24, int
 
 int Yuv422ToJpeg(unsigned char *data, int image_width, int image_height, FILE *fp, int quality)
 {
-#if 0
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
     JSAMPROW row_pointer[1];  /* pointer to JSAMPLE row[s] */
@@ -191,14 +190,14 @@ int Yuv422ToJpeg(unsigned char *data, int image_width, int image_height, FILE *f
     cinfo.in_color_space = JCS_RGB;  /* colorspace of input image */
 
     jpeg_set_defaults(&cinfo);
-    jpeg_set_quality(&cinfo, quality, 1);
+    jpeg_set_quality(&cinfo, quality, TRUE);
 
-    cinfo.raw_data_in = 1;
+    cinfo.raw_data_in = TRUE;
     cinfo.jpeg_color_space = JCS_YCbCr;
     cinfo.comp_info[0].h_samp_factor = 2;
     cinfo.comp_info[0].v_samp_factor = 1;
 
-    jpeg_start_compress(&cinfo, 1);
+    jpeg_start_compress(&cinfo, TRUE);
 
     buffer = (JSAMPIMAGE)(*cinfo.mem->alloc_small)((j_common_ptr)&cinfo, JPOOL_IMAGE, 3 * sizeof(JSAMPARRAY));
     for(band = 0; band < 3; band++) {
@@ -228,12 +227,10 @@ int Yuv422ToJpeg(unsigned char *data, int image_width, int image_height, FILE *f
 
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
-#endif
 
     return 0;
 }
 
-#if 0
 /*
 Function: I420 to jpeg
 Filename：jpg文件名字
@@ -270,14 +267,14 @@ int write_JPEG_file(char * filename, unsigned char* yuvData, int quality, int im
     cinfo.in_color_space = JCS_RGB;  //colorspace of input image
  
     jpeg_set_defaults(&cinfo);
-    jpeg_set_quality(&cinfo, quality, true);
+    jpeg_set_quality(&cinfo, quality, TRUE);
 
-    cinfo.raw_data_in = true;
+    cinfo.raw_data_in = TRUE;
     cinfo.jpeg_color_space = JCS_YCbCr;
     cinfo.comp_info[0].h_samp_factor = 2;
     cinfo.comp_info[0].v_samp_factor = 2;
 
-    jpeg_start_compress(&cinfo, true);
+    jpeg_start_compress(&cinfo, TRUE);
 
     buffer = (JSAMPIMAGE)(*cinfo.mem->alloc_small)((j_common_ptr)&cinfo, JPOOL_IMAGE, 3 * sizeof(JSAMPARRAY)); 
 
@@ -327,7 +324,7 @@ int write_JPEG_file(char * filename, unsigned char* yuvData, int quality, int im
 
     return 0;
 }
-#endif
+
 
 } // end namespace
 
