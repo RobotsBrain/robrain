@@ -39,12 +39,10 @@ CVideoCapture::CVideoCapture()
 , m_buff_num(0)
 , m_buffers(NULL)
 {
-
 }
 
 CVideoCapture::~CVideoCapture()
 {
-
 }
 
 bool CVideoCapture::Start()
@@ -112,7 +110,7 @@ int CVideoCapture::Open(std::string devname, int width, int height)
 	fmt->fmt.pix.width = width;
 	fmt->fmt.pix.height = height;
 	fmt->fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;	//yuv422
-	//fmt->fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420  //yuv420
+	// fmt->fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;  //yuv420
 	fmt->fmt.pix.field = V4L2_FIELD_INTERLACED;	//隔行扫描
 
 	if (camera_ioctl(m_vfd, VIDIOC_S_FMT, fmt) < 0) {
@@ -221,7 +219,8 @@ void CVideoCapture::Close()
 
 	return;
 }
-
+#include "JPEGEncoder.h"
+#include "Yuv2Jpeg.h"
 void CVideoCapture::EventHandleLoop()
 {
 	uint32_t i;
@@ -274,6 +273,26 @@ void CVideoCapture::EventHandleLoop()
 		uint8_t *yuv_frame = (uint8_t *)m_buffers[buf.index].start;
 
 		if (yuv_frame[0] != '\0') {
+			static bool image = false;
+			static int count = 0;
+			if(!image && count++ > 20) {
+				// Image::Yuv422ToJpeg("image.jpg", yuv_frame, 640, 480, 100);
+				// Image::Yuv420ToJpeg((char *)"image.jpg", yuv_frame, 640, 480, 100);
+				
+				YuvToJpegEncoder *encoder = new YUY2ToJpegEncoder(640, 480, 80);
+				
+				std::vector<unsigned char> jpeg;
+				jpeg.clear();
+
+				int encode_len = encoder->encode(yuv_frame, jpeg);
+				FILE *pjpeg = fopen("image.jpg", "w");
+				fwrite(jpeg.data(), sizeof(unsigned char), encode_len, pjpeg);
+				fclose(pjpeg);
+				delete encoder;
+
+				image = true;
+			}
+
 			int h264_length = m_x264encoder.CompressFrame(-1, yuv_frame, h264_buf);
 			// m_rtpsender.SendH264Nalu(h264_buf, h264_length);
 			if(h264_length > 0) {

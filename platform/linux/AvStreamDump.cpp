@@ -29,7 +29,7 @@ bool CAvStreamDump::Stop()
 	
 void CAvStreamDump::EventHandleLoop()
 {
-	char buffer[1024 * 1024];
+	char buffer[128 * 1024];
 	AvPacket packet;
 	Base::CDumpFile	 h264file;
 	Base::CDumpFile	 pcmfile;

@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 	CAvStreamDump dump;
 
 	capture.Start();
-	audio.Start();
+	// audio.Start();
 	dump.Start();
 
 	while(1) {
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 	}
 
 	dump.Stop();
-	audio.Stop();
+	// audio.Stop();
 	capture.Stop();
 
 	return 0;

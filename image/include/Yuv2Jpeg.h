@@ -3,7 +3,9 @@
 
 namespace Image {
 
-int Yuv422ToJpeg(unsigned char *data, int image_width, int image_height, FILE *fp, int quality);
+int Yuv422ToJpeg(char *filename, unsigned char *yuv, int width, int height, int quality);
+
+int Yuv420ToJpeg(char *filename, unsigned char *yuv, int width, int height, int quality);
 
 } // end namespace
 

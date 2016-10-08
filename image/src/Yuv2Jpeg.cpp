@@ -165,27 +165,33 @@ static void YUV420p_to_RGB24(unsigned char *yuv420[3], unsigned char *rgb24, int
  	}
 }
 
-int Yuv422ToJpeg(unsigned char *data, int image_width, int image_height, FILE *fp, int quality)
+int Yuv422ToJpeg(char *filename, unsigned char *data, int width, int height, int quality)
 {
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
     JSAMPROW row_pointer[1];  /* pointer to JSAMPLE row[s] */
     int row_stride;    /* physical row width in image buffer */
-    JSAMPIMAGE  buffer;
-    int band,i,buf_width[3],buf_height[3], mem_size, max_line, counter;
+    JSAMPIMAGE buffer;
+    int band, i, buf_width[3], buf_height[3], mem_size, max_line, counter;
     unsigned char *yuv[3];
     uint8_t *pSrc, *pDst;
+    FILE *fp;
+
+    if((fp = fopen(filename, "wb")) == NULL) {
+        fprintf(stderr, "can't open %s\n", filename);
+        exit(1);
+    }
 
     yuv[0] = data;
-    yuv[1] = yuv[0] + (image_width * image_height);
-    yuv[2] = yuv[1] + (image_width * image_height) /2;
+    yuv[1] = yuv[0] + (width * height);
+    yuv[2] = yuv[1] + (width * height)/2;
 
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
     jpeg_stdio_dest(&cinfo, fp);
 
-    cinfo.image_width = image_width;  /* image width and height, in pixels */
-    cinfo.image_height = image_height;
+    cinfo.image_width = width;  /* image width and height, in pixels */
+    cinfo.image_height = height;
     cinfo.input_components = 3;    /* # of color components per pixel */
     cinfo.in_color_space = JCS_RGB;  /* colorspace of input image */
 
@@ -194,16 +200,23 @@ int Yuv422ToJpeg(unsigned char *data, int image_width, int image_height, FILE *f
 
     cinfo.raw_data_in = TRUE;
     cinfo.jpeg_color_space = JCS_YCbCr;
+    // cinfo.comp_info[0].h_samp_factor = 2;
+    // cinfo.comp_info[0].v_samp_factor = 1;
+
     cinfo.comp_info[0].h_samp_factor = 2;
-    cinfo.comp_info[0].v_samp_factor = 1;
+    cinfo.comp_info[0].v_samp_factor = 2;
+    cinfo.comp_info[1].h_samp_factor = 1;
+    cinfo.comp_info[1].v_samp_factor = 2;
+    cinfo.comp_info[2].h_samp_factor = 1;
+    cinfo.comp_info[2].v_samp_factor = 2;
 
     jpeg_start_compress(&cinfo, TRUE);
 
     buffer = (JSAMPIMAGE)(*cinfo.mem->alloc_small)((j_common_ptr)&cinfo, JPOOL_IMAGE, 3 * sizeof(JSAMPARRAY));
     for(band = 0; band < 3; band++) {
-        buf_width[band] = cinfo.comp_info[band].width_in_blocks * DCTSIZE;
-        buf_height[band] = cinfo.comp_info[band].v_samp_factor * DCTSIZE;
-        buffer[band] = (*cinfo.mem->alloc_sarray)((j_common_ptr) &cinfo, JPOOL_IMAGE, buf_width[band], buf_height[band]);
+      buf_width[band] = cinfo.comp_info[band].width_in_blocks * DCTSIZE;
+      buf_height[band] = cinfo.comp_info[band].v_samp_factor * DCTSIZE;
+      buffer[band] = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, buf_width[band], buf_height[band]);
     }
 
     max_line = cinfo.max_v_samp_factor*DCTSIZE;
@@ -213,7 +226,7 @@ int Yuv422ToJpeg(unsigned char *data, int image_width, int image_height, FILE *f
         for(band = 0; band < 3; band++) {
             mem_size = buf_width[band];
             pDst = (uint8_t *) buffer[band][0];
-            pSrc = (uint8_t *) yuv[band] + counter*buf_height[band] * buf_width[band];
+            pSrc = (uint8_t *) yuv[band] + counter * buf_height[band] * buf_width[band];
 
             for(i = 0; i < buf_height[band]; i++) {
                 memcpy(pDst, pSrc, mem_size);
@@ -228,18 +241,12 @@ int Yuv422ToJpeg(unsigned char *data, int image_width, int image_height, FILE *f
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
 
+    fclose(fp);
+
     return 0;
 }
 
-/*
-Function: I420 to jpeg
-Filename：jpg文件名字
-yuvData：输入的yuv缓存地址
-quality：压缩质量 1-100
-image_width：图像宽度
-image_height：图像高度
-*/
-int write_JPEG_file(char * filename, unsigned char* yuvData, int quality, int image_width, int image_height)
+int Yuv420ToJpeg(char *filename, unsigned char *yuvData, int width, int height, int quality)
 {
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -247,8 +254,8 @@ int write_JPEG_file(char * filename, unsigned char* yuvData, int quality, int im
     JSAMPROW row_pointer[1];  // pointer to JSAMPLE row[s] 
     int row_stride;    // physical row width in image buffer
     JSAMPIMAGE  buffer;
-    unsigned char *pSrc,*pDst;
-    int band,i,buf_width[3],buf_height[3];
+    unsigned char *pSrc, *pDst;
+    int band, i, buf_width[3], buf_height[3];
 
     cinfo.err = jpeg_std_error(&jerr);
 
@@ -261,8 +268,8 @@ int write_JPEG_file(char * filename, unsigned char* yuvData, int quality, int im
 
     jpeg_stdio_dest(&cinfo, outfile);
 
-    cinfo.image_width = image_width;  // image width and height, in pixels
-    cinfo.image_height = image_height;
+    cinfo.image_width = width;  // image width and height, in pixels
+    cinfo.image_height = height;
     cinfo.input_components = 3;    // # of color components per pixel
     cinfo.in_color_space = JCS_RGB;  //colorspace of input image
  
@@ -287,14 +294,14 @@ int write_JPEG_file(char * filename, unsigned char* yuvData, int quality, int im
     unsigned char *rawData[3];
 
     rawData[0] = yuvData;
-    rawData[1] = yuvData + image_width*image_height;
-    rawData[2] = yuvData + image_width*image_height*5/4;
+    rawData[1] = yuvData + width*height;
+    rawData[2] = yuvData + width*height*5/4;
 
-    int src_width[3],src_height[3];
+    int src_width[3], src_height[3];
 
     for(int i = 0; i < 3; i++) {
-        src_width[i] = (i==0) ? image_width:image_width/2;
-        src_height[i] = (i==0) ? image_height:image_height/2;
+        src_width[i] = (i==0) ? width:width/2;
+        src_height[i] = (i==0) ? height:height/2;
     }
  
     //max_line一般为16，外循环每次处理16行数据。
@@ -303,24 +310,24 @@ int write_JPEG_file(char * filename, unsigned char* yuvData, int quality, int im
     for(int counter = 0; cinfo.next_scanline < cinfo.image_height; counter++) {   
         //buffer image copy.
         for(band = 0; band < 3; band++) {  //每个分量分别处理
-			int mem_size = src_width[band];//buf_width[band];
-			pDst = (unsigned char *)buffer[band][0];
-			pSrc = (unsigned char *)rawData[band] + counter*buf_height[band] * src_width[band];//buf_width[band];  //yuv.data[band]分别表示YUV起始地址
+    			int mem_size = src_width[band];//buf_width[band];
+    			pDst = (unsigned char *)buffer[band][0];
+    			pSrc = (unsigned char *)rawData[band] + counter*buf_height[band] * src_width[band];//buf_width[band];  //yuv.data[band]分别表示YUV起始地址
 
-			for(i = 0; i < buf_height[band]; i++) { //处理每行数据
-				memcpy(pDst, pSrc, mem_size);
-				pSrc += src_width[band];//buf_width[band];
-                pDst += buf_width[band];
-            }
+    			for(i = 0; i < buf_height[band]; i++) { //处理每行数据
+    				memcpy(pDst, pSrc, mem_size);
+    				pSrc += src_width[band];//buf_width[band];
+            pDst += buf_width[band];
+          }
         }
 
         jpeg_write_raw_data(&cinfo, buffer, max_line);
     }
 
-    fclose(outfile);
-
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
+
+    fclose(outfile);
 
     return 0;
 }
