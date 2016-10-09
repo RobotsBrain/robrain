@@ -1,17 +1,10 @@
-set(EXECUTABLE_OUTPUT_PATH ${OUTDIR}/platform/linux)
-
 include_directories(
+	${TOPDIR}/network/include
     ${TOPDIR}/base/include
     ${TOPDIR}/opensource/prebuild/include/pcap
+    ${TOPDIR}/opensource/prebuild/include/adns
 )
 
-link_directories(
-    ${TOPDIR}/opensource/prebuild/libs
-)
-
-
-#################################
+file(GLOB_RECURSE HEADERFILES "../include/*")
 aux_source_directory(. DIR_SRCS)
-add_executable(testpcap ${DIR_SRCS})
-
-target_link_libraries(testpcap pcap dbus-1)
+add_library(network ${DIR_SRCS} ${HEADERFILES})

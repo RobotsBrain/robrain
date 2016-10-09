@@ -63,7 +63,7 @@ void pcap_handle(u_char* user,const struct pcap_pkthdr* header,const u_char* pkt
     }
 }
 
-int main(int argc, char **argv)
+int capture()
 {
     char *device = "eth0";
     char errbuf[1024];
