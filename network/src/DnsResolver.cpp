@@ -34,14 +34,39 @@ int HostByName(string name)
     for (i = 0; host->h_aliases[i]; i++) {
         printf("%s\n", host->h_aliases[i]);
     }
-    printf("\naddress list: \n");
 
     for (i = 0; host->h_addr_list[i]; i++) {
         /* h_addr_list[i]指向in_addr类型 */
         serv_addr.sin_addr = *((struct in_addr *)host->h_addr_list[i]);
         const char *ip = inet_ntoa(serv_addr.sin_addr);
-        printf("ip: %s\n", ip);
+        printf("host by name: %s\n", ip);
     }
+
+    return 0;
+}
+
+int GetAddressInfo(string hostname)
+{
+    struct addrinfo *answer = NULL, *curr = NULL;
+    struct addrinfo hint;
+    struct sockaddr_in *serv_addr;
+
+    bzero(&hint, sizeof(hint));
+    hint.ai_family = AF_INET;
+    hint.ai_socktype = SOCK_STREAM;
+
+    int ret = getaddrinfo(hostname.c_str(), NULL, &hint, &answer);
+    if (ret != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(ret));
+        return -1;
+    }
+
+    for (curr = answer; curr != NULL; curr = curr->ai_next) {
+        serv_addr = (struct sockaddr_in *)(curr->ai_addr);
+        printf("get addr info: %s\n", inet_ntoa(serv_addr->sin_addr));
+    }
+
+    freeaddrinfo(answer);
 
     return 0;
 }
