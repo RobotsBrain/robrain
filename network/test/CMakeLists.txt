@@ -14,5 +14,12 @@ link_directories(
 #target_link_libraries(testpcap adns pcap dbus-1)
 
 #################################
+add_executable(TestLnwDetail TestLnwDetail.cpp)
+target_link_libraries(TestLnwDetail network)
+
+
+#################################
 add_executable(TestDnsResolver TestDnsResolver.cpp)
 target_link_libraries(TestDnsResolver network adns)
+
+
