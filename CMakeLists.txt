@@ -24,6 +24,9 @@ add_subdirectory(${TOPDIR}/image/src ${BUILDDIR}/image/src)
 add_subdirectory(${TOPDIR}/network/src ${BUILDDIR}/network/src)
 add_subdirectory(${TOPDIR}/network/test ${BUILDDIR}/network/test)
 
+add_subdirectory(${TOPDIR}/rtsp/src ${BUILDDIR}/rtsp/src)
+add_subdirectory(${TOPDIR}/rtsp/test ${BUILDDIR}/rtsp/test)
+
 add_subdirectory(${TOPDIR}/transmit/src ${BUILDDIR}/transmit/src)
 
 add_subdirectory(${TOPDIR}/platform/linux ${BUILDDIR}/platform/linux)
