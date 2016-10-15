@@ -1,7 +1,7 @@
 #include <string>
 
-#include "Lock.h"
-#include "MsgQueue.h"
+#include "base/Lock.h"
+#include "base/MsgQueue.h"
 
 
 

@@ -1,4 +1,4 @@
-#ifndef _RTCP_H
+#ifndef __RTCP_H
 #define __RTCP_H
 
 #include "type.h"

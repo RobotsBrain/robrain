@@ -13,7 +13,7 @@
 #include <pthread.h>
 #include <sys/utsname.h>
 #include <unistd.h>
-#include <linux/errno.h>
+//#include <linux/errno.h>
 #include <errno.h>
 #include <semaphore.h>
 

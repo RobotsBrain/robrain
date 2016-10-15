@@ -47,6 +47,7 @@ int GetGateWayIp(char *gateway)
 
 void DispNetInfo(const char* szDevName)
 {
+#ifdef __linux__
 	int s = socket(AF_INET, SOCK_DGRAM, 0);
 	if (s < 0) {
 		fprintf(stderr, "Create socket failed!errno=%d", errno);
@@ -97,7 +98,8 @@ void DispNetInfo(const char* szDevName)
 	printf("\tNetmask: %s\n", inet_ntoa(*(in_addr*)&nNetmask));
 
 	close(s);
-
+#endif
+	
 	return;
 }
 

@@ -3,7 +3,7 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "Log.h"
+#include "base/Log.h"
 
 
 size_t log_executable_path(char* processdir, char* processname, size_t len)

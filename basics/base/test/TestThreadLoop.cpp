@@ -1,11 +1,14 @@
-#include <sys/prctl.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
 
-#include "Log.h"
-#include "ThreadLoop.h"
+#ifdef __linux__
+	#include <sys/prctl.h>
+#endif
+
+#include "base/Log.h"
+#include "base/ThreadLoop.h"
 
 
 
@@ -47,10 +50,12 @@ bool TestThreadLoop::Stop()
 void TestThreadLoop::EventHandleLoop()
 {
 	while(1) {
+#ifdef __linux__
 		char name[20] = {0};
 
 		prctl(PR_GET_NAME, name);
 		INFO("thread name(%s)\n", name);
+#endif
 
 		if(WaitForSleep(10000) < 0) {
 			break;

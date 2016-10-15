@@ -1,10 +1,10 @@
+#include <stdlib.h>
 #include <stdarg.h>
-#include <malloc.h>
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
 
-#include "Log.h"
+#include "base/Log.h"
 
 
 namespace Base {

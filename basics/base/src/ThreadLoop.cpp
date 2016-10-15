@@ -1,9 +1,12 @@
 #include <sys/time.h>
-#include <sys/prctl.h>
 #include <errno.h>
 
-#include "Log.h"
-#include "ThreadLoop.h"
+#ifdef  __linux__
+	#include <sys/prctl.h>
+#endif
+
+#include "base/Log.h"
+#include "base/ThreadLoop.h"
 
 
 
@@ -107,7 +110,9 @@ void *CThreadLoop::ThreadProc(void *argv)
 	CThreadLoop *thiz = (CThreadLoop *)argv;
 
 	if(thiz != NULL) {
+#ifdef __linux__
 		prctl(PR_SET_NAME, thiz->m_name.c_str());
+#endif
 		thiz->EventHandleLoop();
 	}
 

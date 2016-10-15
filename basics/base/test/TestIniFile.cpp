@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string>
 
-#include "IniFile.h"
+#include "base/IniFile.h"
 
 
 void Save(Base::CIniFile *pIni)

@@ -16,17 +16,17 @@ set(BUILDDIR ${TOPDIR}/build-cmake/camera)
 
 add_definitions(-DBUILD_DUMP_H264FILE)
 
-add_subdirectory(${TOPDIR}/base/src ${BUILDDIR}/base/src)
-add_subdirectory(${TOPDIR}/base/test ${BUILDDIR}/base/test)
+add_subdirectory(${TOPDIR}/basics/base/src ${BUILDDIR}/basics/base/src)
+add_subdirectory(${TOPDIR}/basics/base/test ${BUILDDIR}/basics/base/test)
 
 add_subdirectory(${TOPDIR}/image/src ${BUILDDIR}/image/src)
 
-add_subdirectory(${TOPDIR}/network/src ${BUILDDIR}/network/src)
-add_subdirectory(${TOPDIR}/network/test ${BUILDDIR}/network/test)
+#add_subdirectory(${TOPDIR}/network/src ${BUILDDIR}/network/src)
+#add_subdirectory(${TOPDIR}/network/test ${BUILDDIR}/network/test)
 
 add_subdirectory(${TOPDIR}/rtsp/src ${BUILDDIR}/rtsp/src)
 add_subdirectory(${TOPDIR}/rtsp/test ${BUILDDIR}/rtsp/test)
 
-add_subdirectory(${TOPDIR}/transmit/src ${BUILDDIR}/transmit/src)
+#add_subdirectory(${TOPDIR}/transmit/src ${BUILDDIR}/transmit/src)
 
-add_subdirectory(${TOPDIR}/platform/linux ${BUILDDIR}/platform/linux)
+#add_subdirectory(${TOPDIR}/platform/linux ${BUILDDIR}/platform/linux)
