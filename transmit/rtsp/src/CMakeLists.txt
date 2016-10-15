@@ -1,6 +1,7 @@
 include_directories(
 	${TOPDIR}/basics/base/include
 	${TOPDIR}/transmit/rtsp/include
+	${TOPDIR}/transmit/rtsp/srv
 )
 
 file(GLOB_RECURSE HEADERFILES "../include/*")

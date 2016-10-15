@@ -11,6 +11,6 @@ link_directories(
 
 #################################
 add_executable(TestRtspServer TestRtspServer.cpp)
-target_link_libraries(TestRtspServer rtspserver base)
+target_link_libraries(TestRtspServer rtspserver base pthread)
 
 

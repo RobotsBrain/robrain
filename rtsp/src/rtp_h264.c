@@ -3,7 +3,6 @@
 #include "rtsp.h"
 #include "type.h"
 
-//#define WRITE_FILE 1
 
 
 /******************************************************************************/
@@ -24,41 +23,6 @@ L64 get_file_size(FILE *infile)
     /**** Jump back to the original position. ****/
     fseek(infile, 0L,SEEK_SET );
 	return (size_of_file);
-}
-
-/******************************************************************************/
-/*
- *  get media file  size
- * Arguments: 
- * infile : file name fd
- */
-/******************************************************************************/
-S32 wirte_to_file(U8 *buff,S32 buffer_size,FILE *outfile)
-{
-	L64 nbytes_read;
-
-	nbytes_read = fwrite(buff, 1, buffer_size,outfile);
-	return nbytes_read;
-}
-
-/******************************************************************************/
-/*
- *  get buffer len
- * Arguments: 
- * str :  input buffer
- */
-/******************************************************************************/
-S32 my_strlen(const CHAR * str)
-{
-	S32 ret=0;
-    const CHAR * p=str;
-	
-    if(NULL==str) return -1;
-
-	while(*p++){
-		ret++; 
-	}
-    return ret;
 }
 
 /******************************************************************************/
@@ -131,6 +95,7 @@ S32 build_rtp_header(RTP_header *r,S32 cur_conn_num)
 	rtsp[cur_conn_num]->cmd_port.timestamp+=rtsp[cur_conn_num]->cmd_port.frame_rate_step;
 	r->timestamp=htonl(rtsp[cur_conn_num]->cmd_port.timestamp);
 	r->ssrc = htonl(rtsp[cur_conn_num]->cmd_port.ssrc);
+
 	return 0;
 }
 
@@ -152,16 +117,18 @@ ssize_t write_n(S32 fd, const VOID *vptr, size_t n)
 	ptr = vptr;
 	nleft = n;
 	while (nleft > 0) {
-		if ( (nwritten = write(fd, ptr, nleft)) <= 0) {
-			if (errno == EINTR)
+		if ((nwritten = write(fd, ptr, nleft)) <= 0) {
+			if (errno == EINTR) {
 				nwritten = 0;		/**** and call write() again ****/
-			else
+			} else {
 				return(-1);			/**** error ****/
+			}
 		}
 
 		nleft -= nwritten;
 		ptr   += nwritten;
 	}
+
 	return(n);
 }
 
@@ -178,17 +145,6 @@ S32 udp_write(S32 len,S32 cur_conn_num)
 {
 	S32 result;
 
-	#if 0
-	again:
-	result=write_n(rtsp[cur_conn_num]->fd.video_rtp_fd,rtsp[cur_conn_num]->nalu_buffer,len);
-	if(result<=0){
-		rtsp[cur_conn_num]->rtspd_status=0x21;
-		goto again;
-	}
-	else{
-		//usleep(DE_TIME);
-	}
-	#endif
 	result=write(rtsp[cur_conn_num]->fd.video_rtp_fd,rtsp[cur_conn_num]->nalu_buffer,len);
 	if(result<=0){
 		rtsp[cur_conn_num]->rtspd_status=0x21;
@@ -212,14 +168,14 @@ S32 udp_write_fua(S32 len,S32 time,S32 cur_conn_num)
 	S32 result;
 	again:
 	result=write(rtsp[cur_conn_num]->fd.video_rtp_fd,rtsp[cur_conn_num]->nalu_buffer,len);
-	if(result<=0){
+	if(result<=0) {
 		goto again;
-	}
-	else{
+	} else {
 		if(time>DE_TIME)
 			time=DE_TIME;
 		usleep(time);
 	}
+
 	return 0;
 }
 
@@ -242,25 +198,21 @@ S32 abstr_nalu_indic(U8 *buf, S32 buf_size, S32 *be_found)
 	frame_size = 4;	
 	p_tmp = buf + 4;
 	
-	while(frame_size < buf_size - 4)
-	{
-	    if(p_tmp[2])
+	while(frame_size < buf_size - 4) {
+	    if(p_tmp[2]) {
 			offset = 3;
-		else if(p_tmp[1])
+	    } else if(p_tmp[1]) {
 			offset = 2;
-		else if(p_tmp[0])
+		} else if(p_tmp[0]) {
 			offset = 1;
-		else
-		{
-		    if(p_tmp[3] != 1)
-		    {
-		        if(p_tmp[3])
+		} else {
+		    if(p_tmp[3] != 1) {
+		        if(p_tmp[3]) {
 					offset = 4;
-				else
+		        } else {
 					offset = 1;
-		    }
-			else
-			{
+				}
+		    } else {
 			    *be_found = 1;
 				break;
 			}
@@ -275,7 +227,6 @@ S32 abstr_nalu_indic(U8 *buf, S32 buf_size, S32 *be_found)
 
 	return frame_size;
 }
-
 
 /*******************************************************************************
  * RTP Packet:
@@ -330,8 +281,7 @@ S32 build_rtp_nalu(U8 *inbuffer, S32 frame_size, S32 cur_conn_num)
 	p_nalu_data = inbuffer + NALU_INDIC_SIZE;
 
 	//Single RTP Packet.
-    if(data_left <= SINGLE_NALU_DATA_MAX)
-    {
+    if(data_left <= SINGLE_NALU_DATA_MAX) {
 	    rtp_header.seq_no=htons(rtsp[cur_conn_num]->cmd_port.seq++);
 	    rtp_header.marker=1;    
 		memcpy(nalu_buffer,&rtp_header,sizeof(rtp_header));
@@ -346,13 +296,9 @@ S32 build_rtp_nalu(U8 *inbuffer, S32 frame_size, S32 cur_conn_num)
 	fu_indic    = (nalu_header&0xE0)|28;	
 	data_left   -= NALU_HEAD_SIZE;
 	p_nalu_data += NALU_HEAD_SIZE;
-	while(data_left>0)
-	{
+	while(data_left>0) {
 	    S32 proc_size = MIN(data_left,SLICE_NALU_DATA_MAX);
-		S32 rtp_size = proc_size + 
-			    RTP_HEADER_SIZE  + 
-			    FU_A_HEAD_SIZE   + 
-			    FU_A_INDI_SIZE;
+		S32 rtp_size = proc_size + RTP_HEADER_SIZE + FU_A_HEAD_SIZE + FU_A_INDI_SIZE;
 		fu_end = (proc_size==data_left);
 		fu_header = nalu_header&0x1F;
 		if(fu_start)
@@ -377,12 +323,6 @@ S32 build_rtp_nalu(U8 *inbuffer, S32 frame_size, S32 cur_conn_num)
 	return 0;	
 }
 
-/******************************************************************************/
-/*
- *  from vidoe file  build rtp packet  and send
- *	  cur_conn_num :	current connect number
- */
-/******************************************************************************/
 S32 rtp_send_form_file(S32 cur_conn_num)
 {
 	FILE *infile = NULL,*outfile = NULL;
@@ -395,52 +335,36 @@ S32 rtp_send_form_file(S32 cur_conn_num)
 	
     outfile = outfile;
 	infile = fopen(rtsp[0]->file_name, "rb");
-	if(infile==NULL){
+	if(infile==NULL) {
 		printf("please check media file\n");
 		return -1;
 	}
 	
-	total_size=get_file_size(infile);
-	if(total_size<=4)
-	{
+	total_size = get_file_size(infile);
+	if(total_size <= 4) {
 		fclose(infile);
 	    return 0;	
 	}
 
-	#ifdef WRITE_FILE
-	outfile = fopen("test_video.h264", "w");
-	if(outfile==NULL){
-		printf("please check media file\n");
-		return -1;
-	}
-	#endif
+	while(rtsp[cur_conn_num]->is_runing) {
+	    bytes_left = fread(inbufs,1,READ_LEN,infile);
+		p_tmp = inbufs;
+		while(bytes_left>0) {
+		    frame_size = abstr_nalu_indic(p_tmp, bytes_left, &found_nalu);
+			reach_last_nalu = (bytes_consumed + frame_size >= total_size); 
 
-	while(rtsp[cur_conn_num]->is_runing)
-	{
-	     bytes_left = fread(inbufs,1,READ_LEN,infile);
-		 p_tmp = inbufs;
-		 while(bytes_left>0)
-		 {
-		     frame_size = abstr_nalu_indic(p_tmp, bytes_left, &found_nalu);
-			 reach_last_nalu = (bytes_consumed + frame_size >= total_size); 
+			if(found_nalu||reach_last_nalu) {	      
+			    memcpy(outbufs, p_tmp, frame_size);
 
-			 if(found_nalu||reach_last_nalu)
-			 {	      
-			     memcpy(outbufs, p_tmp, frame_size);
-				 
-				 #ifdef WRITE_FILE
-				 wirte_to_file(outbufs, frame_size, outfile);
-				 #endif
+				build_rtp_nalu(outbufs, frame_size, cur_conn_num);		 
+				p_tmp += frame_size;
+				bytes_consumed += frame_size;
 
-				 build_rtp_nalu(outbufs, frame_size, cur_conn_num);		 
-				 p_tmp += frame_size;
-				 bytes_consumed += frame_size;
-
-				 if(reach_last_nalu)
+				if(reach_last_nalu)
 				 	rtsp[cur_conn_num]->is_runing = 0;
-			 } 
-			 bytes_left -= frame_size;
-		 }
+			} 
+			bytes_left -= frame_size;
+		}
 	 
 	    fseek(infile,bytes_consumed,SEEK_SET);  
 	}
@@ -448,31 +372,14 @@ S32 rtp_send_form_file(S32 cur_conn_num)
     fclose(infile);
 	close(rtsp[cur_conn_num]->fd.video_rtp_fd);
 	
-#ifdef WRITE_FILE
-	fclose(outfile);
-#endif
 	return 0;
-
 }
 
- /******************************************************************************/
-/*
- *   from stream  build rtp packet  and send
- * Arguments: NULL
- 
- */
-/******************************************************************************/
 S32 rtp_send_form_stream()
 {
 	return 0;
 }
 
-/******************************************************************************/
-/*
- *  send rtp	packet
- *	  cur_conn_num :	current connect number
- */
-/******************************************************************************/
 S32 rtp_send_packet(S32 cur_conn_num)
 {
 	rtp_send_form_file(cur_conn_num);
