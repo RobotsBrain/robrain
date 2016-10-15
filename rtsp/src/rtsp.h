@@ -55,7 +55,6 @@ struct rtsp_port{
 	U16 seq;
 };
 
-
 struct rtsp_fd{
 	S32 rtspfd;
 	S32 video_rtp_fd;
@@ -64,14 +63,12 @@ struct rtsp_fd{
 	S32 audio_rtcp_fd;
 };
 
-
 struct rtsp_th{
 	pthread_t rtsp_vthread;	
 	pthread_t rtsp_vthread1;
 	pthread_t rtp_vthread;
 	pthread_t rtcp_vthread;
 };
-
 
 struct rtsp_cli{
 	S32 cli_fd;

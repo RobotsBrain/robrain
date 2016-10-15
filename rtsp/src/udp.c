@@ -16,39 +16,39 @@
  S32 create_vrtp_socket(const CHAR *host, S32 port,S32 type,S32 cur_conn_num)
  {
 	 /*  Create a socket for the client.	*/
-	 S32 len,reuse =1;
-	 struct sockaddr_in rtp_address,rtp_bind;
-	 S32 result;
+	S32 len,reuse =1;
+	struct sockaddr_in rtp_address,rtp_bind;
+	S32 result;
 
-	 rtsp[cur_conn_num]->fd.video_rtp_fd = socket(AF_INET, type, 0);
+	rtsp[cur_conn_num]->fd.video_rtp_fd = socket(AF_INET, type, 0);
  
-	 /*set address reuse*/	  
-	 (VOID) setsockopt(rtsp[cur_conn_num]->fd.video_rtp_fd, SOL_SOCKET, SO_REUSEADDR, &reuse,sizeof(reuse)); 
+	/*set address reuse*/	  
+	(VOID) setsockopt(rtsp[cur_conn_num]->fd.video_rtp_fd, SOL_SOCKET, SO_REUSEADDR, &reuse,sizeof(reuse)); 
  
-	 /*bind local port*/		 
-	 rtp_bind.sin_family = AF_INET; 		 
-	 rtp_bind.sin_addr.s_addr = htonl(INADDR_ANY);				 
-	 rtp_bind.sin_port = htons(rtsp[cur_conn_num]->cmd_port.rtp_ser_port);			 
-	 if ((bind(rtsp[cur_conn_num]->fd.video_rtp_fd, (struct sockaddr *) &rtp_bind, sizeof(rtp_bind))) <0){				 
-		 printf("bind rtsp server port error"); 
-		 return -1;
-	 }
+	/*bind local port*/		 
+	rtp_bind.sin_family = AF_INET; 		 
+	rtp_bind.sin_addr.s_addr = htonl(INADDR_ANY);				 
+	rtp_bind.sin_port = htons(rtsp[cur_conn_num]->cmd_port.rtp_ser_port);			 
+	if ((bind(rtsp[cur_conn_num]->fd.video_rtp_fd, (struct sockaddr *) &rtp_bind, sizeof(rtp_bind))) <0){				 
+		printf("bind rtsp server port error"); 
+		return -1;
+	}
  
-	 /*  Name the socket, as agreed with the server.  */
-	 rtp_address.sin_family = AF_INET;
-	 rtp_address.sin_addr.s_addr = inet_addr(host);
-	 rtp_address.sin_port = htons(port);
-	 len = sizeof(rtp_address);
-	 /*  Now connect our socket to the server's socket.  */
-	 result = connect(rtsp[cur_conn_num]->fd.video_rtp_fd, (struct sockaddr *)&rtp_address, len);
+	/*  Name the socket, as agreed with the server.  */
+	rtp_address.sin_family = AF_INET;
+	rtp_address.sin_addr.s_addr = inet_addr(host);
+	rtp_address.sin_port = htons(port);
+	len = sizeof(rtp_address);
+	/*  Now connect our socket to the server's socket.  */
+	result = connect(rtsp[cur_conn_num]->fd.video_rtp_fd, (struct sockaddr *)&rtp_address, len);
  
-	 if(result == -1) {
-	 	 printf("connect vrtp socket error\n");
-		 return -1;
-	 }
-	 printf( "bind conn video rtp  sucess\n");
+	if(result == -1) {
+	 	printf("connect vrtp socket error\n");
+		return -1;
+	}
+	printf( "bind conn video rtp  sucess\n");
 
-	 return 0;
+	return 0;
  }
 
 /******************************************************************************/
@@ -171,6 +171,7 @@ S32 proc_rtp(S32 cur_conn_num)
 		rtsp[cur_conn_num]->rtspd_status=0x13;
 		return -1;
 	}
+
 	rtsp[cur_conn_num]->rtspd_status=0x14;
 	if (pthread_create(&rtsp[cur_conn_num]->pth.rtp_vthread,NULL,vd_rtp_func,(VOID *)cur_conn_num)<0){
 		printf("pthread_create rtcp error:\n");
@@ -195,6 +196,7 @@ S32 proc_rtcp(S32 cur_conn_num)
 		rtsp[cur_conn_num]->rtspd_status=0x17;
 		return -1;
 	}
+
 	rtsp[cur_conn_num]->rtspd_status=0x18;
 	if (pthread_create(&rtsp[cur_conn_num]->pth.rtcp_vthread, NULL, vd_rtcp_func,(VOID *)cur_conn_num) < 0){			
 		printf("pthread_create rtcp error:\n");

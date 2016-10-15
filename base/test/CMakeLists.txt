@@ -48,3 +48,8 @@ target_link_libraries(TestThreadLoop base pthread)
 #################################
 add_executable(TestSmartPtr TestSmartPtr.cpp)
 target_link_libraries(TestSmartPtr base)
+
+
+#################################
+add_executable(TestMsgQueue TestMsgQueue.cpp)
+target_link_libraries(TestMsgQueue base)

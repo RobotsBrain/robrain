@@ -165,8 +165,8 @@ S32 create_sercmd_socket(const CHAR *host, const CHAR *port,S32 type)
 				sem_post(&rtspd_lock[cur_conn_num]);
 				return -1;
 			} else {
-				 printf("setup command response  sucessfull\n");
-				 rtsp[cur_conn_num]->rtspd_status=0x06;
+				printf("setup command response  sucessfull\n");
+				rtsp[cur_conn_num]->rtspd_status=0x06;
 			}
 			break;
 			

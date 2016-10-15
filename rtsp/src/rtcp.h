@@ -126,7 +126,6 @@ typedef struct _RTCP_header_SDES {
 	U8 attr_name;
 	U8 len;	
 	CHAR name[];
-		
 } RTCP_header_SDES;
 
 typedef struct _RTCP_header_BYE {
