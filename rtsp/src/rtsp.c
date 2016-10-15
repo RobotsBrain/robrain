@@ -20,13 +20,12 @@ S32 get_rtsp_cseg(S32 cur_conn_num)
 	/****check  CSeq****/ 
 	if ((p = strstr(rtsp[cur_conn_num]->in_buffer, "CSeq")) == NULL) {
 		/**** not find CSeq send 400 error ****/
-		send_reply(400,cur_conn_num);
+		send_reply(400, cur_conn_num);
 		return -1;
-	} 
-	else {
+	} else {
 		if(sscanf(p, "%254s %d", trash, &(rtsp[cur_conn_num]->rtsp_cseq))!=2){
 			/**** not find CSeq value send 400 error ****/	
-			send_reply(400,cur_conn_num);
+			send_reply(400, cur_conn_num);
 			return -1;
 		}
 	}
@@ -591,7 +590,7 @@ S32 rtsp_options(S32 cur_conn_num){
 	}
 
 	if(get_rtsp_cseg(cur_conn_num)!=-1){
-		set_options_reply(200,cur_conn_num);
+		set_options_reply(200, cur_conn_num);
 		return 1;
 	}
 		

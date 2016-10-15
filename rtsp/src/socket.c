@@ -227,18 +227,17 @@ S32 create_sercmd_socket(const CHAR *host, const CHAR *port,S32 type)
 
 	while(1){
 	 	if(tcp_read(rtsp[free_conn]->cli_rtsp.cli_fd, 
-			rtsp[free_conn]->in_buffer, sizeof(rtsp[free_conn]->in_buffer))<0)
-	 	{
+			rtsp[free_conn]->in_buffer, sizeof(rtsp[free_conn]->in_buffer))<0) {
 			break;
 		}
+
 		method=get_rtsp_method(free_conn);
-		if(rtsp_cmd_match(method,free_conn)<0){
+		if(rtsp_cmd_match(method,free_conn)<0) {
 			sem_wait(&rtspd_semop);
 			set_free_conn_status(free_conn,0);
 			sem_post(&rtspd_semop);
 			break;
-		}
-	    else{
+		} else {
 			sem_wait(&rtspd_semop);
 			set_free_conn_status(free_conn,1);
 			sem_post(&rtspd_semop);
@@ -333,10 +332,11 @@ S32 tcp_read(S32 fd, void *buf, S32 length)
 	while(1) {
 	    bytes_read = read(fd,ptr,bytes_left);
 		if(bytes_read<0) {
-		    if(EINTR==errno)
+		    if(EINTR==errno) {
 				continue;
-			else
+		    } else {
 				return (-1);
+		    }
 		} else {
 			break;
 		}
@@ -354,10 +354,11 @@ S32 tcp_write(S32 fd, void *buf, S32 length)
 	while(bytes_left>0) {
 	    bytes_write = write(fd,ptr,bytes_left);
 		if(bytes_write<0) {
-		    if(EINTR==errno)
+		    if(EINTR==errno) {
 				continue;
-			else
+		    } else {
 				return (-1);
+			}
 		}
 
 		bytes_left -= bytes_write;

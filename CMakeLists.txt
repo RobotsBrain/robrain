@@ -27,6 +27,9 @@ add_subdirectory(${TOPDIR}/image/src ${BUILDDIR}/image/src)
 add_subdirectory(${TOPDIR}/rtsp/src ${BUILDDIR}/rtsp/src)
 add_subdirectory(${TOPDIR}/rtsp/test ${BUILDDIR}/rtsp/test)
 
+add_subdirectory(${TOPDIR}/transmit/rtsp/src ${BUILDDIR}/transmit/rtsp/src)
+add_subdirectory(${TOPDIR}/transmit/rtsp/test ${BUILDDIR}/transmit/rtsp/test)
+
 #add_subdirectory(${TOPDIR}/transmit/src ${BUILDDIR}/transmit/src)
 
 #add_subdirectory(${TOPDIR}/platform/linux ${BUILDDIR}/platform/linux)
