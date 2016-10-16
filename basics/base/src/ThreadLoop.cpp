@@ -76,6 +76,31 @@ bool CThreadLoop::StopThread()
 	return true;
 }
 
+/*****************************************************************************
+int pthread_cond_timedwait(pthread_cond_t *restrict cond,
+pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime);
+
+abstime是一个绝对时间，struct timespce的原型为：
+
+struct timespec {
+	__time_t tv_sec;        // Seconds
+	long int tv_nsec;       // Nanoseconds
+};
+
+其中tv_sec是秒，tv_nsec是纳秒（即1000,000,000分之一秒）
+
+struct timespec abstime;
+
+abstime.tv_nsec = (timeout_ms % 1000) * 1000000;
+abstime.tv_sec = time(NULL) + timeout_ms / 1000;
+
+pthread_cond_timedwait(&_read_cond, &_read_mutex, &abstime);
+
+以上代码有问题，主要是因为time(NULL)的返回结果的精度是秒级的，那么如果当前时间是m秒＋n毫秒，
+那么实际等待的时间只是timeout_ms – n，且还有可能发生n > timeout_ms的情况，这种情形下，
+如果这段代码处在一处while循环内，则会造成大量的pthread_cond_timedwait系统调用，并造成
+大量的context switch，系统CPU会占用很高。
+*****************************************************************************/
 int CThreadLoop::WaitForSleep(int timeout_ms)
 {
 	int ret = -1;
