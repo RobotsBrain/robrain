@@ -18,7 +18,7 @@ public:
 	bool Stop();
 
 private:
-	void EventHandleLoop();	
+	void EventHandleLoop();
 
 private:
 	int m_rtspfd;

@@ -5,6 +5,7 @@
 
 #include "base/Log.h"
 
+#include "Common.h"
 #include "Rtsp.h"
 
 
@@ -232,7 +233,7 @@ float NTP_time(time_t t)
 
 char *get_SDP_session_id(char *buffer)
 {	 
-	buffer[0]='\0';
+	buffer[0] = '\0';
 
 	sprintf(buffer, "%.0f", NTP_time(time(NULL)));
 
@@ -241,7 +242,7 @@ char *get_SDP_session_id(char *buffer)
 
 char *get_SDP_version(char *buffer)
 {
-	buffer[0]='\0';
+	buffer[0] = '\0';
 
 	sprintf(buffer, "%.0f", NTP_time(time(NULL)));
 
@@ -293,25 +294,6 @@ void GetSdpInfo(const char *host_name, const char *filename, char *sdp_buff)
 	strcat(sdp_buff, SDP_EL);
 
 	return;
-}
-
-void AddTimestamp(char *b, int crlf)
-{
- 	struct tm *t = NULL;
- 	time_t now;
-
- /*
-  * concatenates a null terminated string with a
-  * time stamp in the format of "Date: 23 Jan 1997 15:35:06 GMT"
-  */
- 	now = time(NULL);
- 	t = gmtime(&now);
- 	strftime(b, 38, "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", t);
- 	if (crlf) {
-	 	strcat(b, "\r\n");  /* add a message header terminator (CRLF) */
- 	}
-
- 	return;
 }
 
 int SetDescribeReply(const char *in, int cseq, int &err, string &response)
@@ -372,6 +354,132 @@ int SetDescribeReply(const char *in, int cseq, int &err, string &response)
 
 	return 0;
 }
+
+void GetResponse(int error, int cseq, string &response)
+{
+	char buf[128] = {0};
+
+	sprintf(buf, "%s %d %s"RTSP_EL"CSeq: %d"RTSP_EL, RTSP_VER, error, 
+		(char *)GetStat(error), cseq);
+
+	strcat(buf, RTSP_EL);
+
+	response.append(buf);
+
+	return;
+}
+
+#if 0
+void GetSetupInfo()
+{
+	char temp[30];
+	char ttl[4];
+
+	/* build a reply message */
+	sprintf(out, "%s 200 %s"RTSP_EL"CSeq: %d"RTSP_EL"Server: %s/%s"RTSP_EL, 
+			RTSP_VER, (char *)GetStat(200), cseq, PACKAGE, VERSION);
+	AddTimestamp(out + strlen(out), 0);
+	strcat(out, "Session: ");
+	sprintf(temp, "%d", session_id);
+	strcat(out, temp);
+	strcat(out, RTSP_EL);
+	/**** unicast  ****/
+	strcat(out, "Transport: RTP/AVP;unicast;client_port=");
+	sprintf(temp, "%d", cmd_port.rtp_cli_port);
+	strcat(out, temp);
+	strcat(out, "-");
+	sprintf(temp, "%d", cmd_port.rtcp_cli_port);
+	strcat(out, temp);
+	//sprintf(temp, ";source=%s", get_address());
+	strcat(out, rtsp[0]->host_name);
+	strcat(out, temp);
+	strcat(out, ";server_port=");
+	sprintf(temp, "%d", cmd_port.rtp_ser_port);
+	strcat(out, temp);
+	strcat(out, "-");
+	sprintf(temp, "%d", cmd_port.rtcp_ser_port);
+	strcat(out, temp);
+	sprintf(temp, ";ssrc=%u", cmd_port.ssrc);/*xxx*/
+	strcat(out, temp);	
+	strcat(out,";ttl=");
+	sprintf(ttl,"%d",(int)DEFAULT_TTL);
+	strcat(out,ttl);	
+	strcat(out, RTSP_EL);
+	strcat(out, RTSP_EL);
+
+	return;
+}
+#endif
+
+int SetSetupReply(const char *in, int cseq, int &err, string &response)
+{
+	const char *p = NULL;
+	char trash[255], line[255];
+
+	int port;
+	char url[128];
+	char object[128], server[128];
+
+	if (!sscanf(in, " %*s %254s ", url)) {
+		err = 400;	/* bad request */
+		return -1;
+	}
+
+	/* Validate the URL */
+	if (!ParseUrl(url, server, port, object)) {
+		err = 400;	/* bad request */
+		return -1;
+	}
+
+	if(!CheckRtspFilename(object, err)) {
+		return -1;
+	}
+
+	INFO("url: %s, server: %s, port: %d, object: %s\n", url, server, port, object);
+	
+	if ((p = strstr(in, "client_port")) == NULL && strstr(in, "multicast") == NULL) {
+		err = 406; /* Not Acceptable */	
+		return -1;
+	}
+
+	/**** Start parsing the Transport header ****/
+	if ((p = strstr(in, HDR_TRANSPORT)) == NULL) {
+		err = 406;	/* Not Acceptable */
+		return -1;
+	}
+
+	if (sscanf(p, "%10s%255s", trash, line) != 2) {
+		err = 400;	/* Bad Request */
+		return -1;
+	}
+
+#if 0
+	/****  get client rtp and rtcp port  ****/
+	if(strstr(line, "client_port") != NULL) {
+		p = strstr(line, "client_port");
+		p = strstr(p, "=");
+		sscanf(p + 1, "%d", &(cmd_port.rtp_cli_port));
+		p = strstr(p, "-");
+		sscanf(p + 1, "%d", &(cmd_port.rtcp_cli_port));
+	}
+
+	get_server_port();
+
+	cmd_port.seq = GetRanddomSeq();
+	cmd_port.ssrc = Random32(0);
+	cmd_port.timestamp = Random32(0);
+
+	if(send_setup_reply(200) != -1) {
+		return 1;
+	}
+#endif
+
+	return 0;
+}
+
+
+
+
 
 
 } // end namespace
