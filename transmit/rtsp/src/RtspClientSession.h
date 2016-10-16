@@ -3,6 +3,9 @@
 
 #include "base/ThreadLoop.h"
 
+#include "Rtsp.h"
+#include "Rtp.h"
+
 
 
 namespace Rtsp {
@@ -19,8 +22,13 @@ public:
 private:
 	void EventHandleLoop();
 
+	int Setup(int clifd, const char *in);
+	int Play(int clifd, const char *in);
+
 private:
 	int 	m_clifd;
+	CRtp 	m_rtp;
+	RtspInfo m_info;
 };
 
 } // end namespace

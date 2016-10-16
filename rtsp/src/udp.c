@@ -33,7 +33,7 @@
 		printf("bind rtsp server port error"); 
 		return -1;
 	}
- 
+
 	/*  Name the socket, as agreed with the server.  */
 	rtp_address.sin_family = AF_INET;
 	rtp_address.sin_addr.s_addr = inet_addr(host);
@@ -46,7 +46,8 @@
 	 	printf("connect vrtp socket error\n");
 		return -1;
 	}
-	printf( "bind conn video rtp  sucess\n");
+
+	printf( "bind (%s) conn video rtp sucess\n", host);
 
 	return 0;
  }
@@ -103,7 +104,7 @@ VOID *vd_rtp_func(VOID *arg)
 		printf("bind rtcp server port error"); 
 		return -1;
 	}
- 
+
 	/*  Name the socket, as agreed with the server.  */
 	rtcp_address.sin_family = AF_INET;
 	rtcp_address.sin_addr.s_addr = inet_addr(host);;
@@ -117,7 +118,8 @@ VOID *vd_rtp_func(VOID *arg)
 		printf("connect vrtcp socket error\n");
 		return -1;
 	}
-	printf("bind conn video rtcp  sucess\n");
+
+	printf("bind (%s) conn video rtcp sucess\n", host);
 	
 	return 0;
  }

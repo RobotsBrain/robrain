@@ -25,7 +25,7 @@ typedef struct {
 	int rtcp_ser_port;
 	unsigned int ssrc;
 	unsigned int timestamp;
-	unsigned int frame_rate_step;
+	// unsigned int frame_rate_step;
 	short seq;
 } RtspInfo;
 
@@ -37,7 +37,7 @@ void SetOptionsReply(int status, int cseq, std::string &response);
 
 int SetDescribeReply(const char *in, int cseq, int &err, std::string &response);
 
-int SetSetupReply(const char *in, int cseq, int &err, std::string &response);
+int SetSetupReply(const char *in, int cseq, int &err, RtspInfo &cmd_port, std::string &response);
 
 int SetPlayReply(const char *in, int cseq, int &err, std::string &response);
 

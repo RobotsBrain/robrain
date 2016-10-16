@@ -415,7 +415,7 @@ void GetSetupInfo(const char *host_name, RtspInfo cmd_port, int cseq, string &re
 	return;
 }
 
-int SetSetupReply(const char *in, int cseq, int &err, string &response)
+int SetSetupReply(const char *in, int cseq, int &err, RtspInfo &cmd_port, string &response)
 {
 	const char *p = NULL;
 	char trash[255], line[255];
@@ -457,8 +457,6 @@ int SetSetupReply(const char *in, int cseq, int &err, string &response)
 		return -1;
 	}
 
-	RtspInfo cmd_port;
-
 	/****  get client rtp and rtcp port  ****/
 	if(strstr(line, "client_port") != NULL) {
 		p = strstr(line, "client_port");
@@ -474,6 +472,8 @@ int SetSetupReply(const char *in, int cseq, int &err, string &response)
 	cmd_port.seq = GetRanddomSeq();
 	cmd_port.ssrc = Random32(0);
 	cmd_port.timestamp = Random32(0);
+
+	INFO("%d, %u, %u\n", cmd_port.seq, cmd_port.ssrc, cmd_port.timestamp);
 
 	GetSetupInfo(server, cmd_port, cseq, response);
 
@@ -528,9 +528,6 @@ int SetPlayReply(const char *in, int cseq, int &err, string &response)
 
 	return 0;
 }
-
-
-
 
 } // end namespace
 

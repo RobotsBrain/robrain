@@ -89,11 +89,11 @@ S32 build_rtp_header(RTP_header *r,S32 cur_conn_num)
 	r->padding = 0;
 	r->extension = 0;
 	r->csrc_len = 0;
-	r->marker=0;
-	r->payload=96;
-	r->seq_no=htons(rtsp[cur_conn_num]->cmd_port.seq);
-	rtsp[cur_conn_num]->cmd_port.timestamp+=rtsp[cur_conn_num]->cmd_port.frame_rate_step;
-	r->timestamp=htonl(rtsp[cur_conn_num]->cmd_port.timestamp);
+	r->marker = 0;
+	r->payload = 96;
+	r->seq_no = htons(rtsp[cur_conn_num]->cmd_port.seq);
+	rtsp[cur_conn_num]->cmd_port.timestamp += rtsp[cur_conn_num]->cmd_port.frame_rate_step;
+	r->timestamp = htonl(rtsp[cur_conn_num]->cmd_port.timestamp);
 	r->ssrc = htonl(rtsp[cur_conn_num]->cmd_port.ssrc);
 
 	return 0;
@@ -166,13 +166,16 @@ S32 udp_write(S32 len,S32 cur_conn_num)
 S32 udp_write_fua(S32 len,S32 time,S32 cur_conn_num)
 {
 	S32 result;
-	again:
+
+again:
 	result=write(rtsp[cur_conn_num]->fd.video_rtp_fd,rtsp[cur_conn_num]->nalu_buffer,len);
 	if(result<=0) {
 		goto again;
 	} else {
-		if(time>DE_TIME)
-			time=DE_TIME;
+		if(time > DE_TIME) {
+			time = DE_TIME;
+		}
+
 		usleep(time);
 	}
 
@@ -222,8 +225,9 @@ S32 abstr_nalu_indic(U8 *buf, S32 buf_size, S32 *be_found)
 		p_tmp += offset;
 	}
 
-	if(!*be_found)
+	if(!*be_found) {
 		frame_size = buf_size;
+	}
 
 	return frame_size;
 }
@@ -299,21 +303,22 @@ S32 build_rtp_nalu(U8 *inbuffer, S32 frame_size, S32 cur_conn_num)
 	while(data_left>0) {
 	    S32 proc_size = MIN(data_left,SLICE_NALU_DATA_MAX);
 		S32 rtp_size = proc_size + RTP_HEADER_SIZE + FU_A_HEAD_SIZE + FU_A_INDI_SIZE;
-		fu_end = (proc_size==data_left);
+		fu_end = (proc_size == data_left);
 		fu_header = nalu_header&0x1F;
 		if(fu_start)
 			fu_header |= 0x80;
 		else if(fu_end)
 			fu_header |= 0x40;
 
-        rtp_header.seq_no=htons(rtsp[cur_conn_num]->cmd_port.seq++);
+        rtp_header.seq_no = htons(rtsp[cur_conn_num]->cmd_port.seq++);
 		memcpy(nalu_buffer,&rtp_header,sizeof(rtp_header));
 		memcpy(nalu_buffer + 14,p_nalu_data,proc_size);
 		nalu_buffer[12] = fu_indic;
 		nalu_buffer[13] = fu_header;
 		udp_write(rtp_size, cur_conn_num);
-		if(fu_end)
+		if(fu_end) {
 			usleep(36000);
+		}
 		
 		data_left -= proc_size;	
 		p_nalu_data += proc_size;
@@ -335,7 +340,7 @@ S32 rtp_send_form_file(S32 cur_conn_num)
 	
     outfile = outfile;
 	infile = fopen(rtsp[0]->file_name, "rb");
-	if(infile==NULL) {
+	if(infile == NULL) {
 		printf("please check media file\n");
 		return -1;
 	}
@@ -372,11 +377,6 @@ S32 rtp_send_form_file(S32 cur_conn_num)
     fclose(infile);
 	close(rtsp[cur_conn_num]->fd.video_rtp_fd);
 	
-	return 0;
-}
-
-S32 rtp_send_form_stream()
-{
 	return 0;
 }
 

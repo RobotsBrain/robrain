@@ -96,6 +96,21 @@ void AddTimestamp(char *b, int crlf)
  	return;
 }
 
+long GetFileSize(FILE *infile)
+{
+    long size_of_file;
+	
+	/****  jump to the end of the file. ****/
+    fseek(infile, 0L, SEEK_END);
+
+	/****  get the end position. ****/
+	size_of_file = ftell(infile);
+
+    /**** Jump back to the original position. ****/
+    fseek(infile, 0L, SEEK_SET);
+
+	return (size_of_file);
+}
 
 } // end namespace
 

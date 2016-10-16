@@ -150,7 +150,7 @@ int RtspDescribe(int clifd, const char *in)
 	return 0;
 }
 
-int RtspSetup(int clifd, const char *in)
+int CRtspClientSession::Setup(int clifd, const char *in)
 {
 	int err = 0;
 	int cseq = 0;
@@ -160,7 +160,7 @@ int RtspSetup(int clifd, const char *in)
 		return -1;
 	}
 
-	if(SetSetupReply(in, cseq, err, response) < 0) {
+	if(SetSetupReply(in, cseq, err, m_info, response) < 0) {
 		SendReply(clifd, err, cseq);
 		return -1;
 	}
@@ -175,7 +175,7 @@ int RtspSetup(int clifd, const char *in)
 	return 0;
 }
 
-int RtspPlay(int clifd, const char *in)
+int CRtspClientSession::Play(int clifd, const char *in)
 {
 	int err = 0;
 	int cseq = 0;
@@ -194,6 +194,8 @@ int RtspPlay(int clifd, const char *in)
 		printf("send_describe_reply error\n");
 		return -1;
 	}
+
+	m_rtp.Start(m_info.rtp_ser_port, m_info.rtp_cli_port, m_info.ssrc, m_info.timestamp, m_info.seq);
 
 	printf("%s\n", response.c_str());
 
@@ -229,7 +231,6 @@ void CRtspClientSession::EventHandleLoop()
 	char in[RTSP_BUFFERSIZE];
 
 	while(1) {
-
 		RtspRead(clifd, in, sizeof(in));
 
   		printf("%s\n", in);
@@ -245,11 +246,11 @@ void CRtspClientSession::EventHandleLoop()
   			break;
 
 		case RTSP_SETUP:
-			RtspSetup(clifd, in);
+			Setup(clifd, in);
 			break;
 
 		case RTSP_PLAY:
-			RtspPlay(clifd, in);
+			Play(clifd, in);
 			break;
 
 		case RTSP_TEARDOWN:

@@ -244,7 +244,7 @@ int main(int argc, char **argv)
 	signal(SIGINT, (VOID*)sig_exit);
 		
 	rtspd_init();
-	rtsp_init("192.168.0.110", 554);
+	rtsp_init("127.0.0.1", 554);
 	free_chn=rtspd_freechn();
 	set_framerate(25,free_chn);
 	rtsp_proc(free_chn);
