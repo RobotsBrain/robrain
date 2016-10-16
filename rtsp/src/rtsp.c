@@ -739,19 +739,6 @@ U32 random32(S32 type)
 	return 0;
 }
 
-S32 get_sessionid(S32 cur_conn_num)
-{
-#ifdef WIN32
-	rtsp[cur_conn_num]->session_id = rand();
-#else
-	rtsp[cur_conn_num]->session_id = 1 + (S32) (10.0 * rand() / (100000 + 1.0));
-#endif
-
-	if (rtsp[cur_conn_num]->session_id == 0) {
-		rtsp[cur_conn_num]->session_id++;
-	}
-}
-
  /******************************************************************************/
 /*
  *	set describe command  response buffer

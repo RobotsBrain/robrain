@@ -2,14 +2,14 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "rtsp/Socket.h"
+#include "rtsp/RtspServerSession.h"
 
 
 
 
 int main(int argc, char **argv)
 {
-	Rtsp::CSocket rtsp;
+	Rtsp::CRtspServerSession rtsp;
 
 	rtsp.Start("127.0.0.1", 5004);
 

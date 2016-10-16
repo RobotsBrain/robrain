@@ -175,6 +175,31 @@ int RtspSetup(int clifd, const char *in)
 	return 0;
 }
 
+int RtspPlay(int clifd, const char *in)
+{
+	int err = 0;
+	int cseq = 0;
+	string response;
+
+	if(GetRtspCseg(in, cseq) < 0) {
+		return -1;
+	}
+
+	if(SetPlayReply(in, cseq, err, response) < 0) {
+		SendReply(clifd, err, cseq);
+		return -1;
+	}
+
+	if(write(clifd, response.c_str(), response.size()) < 0) {
+		printf("send_describe_reply error\n");
+		return -1;
+	}
+
+	printf("%s\n", response.c_str());
+
+	return 0;
+}
+
 CRtspClientSession::CRtspClientSession()
 : Base::CThreadLoop("RtspClientSession")
 {
@@ -224,6 +249,7 @@ void CRtspClientSession::EventHandleLoop()
 			break;
 
 		case RTSP_PLAY:
+			RtspPlay(clifd, in);
 			break;
 
 		case RTSP_TEARDOWN:

@@ -4,15 +4,17 @@
 #include <string>
 
 
-#define RTSP_EL "\r\n"
-#define RTSP_VER "RTSP/1.0"
-#define HDR_REQUIRE "Require"
-#define HDR_ACCEPT "Accept"
-#define PACKAGE "rtspd"
-#define VERSION "1.0"
-#define SDP_EL "\r\n"
-#define HDR_TRANSPORT "Transport"
-#define HDR_SESSION "Session"
+#define RTSP_EL 		"\r\n"
+#define RTSP_VER 		"RTSP/1.0"
+#define HDR_REQUIRE 	"Require"
+#define HDR_ACCEPT 		"Accept"
+#define PACKAGE 		"rtspd"
+#define VERSION 		"1.0"
+#define SDP_EL 			"\r\n"
+#define HDR_TRANSPORT 	"Transport"
+#define HDR_SESSION 	"Session"
+#define DEFAULT_TTL 	32
+#define HDR_CSEQ 		"CSeq"
 
 namespace Rtsp {
 
@@ -36,6 +38,8 @@ void SetOptionsReply(int status, int cseq, std::string &response);
 int SetDescribeReply(const char *in, int cseq, int &err, std::string &response);
 
 int SetSetupReply(const char *in, int cseq, int &err, std::string &response);
+
+int SetPlayReply(const char *in, int cseq, int &err, std::string &response);
 
 } // end namespace
 

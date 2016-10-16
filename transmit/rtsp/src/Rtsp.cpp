@@ -11,6 +11,9 @@
 
 using namespace std;
 
+
+#define RTP_DEFAULT_PORT 5004
+
 namespace Rtsp {
 
 typedef struct {
@@ -369,9 +372,9 @@ void GetResponse(int error, int cseq, string &response)
 	return;
 }
 
-#if 0
-void GetSetupInfo()
+void GetSetupInfo(const char *host_name, RtspInfo cmd_port, int cseq, string &response)
 {
+	char out[1028];
 	char temp[30];
 	char ttl[4];
 
@@ -380,7 +383,7 @@ void GetSetupInfo()
 			RTSP_VER, (char *)GetStat(200), cseq, PACKAGE, VERSION);
 	AddTimestamp(out + strlen(out), 0);
 	strcat(out, "Session: ");
-	sprintf(temp, "%d", session_id);
+	sprintf(temp, "%d", 0); //session_id);
 	strcat(out, temp);
 	strcat(out, RTSP_EL);
 	/**** unicast  ****/
@@ -391,8 +394,8 @@ void GetSetupInfo()
 	sprintf(temp, "%d", cmd_port.rtcp_cli_port);
 	strcat(out, temp);
 	//sprintf(temp, ";source=%s", get_address());
-	strcat(out, rtsp[0]->host_name);
-	strcat(out, temp);
+	// strcat(out, host_name);
+	// strcat(out, temp);
 	strcat(out, ";server_port=");
 	sprintf(temp, "%d", cmd_port.rtp_ser_port);
 	strcat(out, temp);
@@ -407,9 +410,10 @@ void GetSetupInfo()
 	strcat(out, RTSP_EL);
 	strcat(out, RTSP_EL);
 
+	response.append(out);
+
 	return;
 }
-#endif
 
 int SetSetupReply(const char *in, int cseq, int &err, string &response)
 {
@@ -431,9 +435,9 @@ int SetSetupReply(const char *in, int cseq, int &err, string &response)
 		return -1;
 	}
 
-	if(!CheckRtspFilename(object, err)) {
-		return -1;
-	}
+	// if(!CheckRtspFilename(object, err)) {
+	// 	return -1;
+	// }
 
 	INFO("url: %s, server: %s, port: %d, object: %s\n", url, server, port, object);
 	
@@ -453,7 +457,8 @@ int SetSetupReply(const char *in, int cseq, int &err, string &response)
 		return -1;
 	}
 
-#if 0
+	RtspInfo cmd_port;
+
 	/****  get client rtp and rtcp port  ****/
 	if(strstr(line, "client_port") != NULL) {
 		p = strstr(line, "client_port");
@@ -463,21 +468,66 @@ int SetSetupReply(const char *in, int cseq, int &err, string &response)
 		sscanf(p + 1, "%d", &(cmd_port.rtcp_cli_port));
 	}
 
-	get_server_port();
+	cmd_port.rtp_ser_port = (cmd_port.rtp_cli_port - RTP_DEFAULT_PORT)/2 + RTP_DEFAULT_PORT;
+	cmd_port.rtcp_ser_port = cmd_port.rtp_ser_port + 1;
 
 	cmd_port.seq = GetRanddomSeq();
 	cmd_port.ssrc = Random32(0);
 	cmd_port.timestamp = Random32(0);
 
-	if(send_setup_reply(200) != -1) {
-		return 1;
-	}
-#endif
+	GetSetupInfo(server, cmd_port, cseq, response);
 
 	return 0;
 }
 
+int SetPlayReply(const char *in, int cseq, int &err, string &response)
+{
+	const char *p = NULL;
+	char temp[255];
+	int port;
+	char url[128];
+	char object[128], server[128];
 
+	if (!sscanf(in, " %*s %254s ", url)) {
+		err = 400;	/* bad request */
+		return -1;
+	}
+
+	/* Validate the URL */
+	if (!ParseUrl(url, server, port, object)) {
+		err = 400;	/* bad request */
+		return -1;
+	}
+	
+	int session_id;
+
+	// If we get a Session hdr, then we have an aggregate control
+	if ((p = strstr(in, HDR_SESSION)) != NULL) {
+		if (sscanf(p, "%254s %d", temp, &session_id) != 2) {
+			err = 454;	/* Session Not Found */
+			return -1;
+		}
+	} else {
+		err = 400;	/* bad request */
+		return -1;
+	}
+
+	char out[256] = {0};
+
+	/* build a reply message */
+	sprintf(out, "%s 200 %s"RTSP_EL"CSeq: %d"RTSP_EL"Server: %s/%s"RTSP_EL, 
+		RTSP_VER, (char *)GetStat(200), cseq, PACKAGE, VERSION);
+	AddTimestamp(out + strlen(out), 0);
+	strcat(out, "Session: ");
+	sprintf(temp, "%d", session_id);
+	strcat(out, temp);
+	strcat(out, RTSP_EL);
+	strcat(out, RTSP_EL);
+
+	response.append(out);
+
+	return 0;
+}
 
 
 
