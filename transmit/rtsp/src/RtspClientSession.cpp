@@ -1,14 +1,5 @@
-#include <sys/utsname.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include <time.h>
-#include <netdb.h>
-#include <pthread.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -85,6 +76,7 @@ RTSPMETHOD ParseRtspCmdMethod(const char *buf)
 
 	for(int i = 0; i < sizeof(RtspMethodString); i++) {
 		if(strncmp(buf, RtspMethodString[i].c_str(), RtspMethodString[i].size()) == 0) {
+			DEBUG("recv cmd: %s\n", RtspMethodString[i].c_str());
 			return (RTSPMETHOD)i;
 		}
 	}
@@ -104,17 +96,17 @@ int SendReply(int clifd, int error, int cseq)
 	return 0;
 }
 
-int RtspOptions(int clifd, const char *in)
+int CRtspClientSession::Options(int clifd, const char *in)
 {
 	int cseq = 0;
+	string response;
 
 	if(GetRtspCseg(in, cseq) < 0) {
 		return -1;
 	}
 
-	string response;
-
 	SetOptionsReply(200, cseq, response);
+
 	if(write(clifd, response.c_str(), response.size()) < 0) {
 		printf("set_options_reply error\n");
 		return -1;
@@ -125,7 +117,7 @@ int RtspOptions(int clifd, const char *in)
 	return 0;
 }
 
-int RtspDescribe(int clifd, const char *in)
+int CRtspClientSession::Describe(int clifd, const char *in)
 {
 	int err = 0;
 	string response;
@@ -202,6 +194,28 @@ int CRtspClientSession::Play(int clifd, const char *in)
 	return 0;
 }
 
+int CRtspClientSession::Teardown(int clifd, const char *in)
+{
+	int err = 0;
+	int cseq = 0;
+	string response;
+
+	if(GetRtspCseg(in, cseq) < 0) {
+		return -1;
+	}
+
+	SetTeardownReply(in, cseq, err, response);
+	
+	if(write(clifd, response.c_str(), response.size()) < 0) {
+		printf("send_describe_reply error\n");
+		return -1;
+	}
+
+	printf("%s\n", response.c_str());
+
+	return 0;
+}
+
 CRtspClientSession::CRtspClientSession()
 : Base::CThreadLoop("RtspClientSession")
 {
@@ -238,11 +252,11 @@ void CRtspClientSession::EventHandleLoop()
   		RTSPMETHOD method = ParseRtspCmdMethod(in);
   		switch(method) {
   		case RTSP_OPTIONS:
-  			RtspOptions(clifd, in);
+  			Options(clifd, in);
   			break;
 
   		case RTSP_DESCRIBE:
-  			RtspDescribe(clifd, in);
+  			Describe(clifd, in);
   			break;
 
 		case RTSP_SETUP:
@@ -254,6 +268,7 @@ void CRtspClientSession::EventHandleLoop()
 			break;
 
 		case RTSP_TEARDOWN:
+			Teardown(clifd, in);
 			break;
   		}
 

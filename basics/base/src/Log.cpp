@@ -100,7 +100,7 @@ void LogPrint(LOGLEVEL level, const char *prefix, const char *fmt, ...)
 	time(&t_secs);
 	t_info = gmtime(&t_secs);
 
-	fprintf(fp, "%d-%d-%d %d:%d:%d %s %s: ", t_info->tm_year + 1900, t_info->tm_mon + 1, 
+	fprintf(fp, "[%d-%d-%d %d:%d:%d %s %s] ", t_info->tm_year + 1900, t_info->tm_mon + 1, 
 				t_info->tm_mday, t_info->tm_hour, t_info->tm_min, t_info->tm_sec, prefix, log_info[level]);
 
 	va_start(args, fmt);

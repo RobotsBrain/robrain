@@ -529,6 +529,38 @@ int SetPlayReply(const char *in, int cseq, int &err, string &response)
 	return 0;
 }
 
+int SetTeardownReply(const char *in, int cseq, int &err, string &response)
+{
+	const char *p = NULL;
+	char  trash[255];
+	char temp[20];
+	int session_id;
+
+	// If we get a Session hdr, then we have an aggregate control
+	if ((p = strstr(in, HDR_SESSION)) != NULL) {
+		if (sscanf(p, "%254s %d", trash, &session_id) != 2) {
+			err = 454;	/* Session Not Found */
+			return -1;
+		}
+	} else {
+		err = 400;	/* bad request */
+		return -1;
+	}
+	
+	sprintf(trash, "%s 200 %s"RTSP_EL"CSeq: %d"RTSP_EL"Server: %s/%s"RTSP_EL, 
+		RTSP_VER, (char *)GetStat(200), cseq, PACKAGE, VERSION);
+	AddTimestamp(trash + strlen(trash), 0);
+	strcat(trash, "Session: ");
+	sprintf(temp, "%d", session_id);
+	strcat(trash, temp);
+	strcat(trash, RTSP_EL);
+	strcat(trash, RTSP_EL);
+
+	response.append(trash);
+
+	return 0;
+}
+
 } // end namespace
 
 

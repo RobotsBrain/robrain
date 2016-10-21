@@ -1,20 +1,14 @@
+#include <sys/utsname.h>
+#include <sys/types.h>
 #include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <stdlib.h>
 #include <time.h>
-#include <netdb.h>
 #include <pthread.h>
-#include <sys/utsname.h>
 #include <unistd.h>
-#include <errno.h>
 
 #include "md5.h"
-
 
 
 

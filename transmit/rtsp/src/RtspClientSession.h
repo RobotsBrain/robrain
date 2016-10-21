@@ -22,8 +22,11 @@ public:
 private:
 	void EventHandleLoop();
 
+	int Options(int clifd, const char *in);
+	int Describe(int clifd, const char *in);
 	int Setup(int clifd, const char *in);
 	int Play(int clifd, const char *in);
+	int Teardown(int clifd, const char *in);
 
 private:
 	int 	m_clifd;

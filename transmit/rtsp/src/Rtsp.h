@@ -41,6 +41,8 @@ int SetSetupReply(const char *in, int cseq, int &err, RtspInfo &cmd_port, std::s
 
 int SetPlayReply(const char *in, int cseq, int &err, std::string &response);
 
+int SetTeardownReply(const char *in, int cseq, int &err, std::string &response);
+
 } // end namespace
 
 #endif

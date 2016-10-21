@@ -28,7 +28,7 @@ bool CRtspServerSession::Start(const char *host, int port)
 {
     m_rtspfd = CreateTcpConnect(host, port);
 
-  	DEBUG("rtsp server listen sucess\n");
+  	DEBUG("rtsp server(%s) listen port(%d) sucess\n", host, port);
 
 	return StartThread();
 }
