@@ -1,6 +1,10 @@
 #ifndef __RTCP_H__
 #define __RTCP_H__
 
+#include "base/ThreadLoop.h"
+
+
+
 namespace Rtsp {
 
 typedef enum {
@@ -65,12 +69,34 @@ typedef struct _RTCP_header_BYE {
 	unsigned char length;
 } RTCP_header_BYE;
 
-struct rtcp_pkt{
+typedef struct {
    RTCP_header comm;
    RTCP_header_SDES sdec;
-} rtcp_pkt;
+} RtcpPkt;
 
+
+
+
+class CRtcp : public Base::CThreadLoop
+{
+public:
+	CRtcp();
+	~CRtcp();
+	
+	bool Start(int port, int cliport);
+	bool Stop();
+
+private:
+	void EventHandleLoop();
+	int BuildPacket(RtcpPkt &pkt);
+
+private:
+	int 		m_rtcp_fd;
+	std::string m_host;
+};
 
 } // end namespace
 
 #endif
+
+

@@ -188,6 +188,7 @@ int CRtspClientSession::Play(int clifd, const char *in)
 	}
 
 	m_rtp.Start(m_info.rtp_ser_port, m_info.rtp_cli_port, m_info.ssrc, m_info.timestamp, m_info.seq);
+	m_rtcp.Start(m_info.rtcp_ser_port, m_info.rtcp_cli_port);
 
 	printf("%s\n", response.c_str());
 

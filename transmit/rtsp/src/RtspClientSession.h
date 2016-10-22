@@ -5,6 +5,7 @@
 
 #include "Rtsp.h"
 #include "Rtp.h"
+#include "Rtcp.h"
 
 
 
@@ -29,9 +30,10 @@ private:
 	int Teardown(int clifd, const char *in);
 
 private:
-	int 	m_clifd;
-	CRtp 	m_rtp;
-	RtspInfo m_info;
+	int 		m_clifd;
+	CRtp 		m_rtp;
+	CRtcp 		m_rtcp;
+	RtspInfo 	m_info;
 };
 
 } // end namespace
