@@ -1,6 +1,7 @@
 #ifndef _H264VideoSource_H  
 #define _H264VideoSource_H  
   
+#include <stdio.h>
 
 #include "BasicUsageEnvironment.hh"
 #include "GroupsockHelper.hh"
@@ -25,9 +26,10 @@ public:
     void GetFrameData();  
   
 private:  
-    void *m_pToken;  
+    void *m_pToken;
     char *m_pFrameBuffer;  
-    int  m_hFifo;  
+    int  m_hFifo;
+    FILE *m_fp;
 };  
   
 #endif  

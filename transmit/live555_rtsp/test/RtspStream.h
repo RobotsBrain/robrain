@@ -15,6 +15,9 @@ public:
 
     bool SendH264File(const char *pFileName);
     int SendH264Data(const unsigned char *data, unsigned int size);
+
+private:
+	int m_pipe_fd;
 };
 
 

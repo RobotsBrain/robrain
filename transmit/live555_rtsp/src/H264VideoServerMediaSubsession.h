@@ -10,7 +10,7 @@
 class H264VideoServerMediaSubsession : public OnDemandServerMediaSubsession  
 {  
 public:  
-    H264VideoServerMediaSubsession(UsageEnvironment &env, FramedSource *source);  
+    H264VideoServerMediaSubsession(UsageEnvironment &env);  
     ~H264VideoServerMediaSubsession(void);  
   
 public:  
@@ -18,7 +18,7 @@ public:
     virtual FramedSource *createNewStreamSource(unsigned clientSessionId, unsigned &estBitrate); // "estBitrate" is the stream's estimated bitrate, in kbps  
     virtual RTPSink *createNewRTPSink(Groupsock *rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource *inputSource);  
   
-    static H264VideoServerMediaSubsession *createNew(UsageEnvironment &env, FramedSource *source);  
+    static H264VideoServerMediaSubsession *createNew(UsageEnvironment &env);  
   
     void afterPlayingDummy1();
     void checkForAuxSDPLine1();

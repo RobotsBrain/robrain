@@ -5,26 +5,29 @@
 
 
 
-H264VideoServerMediaSubsession::H264VideoServerMediaSubsession(UsageEnvironment &env, 
-                                                                FramedSource *source)
+H264VideoServerMediaSubsession::H264VideoServerMediaSubsession(UsageEnvironment &env)
 : OnDemandServerMediaSubsession(env, True)
 , m_fAuxSDPLine(NULL)
 , m_fDoneFlag(0)
 {
-    m_pSource = source;
+    DEBUG("\n");
 }
 
 H264VideoServerMediaSubsession::~H264VideoServerMediaSubsession(void)  
 {
+    DEBUG("\n");
+
     if (m_fAuxSDPLine) {
         free(m_fAuxSDPLine);
         m_fAuxSDPLine = NULL;
     }
 }
 
-H264VideoServerMediaSubsession *H264VideoServerMediaSubsession::createNew(UsageEnvironment &env, FramedSource *source)  
+H264VideoServerMediaSubsession *H264VideoServerMediaSubsession::createNew(UsageEnvironment &env)  
 {
-    return new H264VideoServerMediaSubsession(env, source);  
+    DEBUG("\n");
+
+    return new H264VideoServerMediaSubsession(env);  
 }
 
 static void afterPlayingDummy(void *clientData)
@@ -35,6 +38,8 @@ static void afterPlayingDummy(void *clientData)
 
 void H264VideoServerMediaSubsession::afterPlayingDummy1()
 {
+    DEBUG("\n");
+
     // Unschedule any pending 'checking' task:
     envir().taskScheduler().unscheduleDelayedTask(nextTask());
     // Signal the event loop that we're done:
@@ -102,6 +107,8 @@ char const *H264VideoServerMediaSubsession::getAuxSDPLine(RTPSink *rtpSink, Fram
 
 FramedSource *H264VideoServerMediaSubsession::createNewStreamSource(unsigned clientSessionId, unsigned &estBitrate)
 {
+    DEBUG("\n");
+
     estBitrate = 500; // kbps, estimate
 
     // create stream source
@@ -115,6 +122,8 @@ FramedSource *H264VideoServerMediaSubsession::createNewStreamSource(unsigned cli
 
 RTPSink *H264VideoServerMediaSubsession::createNewRTPSink(Groupsock *rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource *inputSource)
 {
+    DEBUG("\n");
+
     return H264VideoRTPSink::createNew(envir(), rtpGroupsock, rtpPayloadTypeIfDynamic);
 }
 

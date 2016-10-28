@@ -29,10 +29,8 @@ int main(int argc, char** argv)
     }  
   
     // Add live stream
-    H264VideoSource *videoSource = 0;  
-  
     ServerMediaSession *sms = ServerMediaSession::createNew(*env, "live", 0, "live test");  
-    sms->addSubsession(H264VideoServerMediaSubsession::createNew(*env, videoSource));  
+    sms->addSubsession(H264VideoServerMediaSubsession::createNew(*env));  
     rtspServer->addServerMediaSession(sms);  
   
     char *url = rtspServer->rtspURL(sms);  
