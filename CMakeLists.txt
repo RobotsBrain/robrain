@@ -21,11 +21,14 @@ add_subdirectory(${TOPDIR}/basics/base/test ${BUILDDIR}/basics/base/test)
 
 add_subdirectory(${TOPDIR}/image/src ${BUILDDIR}/image/src)
 
-add_subdirectory(${TOPDIR}/network/src ${BUILDDIR}/network/src)
-add_subdirectory(${TOPDIR}/network/test ${BUILDDIR}/network/test)
+#add_subdirectory(${TOPDIR}/network/src ${BUILDDIR}/network/src)
+#add_subdirectory(${TOPDIR}/network/test ${BUILDDIR}/network/test)
 
-add_subdirectory(${TOPDIR}/transmit/rtsp/src ${BUILDDIR}/transmit/rtsp/src)
-add_subdirectory(${TOPDIR}/transmit/rtsp/test ${BUILDDIR}/transmit/rtsp/test)
+add_subdirectory(${TOPDIR}/transmit/live555_rtsp/src ${BUILDDIR}/transmit/live555_rtsp/src)
+add_subdirectory(${TOPDIR}/transmit/live555_rtsp/test ${BUILDDIR}/transmit/live555_rtsp/test)
+
+#add_subdirectory(${TOPDIR}/transmit/rtsp/src ${BUILDDIR}/transmit/rtsp/src)
+#add_subdirectory(${TOPDIR}/transmit/rtsp/test ${BUILDDIR}/transmit/rtsp/test)
 
 #add_subdirectory(${TOPDIR}/transmit/src ${BUILDDIR}/transmit/src)
 

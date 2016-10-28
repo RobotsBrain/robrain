@@ -1,6 +1,7 @@
+#include <stdlib.h>
 #include <stdio.h>
 
-#include "RTSPStream.h"
+#include "RtspStream.h"
 
 
 
@@ -10,9 +11,7 @@ int main(int argc, char **argv)
 
     bool bRet = rtspSender.Init();
 
-    rtspSender.SendH264File("test.264"); 
-
-    system("pause"); 
+    rtspSender.SendH264File("test.h264");
 
     return 0;   
 }

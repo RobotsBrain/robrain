@@ -16,18 +16,20 @@ public:
 public:  
     virtual char const *getAuxSDPLine(RTPSink *rtpSink, FramedSource *inputSource);  
     virtual FramedSource *createNewStreamSource(unsigned clientSessionId, unsigned &estBitrate); // "estBitrate" is the stream's estimated bitrate, in kbps  
-    virtual RTPSink *createNewRTPSink(Groupsock *rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource * inputSource);  
+    virtual RTPSink *createNewRTPSink(Groupsock *rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource *inputSource);  
   
-    static H264VideoServerMediaSubsession * createNew(UsageEnvironment & env, FramedSource * source);  
+    static H264VideoServerMediaSubsession *createNew(UsageEnvironment &env, FramedSource *source);  
   
-    static void afterPlayingDummy(void * ptr);  
+    static void afterPlayingDummy(void *ptr);  
   
-    static void chkForAuxSDPLine(void * ptr);  
+    static void chkForAuxSDPLine(void *ptr);  
     void chkForAuxSDPLine1();  
   
 private:  
-    FramedSource * m_pSource;  
-    char * m_pSDPLine;  
-    RTPSink * m_pDummyRTPSink;  
-    char m_done;  
+    FramedSource    *m_pSource;  
+    char            *m_pSDPLine;  
+    RTPSink         *m_pDummyRTPSink;  
+    char            m_done;  
 };
+
+

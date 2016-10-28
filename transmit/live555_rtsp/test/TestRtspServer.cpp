@@ -1,6 +1,5 @@
-#include <BasicUsageEnvironment.hh>  
-#include "DynamicRTSPServer.hh"  
-#include "version.hh"  
+#include "BasicUsageEnvironment.hh"
+
 #include "H264VideoSource.h"  
 #include "H264VideoServerMediaSubsession.h"  
 
@@ -12,7 +11,8 @@ int main(int argc, char** argv)
     TaskScheduler* scheduler = BasicTaskScheduler::createNew();  
     UsageEnvironment* env = BasicUsageEnvironment::createNew(*scheduler);  
   
-    UserAuthenticationDatabase* authDB = NULL;  
+    UserAuthenticationDatabase* authDB = NULL;
+
 #ifdef ACCESS_CONTROL  
     // To implement client access control to the RTSP server, do the following:  
     authDB = new UserAuthenticationDatabase;  
@@ -30,9 +30,9 @@ int main(int argc, char** argv)
   
     // Add live stream  
   
-    H264VideoSource * videoSource = 0;  
+    H264VideoSource *videoSource = 0;  
   
-    ServerMediaSession * sms = ServerMediaSession::createNew(*env, "live", 0, "ww live test");  
+    ServerMediaSession * sms = ServerMediaSession::createNew(*env, "live", 0, "live test");  
     sms->addSubsession(H264VideoServerMediaSubsession::createNew(*env, videoSource));  
     rtspServer->addServerMediaSession(sms);  
   
