@@ -1,17 +1,17 @@
 #include "BasicUsageEnvironment.hh"
 
-#include "H264VideoSource.h"  
-#include "H264VideoServerMediaSubsession.h"  
+#include "H264VideoSource.h"
+#include "H264VideoServerMediaSubsession.h"
 
 
 
 int main(int argc, char** argv)
 {  
     // Begin by setting up our usage environment:  
-    TaskScheduler* scheduler = BasicTaskScheduler::createNew();  
-    UsageEnvironment* env = BasicUsageEnvironment::createNew(*scheduler);  
+    TaskScheduler *scheduler = BasicTaskScheduler::createNew();  
+    UsageEnvironment *env = BasicUsageEnvironment::createNew(*scheduler);  
   
-    UserAuthenticationDatabase* authDB = NULL;
+    UserAuthenticationDatabase *authDB = NULL;
 
 #ifdef ACCESS_CONTROL  
     // To implement client access control to the RTSP server, do the following:  
@@ -22,21 +22,20 @@ int main(int argc, char** argv)
 #endif  
   
     // Create the RTSP server:  
-    RTSPServer* rtspServer = RTSPServer::createNew(*env, 554, authDB);  
+    RTSPServer* rtspServer = RTSPServer::createNew(*env, 8554, authDB);  
     if (rtspServer == NULL) {  
         *env << "Failed to create RTSP server: " << env->getResultMsg() << "\n";  
         exit(1);  
     }  
   
-    // Add live stream  
-  
+    // Add live stream
     H264VideoSource *videoSource = 0;  
   
-    ServerMediaSession * sms = ServerMediaSession::createNew(*env, "live", 0, "live test");  
+    ServerMediaSession *sms = ServerMediaSession::createNew(*env, "live", 0, "live test");  
     sms->addSubsession(H264VideoServerMediaSubsession::createNew(*env, videoSource));  
     rtspServer->addServerMediaSession(sms);  
   
-    char * url = rtspServer->rtspURL(sms);  
+    char *url = rtspServer->rtspURL(sms);  
     *env << "using url \"" << url << "\"\n";  
     delete[] url;  
   

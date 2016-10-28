@@ -72,7 +72,7 @@ bool CRTSPStream::SendH264File(const char *pFileName)
         memcpy(buffer, buffer + writelen, readlen - writelen);
         pos = readlen - writelen;
 
-        sleep(25);
+        usleep(100);
     }
     
     fclose(fp);

@@ -20,16 +20,16 @@ public:
   
     static H264VideoServerMediaSubsession *createNew(UsageEnvironment &env, FramedSource *source);  
   
-    static void afterPlayingDummy(void *ptr);  
-  
-    static void chkForAuxSDPLine(void *ptr);  
-    void chkForAuxSDPLine1();  
+    void afterPlayingDummy1();
+    void checkForAuxSDPLine1();
+
+    void setDoneFlag() { m_fDoneFlag = ~0; }
   
 private:  
     FramedSource    *m_pSource;  
-    char            *m_pSDPLine;  
+    char            *m_fAuxSDPLine;  
     RTPSink         *m_pDummyRTPSink;  
-    char            m_done;  
+    char            m_fDoneFlag;  
 };
 
 

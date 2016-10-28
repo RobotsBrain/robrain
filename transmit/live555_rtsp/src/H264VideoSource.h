@@ -14,14 +14,14 @@
 class H264VideoSource : public FramedSource  
 {  
 public:  
-    H264VideoSource(UsageEnvironment & env);  
-    ~H264VideoSource(void);  
+    H264VideoSource(UsageEnvironment &env);  
+    ~H264VideoSource();  
   
 public:  
     virtual void doGetNextFrame();  
     virtual unsigned int maxFrameSize() const;  
   
-    static void getNextFrame(void * ptr);  
+    static void getNextFrame(void *ptr);  
     void GetFrameData();  
   
 private:  

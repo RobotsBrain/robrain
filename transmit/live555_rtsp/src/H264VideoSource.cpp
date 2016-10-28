@@ -6,13 +6,15 @@
 #include <limits.h>
 #include <stdio.h>
 
+#include "base/Log.h"
+
 #include "H264VideoSource.h"
 
 
 
 #define FIFO_NAME     "/tmp/H264_fifo"
 #define BUFFER_SIZE   PIPE_BUF
-#define REV_BUF_SIZE  (1024*1024)
+#define REV_BUF_SIZE  (1024*100)
 
 
 
@@ -24,25 +26,28 @@ H264VideoSource::H264VideoSource(UsageEnvironment & env)
 {
     m_hFifo = open(FIFO_NAME, O_RDONLY);
     if(m_hFifo == -1) {
-        printf("open fifo fail!\n");
+        ERROR("open fifo fail!\n");
         return;
     }
 
-    printf("open fifo(%d) success!\n", m_hFifo);  
+    DEBUG("open fifo(%d) success!\n", m_hFifo);  
       
     m_pFrameBuffer = new char[REV_BUF_SIZE];  
     if(m_pFrameBuffer == NULL) {
-        printf("malloc data buffer failed\n");
+        ERROR("malloc data buffer failed\n");
         return;
     }
 
     memset(m_pFrameBuffer, 0, REV_BUF_SIZE);
 }
 
-H264VideoSource::~H264VideoSource(void)
+H264VideoSource::~H264VideoSource()
 {
+    DEBUG("Begin___\n");
+
     if(m_hFifo) {
         ::close(m_hFifo);
+        m_hFifo = 0;
     }
 
     envir().taskScheduler().unscheduleDelayedTask(m_pToken);
@@ -52,7 +57,7 @@ H264VideoSource::~H264VideoSource(void)
         m_pFrameBuffer = NULL;
     }
 
-    printf("rtsp connection closed\n");
+    DEBUG("End___\n");
 }
 
 void H264VideoSource::doGetNextFrame()
@@ -79,11 +84,13 @@ void H264VideoSource::GetFrameData()
     int len = 0;
     unsigned char buffer[BUFFER_SIZE] = {0};
 
+    DEBUG("Begin___\n");
+
     gettimeofday(&fPresentationTime, 0);
 
     fFrameSize = 0;
 
-    while((len = read(m_hFifo, buffer, BUFFER_SIZE)) > 0) {
+    while((fFrameSize < REV_BUF_SIZE) && (len = read(m_hFifo, buffer, BUFFER_SIZE)) > 0) {
         memcpy(m_pFrameBuffer + fFrameSize, buffer, len);
         fFrameSize += len;
     }  
@@ -97,7 +104,10 @@ void H264VideoSource::GetFrameData()
         fNumTruncatedBytes = 0;
     }
 
-    afterGetting(this);
+    // Inform the downstream object that it has data:
+    FramedSource::afterGetting(this);
+
+    DEBUG("End___, fFrameSize: %d, fMaxSize: %d\n", fFrameSize, fMaxSize);
 
     return;
 }
