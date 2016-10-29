@@ -49,14 +49,11 @@ int main(int argc, char** argv)
   	// "ServerMediaSession" object, plus one or more
   	// "ServerMediaSubsession" objects for each audio/video substream.
 
-  	// A G711 audio stream:
     char const* streamName = "stream0";
     ServerMediaSession* sms = ServerMediaSession::createNew(*env, streamName, streamName,
 				      descriptionString);
 	
     sms->addSubsession(G711AudioStreamServerMediaSubsession::createNew(*env, reuseFirstSource));
-    // rtspServer->addServerMediaSession(sms);
-
     sms->addSubsession(H264VideoServerMediaSubsession::createNew(*env));  
     rtspServer->addServerMediaSession(sms); 
 
