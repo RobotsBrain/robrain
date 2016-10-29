@@ -2,28 +2,6 @@
 
 
 
-int audioOpen(void);
-int audioClose(void);
-int audioGetOneFrame(unsigned char *buf, unsigned int *size);
-
-#if 0
-static FILE *fp;
-static int audioGetOneFrame(unsigned char *buf, unsigned int *size)
-{
-    int ret;
-
-    ret = fread(buf, 1, 320, fp);
-    if(ret < 0) {
-        printf("ERR : %s : %d\n", __FILE__, __LINE__);
-        return -1;
-    }
-
-    *size = 320;
-
-    return 0;
-}
-#endif
-
 G711AudioStreamSource *G711AudioStreamSource::createNew(UsageEnvironment& env) 
 {
     G711AudioStreamSource* newSource = new G711AudioStreamSource(env);
@@ -61,23 +39,16 @@ G711AudioStreamSource::G711AudioStreamSource(UsageEnvironment& env)
     unsigned samplesPerFrame = desiredSamplesPerFrame < maxSamplesPerFrame ? desiredSamplesPerFrame : maxSamplesPerFrame;
     fPreferredFrameSize = (samplesPerFrame*fNumChannels*fBitsPerSample)/8;
 
-    audioOpen();
-#if 0
-    fp = NULL;
-    fp = fopen("test.g711", "r");
-    if(fp == NULL) {
+    m_fp = fopen("test.g711", "r");
+    if(m_fp == NULL) {
         printf("ERR : %s : %d\n", __FILE__, __LINE__);
     }
-#endif
 }
 
 G711AudioStreamSource::~G711AudioStreamSource()
 {
-    audioClose();
-#if 0
-    if(fp != NULL)
-        fclose(fp);
-#endif
+    if(m_fp != NULL)
+        fclose(m_fp);
 }
 
 // Note: We should change the following to use asynchronous file reading, #####
@@ -99,7 +70,13 @@ void G711AudioStreamSource::doGetNextFrame()
     //unsigned bytesToRead = fMaxSize - fMaxSize%bytesPerSample;
 
     //fFrameSize : 1000
-    audioGetOneFrame(fTo, &fFrameSize);
+    int ret = fread(fTo, 1, 320, m_fp);
+    if(ret < 0) {
+        printf("ERR : %s : %d\n", __FILE__, __LINE__);
+        return;
+    }
+   
+    fFrameSize = 320;
 
     // Set the 'presentation time' and 'duration' of this frame:
     if (fPresentationTime.tv_sec == 0 && fPresentationTime.tv_usec == 0) {

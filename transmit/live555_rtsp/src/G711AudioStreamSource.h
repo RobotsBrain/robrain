@@ -33,6 +33,7 @@ private:
   unsigned fNumBytesToStream;
   unsigned fLastPlayTime;
   double fPlayTimePerSample; // useconds
+  FILE *m_fp;
 };
 
 #endif
