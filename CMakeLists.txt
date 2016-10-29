@@ -27,6 +27,9 @@ add_subdirectory(${TOPDIR}/image/src ${BUILDDIR}/image/src)
 add_subdirectory(${TOPDIR}/transmit/live555_rtsp/src ${BUILDDIR}/transmit/live555_rtsp/src)
 add_subdirectory(${TOPDIR}/transmit/live555_rtsp/test ${BUILDDIR}/transmit/live555_rtsp/test)
 
+add_subdirectory(${TOPDIR}/transmit/rtmp/src ${BUILDDIR}/transmit/rtmp/src)
+add_subdirectory(${TOPDIR}/transmit/rtmp/test ${BUILDDIR}/transmit/rtmp/test)
+
 #add_subdirectory(${TOPDIR}/transmit/rtsp/src ${BUILDDIR}/transmit/rtsp/src)
 #add_subdirectory(${TOPDIR}/transmit/rtsp/test ${BUILDDIR}/transmit/rtsp/test)
 
