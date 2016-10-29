@@ -22,3 +22,8 @@ target_link_libraries(TestRtspServer live555_rtsp liveMedia UsageEnvironment Bas
 #################################
 add_executable(TestG711RtspServer TestG711RtspServer.cpp)
 target_link_libraries(TestG711RtspServer live555_rtsp liveMedia BasicUsageEnvironment UsageEnvironment groupsock base pthread)
+
+
+#################################
+add_executable(TestLiveStreamRtspServer TestLiveStreamRtspServer.cpp)
+target_link_libraries(TestLiveStreamRtspServer live555_rtsp liveMedia BasicUsageEnvironment UsageEnvironment groupsock base pthread)
