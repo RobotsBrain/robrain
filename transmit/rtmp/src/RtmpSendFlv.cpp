@@ -140,7 +140,7 @@ int publish_using_packet()
 				RTMP_LogPrintf("TimeStamp:%8lu ms\n", pre_frame_time);
 				lasttime = pre_frame_time;
 			}
-			Sleep(1000);
+			usleep(1000);
 			continue;
 		}
 //not quite the same as FLV spec
@@ -271,7 +271,7 @@ int publish_using_write()
 				RTMP_LogPrintf("TimeStamp:%8lu ms\n", pre_frame_time);
 				lasttime = pre_frame_time;
 			}
-			Sleep(1000);
+			usleep(1000);
 			continue;
 		}
 //jump over type

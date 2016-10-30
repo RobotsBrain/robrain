@@ -598,7 +598,7 @@ got_sps_pps:
 		tick += tick_gap;
 		now = RTMP_GetTime();
 		usleep(tick_gap - now + last_update);
-//msleep(40);
+		sleep(2);
 	}
 
 end:
