@@ -19,5 +19,5 @@ make
 make install
 cd ..
 
-cp ${CURDIR}/include/speex/*.h ${CURDIR}/../prebuild/include/speex
-cp ${CURDIR}/lib/libspeex.a ${CURDIR}/../prebuild/libs
+#cp ${CURDIR}/include/speex/*.h ${CURDIR}/../prebuild/include/speex
+#cp ${CURDIR}/lib/libspeex.a ${CURDIR}/../prebuild/libs
