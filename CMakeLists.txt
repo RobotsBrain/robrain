@@ -24,6 +24,9 @@ add_subdirectory(${TOPDIR}/image/src ${BUILDDIR}/image/src)
 #add_subdirectory(${TOPDIR}/network/src ${BUILDDIR}/network/src)
 #add_subdirectory(${TOPDIR}/network/test ${BUILDDIR}/network/test)
 
+add_subdirectory(${TOPDIR}/avcodec/src ${BUILDDIR}/avcodec/src)
+add_subdirectory(${TOPDIR}/avcodec/test ${BUILDDIR}/avcodec/test)
+
 add_subdirectory(${TOPDIR}/transmit/live555_rtsp/src ${BUILDDIR}/transmit/live555_rtsp/src)
 add_subdirectory(${TOPDIR}/transmit/live555_rtsp/test ${BUILDDIR}/transmit/live555_rtsp/test)
 

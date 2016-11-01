@@ -1,52 +1,48 @@
-// NALU单元  
-typedef struct _MP4ENC_NaluUnit {
+#ifndef __MP4ENCODER_H__
+#define __MP4ENCODER_H__
+
+#include "mp4v2/mp4v2.h"
+
+
+
+typedef struct {
 	int type;
 	int size;
 	unsigned char *data;
-} MP4ENC_NaluUnit;
+} NaluUnit;
 
-typedef struct _MP4ENC_Metadata {
+typedef struct {
 	// video, must be h264 type  
 	unsigned int nSpsLen;
 	unsigned char Sps[1024];
 	unsigned int nPpsLen;
 	unsigned char Pps[1024];
-
-} MP4ENC_Metadata, *LPMP4ENC_Metadata;
-
+} Metadata, *PMetadata;
 
 
-class MP4Encoder {
+
+class Mp4Encoder {
 public:
-	MP4Encoder(void);
-	~MP4Encoder(void);
+	Mp4Encoder();
+	~Mp4Encoder();
 
 public:
-	// open or creat a mp4 file.  
-	 MP4FileHandle CreateMP4File(const char *fileName, int width, int height,
+	MP4FileHandle CreateMP4File(const char *fileName, int width, int height,
 								 int timeScale = 90000, int frameRate = 25);
-	// wirte 264 metadata in mp4 file.  
-	bool Write264Metadata(MP4FileHandle hMp4File, LPMP4ENC_Metadata lpMetadata);
 
-	// wirte 264 data, data can contain  multiple frame.  
-	int WriteH264Data(MP4FileHandle hMp4File, const unsigned char *pData,
-					  int size);
-	// close mp4 file.  
+	bool Write264Metadata(MP4FileHandle hMp4File, PMetadata lpMetadata);
+
+	int WriteH264Data(MP4FileHandle hMp4File, const unsigned char *pData, int size);
+
 	void CloseMP4File(MP4FileHandle hMp4File);
 
-	// convert H264 file to mp4 file.  
-	// no need to call CreateMP4File and CloseMP4File,it will create/close mp4 file automaticly.  
 	bool WriteH264File(const char *pFile264, const char *pFileMp4);
 
-	// Prase H264 metamata from H264 data frame  
-	static bool PraseMetadata(const unsigned char *pData, int size,
-							  MP4ENC_Metadata & metadata);
+	bool PraseMetadata(const unsigned char *pData, int size, Metadata &metadata);
 
 private:
-	// read one nalu from H264 data buffer  
-	static int ReadOneNaluFromBuf(const unsigned char *buffer,
-								  unsigned int nBufferSize, unsigned int offSet,
-								  MP4ENC_NaluUnit & nalu);
+	int ReadOneNaluFromBuf(const unsigned char *buffer, unsigned int nBufferSize, 
+                            unsigned int offSet, NaluUnit &nalu);
 
 private:
 	int m_nWidth;
@@ -55,3 +51,5 @@ private:
 	int m_nTimeScale;
 	MP4TrackId m_videoId;
 };
+
+#endif

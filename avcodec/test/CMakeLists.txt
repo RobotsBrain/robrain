@@ -1,7 +1,9 @@
-set(EXECUTABLE_OUTPUT_PATH ${OUTDIR}/transmit/live555_rtsp/test)
+set(EXECUTABLE_OUTPUT_PATH ${OUTDIR}/avcodec/test)
 
 include_directories(
 	${TOPDIR}/basics/base/include
+	${TOPDIR}/avcodec/src
+	${TOPDIR}/opensource/prebuild/include/mp4v2/include
 )
 
 link_directories(
@@ -10,6 +12,6 @@ link_directories(
 
 
 #################################
-add_executable(TestRtspServer TestRtspServer.cpp)
-target_link_libraries(TestRtspServer live555_rtsp liveMedia UsageEnvironment BasicUsageEnvironment groupsock base pthread)
+add_executable(TestMp4Encoder TestMp4Encoder.cpp)
+target_link_libraries(TestMp4Encoder avcodec mp4v2 base pthread)
 
