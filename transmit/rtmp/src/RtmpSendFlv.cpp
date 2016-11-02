@@ -9,8 +9,7 @@
 
 #define HTON16(x) ((x>>8&0xff)|(x<<8&0xff00))
 #define HTON24(x) ((x>>16&0xff)|(x<<16&0xff0000)|(x&0xff00))
-#define HTON32(x) ((x>>24&0xff)|(x>>8&0xff00)|\
-(x<<8&0xff0000)|(x<<24&0xff000000))
+#define HTON32(x) ((x>>24&0xff)|(x>>8&0xff00)|(x<<8&0xff0000)|(x<<24&0xff000000))
 #define HTONTIME(x) ((x>>16&0xff)|(x<<16&0xff0000)|(x&0xff00)|(x&0xff000000))
 
 /*read 1 byte*/
@@ -90,15 +89,12 @@ int publish_using_packet()
 
 		return -1;
 	}
-/* set log level */
-//RTMP_LogLevel loglvl=RTMP_LOGDEBUG;
-//RTMP_LogSetLevel(loglvl);
 
 	rtmp = RTMP_Alloc();
 	RTMP_Init(rtmp);
 //set connection timeout,default 30s
 	rtmp->Link.timeout = 5;
-	if (!RTMP_SetupURL(rtmp, "rtmp://localhost/publishlive/livestream")) {
+	if (!RTMP_SetupURL(rtmp, "rtmp://localhost:1935/live/livestream")) {
 		RTMP_Log(RTMP_LOGERROR, "SetupURL Err\n");
 		RTMP_Free(rtmp);
 
@@ -227,15 +223,12 @@ int publish_using_write()
 		RTMP_LogPrintf("Open File Error.\n");
 		return -1;
 	}
-/* set log level */
-//RTMP_LogLevel loglvl=RTMP_LOGDEBUG;
-//RTMP_LogSetLevel(loglvl);
 
 	rtmp = RTMP_Alloc();
 	RTMP_Init(rtmp);
 //set connection timeout,default 30s
 	rtmp->Link.timeout = 5;
-	if (!RTMP_SetupURL(rtmp, "rtmp://localhost/publishlive/livestream")) {
+	if (!RTMP_SetupURL(rtmp, "rtmp://localhost:1935/live/livestream")) {
 		RTMP_Log(RTMP_LOGERROR, "SetupURL Err\n");
 		RTMP_Free(rtmp);
 		return -1;
@@ -338,12 +331,4 @@ int publish_using_write()
 	return 0;
 }
 
-/*
-int main(int argc, char *argv[])
-{
-//2 Methods:
-	publish_using_packet();
-//publish_using_write();
-	return 0;
-}
-*/
+

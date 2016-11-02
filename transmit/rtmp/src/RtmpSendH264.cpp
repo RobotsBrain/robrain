@@ -115,13 +115,6 @@ unsigned char *m_pFileBuf_tmp;
 unsigned char *m_pFileBuf_tmp_old;	//used for realloc
 
 
-/**
-* 初始化并连接到服务器
-*
-* @param url 服务器上对应webapp的地址
-*
-* @成功则返回1 , 失败则返回0
-*/
 int RTMP264_Connect(const char *url)
 {
 	nalhead_pos = 0;
@@ -131,31 +124,30 @@ int RTMP264_Connect(const char *url)
 
 	m_pRtmp = RTMP_Alloc();
 	RTMP_Init(m_pRtmp);
-/*设置URL*/
+
 	if (RTMP_SetupURL(m_pRtmp, (char *)url) == FALSE) {
 		RTMP_Free(m_pRtmp);
 		return false;
 	}
-/*设置可写,即发布流,这个函数必须在连接前使用,否则无效*/
+
 	RTMP_EnableWrite(m_pRtmp);
-/*连接服务器*/
+
 	if (RTMP_Connect(m_pRtmp, NULL) == FALSE) {
 		RTMP_Free(m_pRtmp);
 		return false;
 	}
-/*连接流*/
+
 	if (RTMP_ConnectStream(m_pRtmp, 0) == FALSE) {
 		RTMP_Close(m_pRtmp);
 		RTMP_Free(m_pRtmp);
 		return false;
 	}
+
+	printf("connect success!\n");
+
 	return true;
 }
 
-/**
-* 断开连接，释放相关的资源。
-*
-*/
 void RTMP264_Close()
 {
 	if (m_pRtmp) {
@@ -173,16 +165,6 @@ void RTMP264_Close()
 	}
 }
 
-/**
-* 发送RTMP数据包
-*
-* @param nPacketType 数据类型
-* @param data 存储数据内容
-* @param size 数据大小
-* @param nTimestamp 当前包的时间戳
-*
-* @成功则返回 1 , 失败则返回一个小于0的数
-*/
 int SendPacket(unsigned int nPacketType, unsigned char *data, unsigned int size,
 			   unsigned int nTimestamp)
 {
@@ -214,24 +196,13 @@ int SendPacket(unsigned int nPacketType, unsigned char *data, unsigned int size,
 	return nRet;
 }
 
-/**
-* 发送视频的sps和pps信息
-*
-* @param pps 存储视频的pps信息
-* @param pps_len 视频的pps信息长度
-* @param sps 存储视频的pps信息
-* @param sps_len 视频的sps信息长度
-*
-* @成功则返回 1 , 失败则返回0
-*/
-int SendVideoSpsPps(unsigned char *pps, int pps_len, unsigned char *sps,
-					int sps_len)
+int SendVideoSpsPps(unsigned char *pps, int pps_len, unsigned char *sps, int sps_len)
 {
 	RTMPPacket *packet = NULL;	//rtmp包结构
 	unsigned char *body = NULL;
 	int i;
 	packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 1024);
-//RTMPPacket_Reset(packet);//重置packet状态
+	//RTMPPacket_Reset(packet);//重置packet状态
 	memset(packet, 0, RTMP_HEAD_SIZE + 1024);
 	packet->m_body = (char *)packet + RTMP_HEAD_SIZE;
 	body = (unsigned char *)packet->m_body;
@@ -241,19 +212,19 @@ int SendVideoSpsPps(unsigned char *pps, int pps_len, unsigned char *sps,
 	body[i++] = 0x00;
 	body[i++] = 0x00;
 	body[i++] = 0x00;
-/*AVCDecoderConfigurationRecord*/
+	/*AVCDecoderConfigurationRecord*/
 	body[i++] = 0x01;
 	body[i++] = sps[1];
 	body[i++] = sps[2];
 	body[i++] = sps[3];
 	body[i++] = 0xff;
-/*sps*/
+	/*sps*/
 	body[i++] = 0xe1;
 	body[i++] = (sps_len >> 8) & 0xff;
 	body[i++] = sps_len & 0xff;
 	memcpy(&body[i], sps, sps_len);
 	i += sps_len;
-/*pps*/
+	/*pps*/
 	body[i++] = 0x01;
 	body[i++] = (pps_len >> 8) & 0xff;
 	body[i++] = (pps_len) & 0xff;
@@ -266,25 +237,14 @@ int SendVideoSpsPps(unsigned char *pps, int pps_len, unsigned char *sps,
 	packet->m_hasAbsTimestamp = 0;
 	packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
 	packet->m_nInfoField2 = m_pRtmp->m_stream_id;
-/*调用发送接口*/
+	/*调用发送接口*/
 	int nRet = RTMP_SendPacket(m_pRtmp, packet, TRUE);
 	free(packet);				//释放内存
 
 	return nRet;
 }
 
-/**
-* 发送H264数据帧
-*
-* @param data 存储数据帧内容
-* @param size 数据帧的大小
-* @param bIsKeyFrame 记录该帧是否为关键帧
-* @param nTimeStamp 当前帧的时间戳
-*
-* @成功则返回 1 , 失败则返回0
-*/
-int SendH264Packet(unsigned char *data, unsigned int size, int bIsKeyFrame,
-				   unsigned int nTimeStamp)
+int SendH264Packet(unsigned char *data, unsigned int size, int bIsKeyFrame, unsigned int nTimeStamp)
 {
 	if (data == NULL && size < 11) {
 		return false;
@@ -327,24 +287,13 @@ int SendH264Packet(unsigned char *data, unsigned int size, int bIsKeyFrame,
 	}
 
 	int bRet = SendPacket(RTMP_PACKET_TYPE_VIDEO, body, i + size, nTimeStamp);
+
 	free(body);
 
 	return bRet;
 }
 
-/**
-* 从内存中读取出第一个Nal单元
-*
-* @param nalu 存储nalu数据
-* @param read_buffer 回调函数，当数据不足的时候，系统会自动调用该函数获取输入数据。
-* 2个参数功能：
-* uint8_t *buf：外部数据送至该地址
-* int buf_size：外部数据大小
-* 返回值：成功读取的内存大小
-* @成功则返回 1 , 失败则返回0
-*/
-int ReadFirstNaluFromBuf(NaluUnit & nalu,
-						 int (*read_buffer) (uint8_t * buf, int buf_size))
+int ReadFirstNaluFromBuf(NaluUnit & nalu, int (*read_buffer)(uint8_t *buf, int buf_size))
 {
 	int naltail_pos = nalhead_pos;
 
@@ -403,19 +352,7 @@ gotnal_head:
 	}
 }
 
-/**
-* 从内存中读取出一个Nal单元
-*
-* @param nalu 存储nalu数据
-* @param read_buffer 回调函数，当数据不足的时候，系统会自动调用该函数获取输入数据。
-* 2个参数功能：
-* uint8_t *buf：外部数据送至该地址
-* int buf_size：外部数据大小
-* 返回值：成功读取的内存大小
-* @成功则返回 1 , 失败则返回0
-*/
-int ReadOneNaluFromBuf(NaluUnit & nalu,
-					   int (*read_buffer) (uint8_t * buf, int buf_size))
+int ReadOneNaluFromBuf(NaluUnit & nalu, int (*read_buffer)(uint8_t * buf, int buf_size))
 {
 	int naltail_pos = nalhead_pos;
 	int ret;
@@ -530,16 +467,6 @@ gotnal:
 	return FALSE;
 }
 
-/**
-* 将内存中的一段H.264编码的视频数据利用RTMP协议发送到服务器
-*
-* @param read_buffer 回调函数，当数据不足的时候，系统会自动调用该函数获取输入数据。
-* 2个参数功能：
-* uint8_t *buf：外部数据送至该地址
-* int buf_size：外部数据大小
-* 返回值：成功读取的内存大小
-* @成功则返回1 , 失败则返回0
-*/
 int RTMP264_Send(int (*read_buffer) (unsigned char *buf, int buf_size))
 {
 	int ret;
@@ -598,7 +525,7 @@ got_sps_pps:
 		tick += tick_gap;
 		now = RTMP_GetTime();
 		usleep(tick_gap - now + last_update);
-		sleep(2);
+		sleep(1);
 	}
 
 end:
