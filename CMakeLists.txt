@@ -1,11 +1,12 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9)
 
 set(TOPDIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(OUTDIR ${TOPDIR}/out/)
-set(BUILDDIR ${TOPDIR}/build-cmake/camera)
 
-#include(${TOPDIR}/)
-#include(${BOARDDIR}/)
+include(${TOPDIR}/cmake/${TOOLCHAIN}.cmake)
+
+set(OUTDIR ${TOPDIR}/out/)
+set(BUILDDIR ${TOPDIR}/build/)
+
 
 #SET(CMAKE_BUILD_TYPE "Debug")
 #SET(CMAKE_CXX_FLAGS_DEBUG "-g -Wall")

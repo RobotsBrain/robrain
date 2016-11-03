@@ -8,6 +8,9 @@ class CLiveRtmpStream
 public:
 	CLiveRtmpStream();
 	~CLiveRtmpStream();
+
+	bool Start();
+	bool Stop();
 	
 };
 

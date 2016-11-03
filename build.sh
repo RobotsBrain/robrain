@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cmake ./
+cmake ./ -DTOOLCHAIN=$1
 make

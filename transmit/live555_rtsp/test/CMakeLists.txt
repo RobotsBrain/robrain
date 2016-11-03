@@ -10,7 +10,7 @@ include_directories(
 )
 
 link_directories(
-	${TOPDIR}/opensource/prebuild/libs
+	${TOPDIR}/opensource/prebuild/libs/${OPENSOURCE_LIB_DIR}
 )
 
 
