@@ -65,19 +65,18 @@ int ReadTime(uint32_t * utime, FILE * fp)
 	return 1;
 }
 
-//Publish using RTMP_SendPacket()
 int publish_using_packet()
 {
 	RTMP *rtmp = NULL;
 	RTMPPacket *packet = NULL;
 	uint32_t start_time = 0;
 	uint32_t now_time = 0;
-//the timestamp of the previous frame
+	//the timestamp of the previous frame
 	long pre_frame_time = 0;
 	long lasttime = 0;
 	int bNextIsKey = 1;
 	uint32_t preTagsize = 0;
-//packet attributes
+	//packet attributes
 	uint32_t type = 0;
 	uint32_t datalength = 0;
 	uint32_t timestamp = 0;
@@ -86,35 +85,34 @@ int publish_using_packet()
 	fp = fopen("test.flv", "rb");
 	if (!fp) {
 		RTMP_LogPrintf("Open File Error.\n");
-
 		return -1;
 	}
 
 	rtmp = RTMP_Alloc();
 	RTMP_Init(rtmp);
-//set connection timeout,default 30s
-	rtmp->Link.timeout = 5;
+
+	rtmp->Link.timeout = 5; //set connection timeout,default 30s
 	if (!RTMP_SetupURL(rtmp, "rtmp://localhost:1935/live/livestream")) {
 		RTMP_Log(RTMP_LOGERROR, "SetupURL Err\n");
 		RTMP_Free(rtmp);
-
 		return -1;
 	}
-//if unable,the AMF command would be 'play' instead of 'publish'
+
+	//if unable,the AMF command would be 'play' instead of 'publish'
 	RTMP_EnableWrite(rtmp);
 	if (!RTMP_Connect(rtmp, NULL)) {
 		RTMP_Log(RTMP_LOGERROR, "Connect Err\n");
 		RTMP_Free(rtmp);
-
 		return -1;
 	}
+
 	if (!RTMP_ConnectStream(rtmp, 0)) {
 		RTMP_Log(RTMP_LOGERROR, "ConnectStream Err\n");
 		RTMP_Close(rtmp);
 		RTMP_Free(rtmp);
-
 		return -1;
 	}
+
 	packet = (RTMPPacket *) malloc(sizeof(RTMPPacket));
 	RTMPPacket_Alloc(packet, 1024 * 64);
 	RTMPPacket_Reset(packet);
@@ -122,16 +120,18 @@ int publish_using_packet()
 	packet->m_nChannel = 0x04;
 	packet->m_nInfoField2 = rtmp->m_stream_id;
 	RTMP_LogPrintf("Start to send data ...\n");
-//jump over FLV Header
-	fseek(fp, 9, SEEK_SET);
-//jump over previousTagSizen
-	fseek(fp, 4, SEEK_CUR);
+
+	fseek(fp, 9, SEEK_SET); //jump over FLV Header
+	fseek(fp, 4, SEEK_CUR); //jump over previousTagSizen
+
 	start_time = RTMP_GetTime();
+
 	while (1) {
-		if ((((now_time = RTMP_GetTime()) - start_time)
-			 < (pre_frame_time)) && bNextIsKey) {
-//wait for 1 sec if the send process is too fast
-//this mechanism is not very good,need some improvement
+		now_time = RTMP_GetTime();
+
+		if(((now_time - start_time) < pre_frame_time) && bNextIsKey) {
+			//wait for 1 sec if the send process is too fast
+			//this mechanism is not very good,need some improvement
 			if (pre_frame_time > lasttime) {
 				RTMP_LogPrintf("TimeStamp:%8lu ms\n", pre_frame_time);
 				lasttime = pre_frame_time;
@@ -139,61 +139,90 @@ int publish_using_packet()
 			usleep(1000);
 			continue;
 		}
-//not quite the same as FLV spec
-		if (!ReadU8(&type, fp))
+
+		//not quite the same as FLV spec
+		if (!ReadU8(&type, fp)) {
 			break;
-		if (!ReadU24(&datalength, fp))
+		}
+
+		if (!ReadU24(&datalength, fp)) {
 			break;
-		if (!ReadTime(&timestamp, fp))
+		}
+
+		if (!ReadTime(&timestamp, fp)) {
 			break;
-		if (!ReadU24(&streamid, fp))
+		}
+
+		if (!ReadU24(&streamid, fp)) {
 			break;
+		}
+
 		if (type != 0x08 && type != 0x09) {
-//jump over non_audio and non_video frame，
-//jump over next previousTagSizen at the same time
+			//jump over non_audio and non_video frame，
+			//jump over next previousTagSizen at the same time
 			fseek(fp, datalength + 4, SEEK_CUR);
 			continue;
 		}
-		if (fread(packet->m_body, 1, datalength, fp) != datalength)
+
+		if (fread(packet->m_body, 1, datalength, fp) != datalength) {
 			break;
+		}
+
 		packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
 		packet->m_nTimeStamp = timestamp;
 		packet->m_packetType = type;
 		packet->m_nBodySize = datalength;
 		pre_frame_time = timestamp;
+
 		if (!RTMP_IsConnected(rtmp)) {
 			RTMP_Log(RTMP_LOGERROR, "rtmp is not connect\n");
 			break;
 		}
+
 		if (!RTMP_SendPacket(rtmp, packet, 0)) {
 			RTMP_Log(RTMP_LOGERROR, "Send Error\n");
 			break;
 		}
-		if (!ReadU32(&preTagsize, fp))
+
+		if (!ReadU32(&preTagsize, fp)) {
 			break;
-		if (!PeekU8(&type, fp))
+		}
+
+		if (!PeekU8(&type, fp)) {
 			break;
+		}
+
 		if (type == 0x09) {
-			if (fseek(fp, 11, SEEK_CUR) != 0)
+			if (fseek(fp, 11, SEEK_CUR) != 0) {
 				break;
+			}
+
 			if (!PeekU8(&type, fp)) {
 				break;
 			}
-			if (type == 0x17)
+
+			if (type == 0x17) {
 				bNextIsKey = 1;
-			else
+			} else {
 				bNextIsKey = 0;
+			}
+
 			fseek(fp, -11, SEEK_CUR);
 		}
 	}
+
 	RTMP_LogPrintf("\nSend Data Over\n");
-	if (fp)
+
+	if (fp) {
 		fclose(fp);
+	}
+
 	if (rtmp != NULL) {
 		RTMP_Close(rtmp);
 		RTMP_Free(rtmp);
 		rtmp = NULL;
 	}
+
 	if (packet != NULL) {
 		RTMPPacket_Free(packet);
 		free(packet);
@@ -203,7 +232,6 @@ int publish_using_packet()
 	return 0;
 }
 
-//Publish using RTMP_Write()
 int publish_using_write()
 {
 	uint32_t start_time = 0;
@@ -212,7 +240,7 @@ int publish_using_write()
 	uint32_t lasttime = 0;
 	int bNextIsKey = 0;
 	char *pFileBuf = NULL;
-//read from tag header
+	//read from tag header
 	uint32_t type = 0;
 	uint32_t datalength = 0;
 	uint32_t timestamp = 0;
@@ -226,40 +254,45 @@ int publish_using_write()
 
 	rtmp = RTMP_Alloc();
 	RTMP_Init(rtmp);
-//set connection timeout,default 30s
+
+	//set connection timeout,default 30s
 	rtmp->Link.timeout = 5;
 	if (!RTMP_SetupURL(rtmp, "rtmp://localhost:1935/live/livestream")) {
 		RTMP_Log(RTMP_LOGERROR, "SetupURL Err\n");
 		RTMP_Free(rtmp);
 		return -1;
 	}
+
 	RTMP_EnableWrite(rtmp);
-//1hour
-	RTMP_SetBufferMS(rtmp, 3600 * 1000);
+
+	RTMP_SetBufferMS(rtmp, 3600 * 1000); //1hour
+
 	if (!RTMP_Connect(rtmp, NULL)) {
 		RTMP_Log(RTMP_LOGERROR, "Connect Err\n");
 		RTMP_Free(rtmp);
-
 		return -1;
 	}
+
 	if (!RTMP_ConnectStream(rtmp, 0)) {
 		RTMP_Log(RTMP_LOGERROR, "ConnectStream Err\n");
 		RTMP_Close(rtmp);
 		RTMP_Free(rtmp);
-
 		return -1;
 	}
+
 	printf("Start to send data ...\n");
-//jump over FLV Header
-	fseek(fp, 9, SEEK_SET);
-//jump over previousTagSizen
-	fseek(fp, 4, SEEK_CUR);
+
+	fseek(fp, 9, SEEK_SET); //jump over FLV Header
+	fseek(fp, 4, SEEK_CUR); //jump over previousTagSizen
+
 	start_time = RTMP_GetTime();
+
 	while (1) {
-		if ((((now_time = RTMP_GetTime()) - start_time)
-			 < (pre_frame_time)) && bNextIsKey) {
-//wait for 1 sec if the send process is too fast
-//this mechanism is not very good,need some improvement
+		now_time = RTMP_GetTime();
+
+		if (((now_time - start_time) < pre_frame_time) && bNextIsKey) {
+			//wait for 1 sec if the send process is too fast
+			//this mechanism is not very good,need some improvement
 			if (pre_frame_time > lasttime) {
 				RTMP_LogPrintf("TimeStamp:%8lu ms\n", pre_frame_time);
 				lasttime = pre_frame_time;
@@ -267,46 +300,58 @@ int publish_using_write()
 			usleep(1000);
 			continue;
 		}
-//jump over type
-		fseek(fp, 1, SEEK_CUR);
-		if (!ReadU24(&datalength, fp))
+
+		fseek(fp, 1, SEEK_CUR); //jump over type
+
+		if (!ReadU24(&datalength, fp)) {
 			break;
-		if (!ReadTime(&timestamp, fp))
+		}
+
+		if (!ReadTime(&timestamp, fp)) {
 			break;
-//jump back
-		fseek(fp, -8, SEEK_CUR);
+		}
+
+		fseek(fp, -8, SEEK_CUR); //jump back
+
 		pFileBuf = (char *)malloc(11 + datalength + 4);
 		memset(pFileBuf, 0, 11 + datalength + 4);
-		if (fread(pFileBuf, 1, 11 + datalength + 4, fp) !=
-			(11 + datalength + 4))
+		if(fread(pFileBuf, 1, 11 + datalength + 4, fp) != (11 + datalength + 4)) {
 			break;
+		}
+
 		pre_frame_time = timestamp;
+
 		if (!RTMP_IsConnected(rtmp)) {
 			RTMP_Log(RTMP_LOGERROR, "rtmp is not connect\n");
 			break;
 		}
+
 		if (!RTMP_Write(rtmp, pFileBuf, 11 + datalength + 4)) {
 			RTMP_Log(RTMP_LOGERROR, "Rtmp Write Error\n");
 			break;
 		}
+
 		free(pFileBuf);
 		pFileBuf = NULL;
 
-		if (!PeekU8(&type, fp))
+		if (!PeekU8(&type, fp)) {
 			break;
+		}
 
 		if (type == 0x09) {
-			if (fseek(fp, 11, SEEK_CUR) != 0)
+			if (fseek(fp, 11, SEEK_CUR) != 0) {
 				break;
+			}
 
 			if (!PeekU8(&type, fp)) {
 				break;
 			}
 
-			if (type == 0x17)
+			if (type == 0x17) {
 				bNextIsKey = 1;
-			else
+			} else {
 				bNextIsKey = 0;
+			}
 
 			fseek(fp, -11, SEEK_CUR);
 		}
@@ -314,8 +359,9 @@ int publish_using_write()
 
 	RTMP_LogPrintf("\nSend Data Over\n");
 
-	if (fp)
+	if (fp) {
 		fclose(fp);
+	}
 
 	if (rtmp != NULL) {
 		RTMP_Close(rtmp);
