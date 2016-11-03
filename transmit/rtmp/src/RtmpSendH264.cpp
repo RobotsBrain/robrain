@@ -165,8 +165,7 @@ void RTMP264_Close()
 	}
 }
 
-int SendPacket(unsigned int nPacketType, unsigned char *data, unsigned int size,
-			   unsigned int nTimestamp)
+int SendPacket(unsigned int nPacketType, unsigned char *data, unsigned int size, unsigned int nTimestamp)
 {
 	RTMPPacket *packet;
 /*分配包内存和初始化,len为包体长度*/
@@ -185,7 +184,7 @@ int SendPacket(unsigned int nPacketType, unsigned char *data, unsigned int size,
 		packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
 	}
 	packet->m_nTimeStamp = nTimestamp;
-/*发送*/
+
 	int nRet = 0;
 	if (RTMP_IsConnected(m_pRtmp)) {
 		nRet = RTMP_SendPacket(m_pRtmp, packet, TRUE);	/*TRUE为放进发送队列,FALSE是不放进发送队列,直接发送 */
