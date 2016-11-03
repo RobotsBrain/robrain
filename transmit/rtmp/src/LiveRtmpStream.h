@@ -3,7 +3,9 @@
 
 
 
-class CLiveRtmpStream
+#include "base/ThreadLoop.h"
+
+class CLiveRtmpStream : public Base::CThreadLoop
 {
 public:
 	CLiveRtmpStream();
@@ -12,6 +14,7 @@ public:
 	bool Start();
 	bool Stop();
 	
+	virtual void EventHandleLoop();
 };
 
 #endif

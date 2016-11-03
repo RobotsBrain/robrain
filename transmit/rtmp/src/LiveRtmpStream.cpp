@@ -1,7 +1,14 @@
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdint.h>
+
+#include "base/Log.h"
+
 #include "LiveRtmpStream.h"
 
 
-#if 0
 #define HTON16(x) ((x>>8&0xff)|(x<<8&0xff00))
 #define HTON24(x) ((x>>16&0xff)|(x<<16&0xff0000)|(x&0xff00))
 #define HTON32(x) ((x>>24&0xff)|(x>>8&0xff00)|(x<<8&0xff0000)|(x<<24&0xff000000))
@@ -59,18 +66,16 @@ int ReadTime(uint32_t * utime, FILE * fp)
 	*utime = HTONTIME(*utime);
 	return 1;
 }
-#endif
 
 /***********************************************************************************/
 
 CLiveRtmpStream::CLiveRtmpStream()
+: Base::CThreadLoop("LiveRtmpStream")
 {
-
 }
 
 CLiveRtmpStream::~CLiveRtmpStream()
 {
-
 }
 
 bool CLiveRtmpStream::Start()
@@ -105,7 +110,7 @@ bool CLiveRtmpStream::Start()
 	}
 #endif
 
-	return true;
+	return StartThread();
 }
 
 bool CLiveRtmpStream::Stop()
@@ -117,5 +122,23 @@ bool CLiveRtmpStream::Stop()
 		rtmp = NULL;
 	}
 #endif
-	return true;
+	return StopThread();
 }
+
+void CLiveRtmpStream::EventHandleLoop()
+{
+	DEBUG("Begin___\n");
+
+	while(1) {
+
+		if(WaitForSleep(10) < 0) {
+			break;
+		}
+	}
+
+	DEBUG("End___\n");
+
+	return;
+}
+
+

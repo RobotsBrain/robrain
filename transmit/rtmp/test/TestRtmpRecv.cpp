@@ -10,7 +10,6 @@
 
 int main(int argc, char* argv[])
 {
-	double duration = -1;
 	int nRead;
 	bool bLiveStream = true;
 	int bufsize = 1024*1024*10;
@@ -19,21 +18,17 @@ int main(int argc, char* argv[])
 
 	memset(buf, 0, bufsize);
 
-	FILE *fp = fopen("receive.flv","wb");
+	FILE *fp = fopen("receive.flv", "wb");
 	if (!fp) {
 		RTMP_LogPrintf("Open File Error.\n");
 		return -1;
 	}
 
-	/* set log level */
-	//RTMP_LogLevel loglvl=RTMP_LOGDEBUG;
-	//RTMP_LogSetLevel(loglvl);
-
 	RTMP *rtmp = RTMP_Alloc();
 	RTMP_Init(rtmp);
-	//set connection timeout,default 30s
-	rtmp->Link.timeout=10;
-	// HKS's live URL
+	
+	rtmp->Link.timeout = 10; //set connection timeout,default 30s
+
 	if(!RTMP_SetupURL(rtmp, "rtmp://live.hkstv.hk.lxdns.com/live/hks")) {
 		RTMP_Log(RTMP_LOGERROR,"SetupURL Err\n");
 		RTMP_Free(rtmp);
@@ -44,8 +39,8 @@ int main(int argc, char* argv[])
 		rtmp->Link.lFlags |= RTMP_LF_LIVE;
 	}
 
-	//1hour
-	RTMP_SetBufferMS(rtmp, 3600*1000);
+	RTMP_SetBufferMS(rtmp, 3600*1000); // 1hour
+
 	if(!RTMP_Connect(rtmp, NULL)) {
 		RTMP_Log(RTMP_LOGERROR,"Connect Err\n");
 		RTMP_Free(rtmp);
@@ -59,7 +54,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	while(nRead=RTMP_Read(rtmp, buf, bufsize)) {
+	while((nRead = RTMP_Read(rtmp, buf, bufsize)) > 0) {
 		fwrite(buf, 1, nRead, fp);
 		countbufsize += nRead;
 		RTMP_LogPrintf("Receive: %5d Byte, Total: %5.2f kB\n", nRead, countbufsize*1.0/1024);
@@ -76,8 +71,7 @@ int main(int argc, char* argv[])
 	if(rtmp) {
 		RTMP_Close(rtmp);
 		RTMP_Free(rtmp);
-
-		rtmp=NULL;
+		rtmp = NULL;
 	}
 
 	return 0;
