@@ -22,10 +22,5 @@ target_link_libraries(TestRtmpRecv rtmpsend rtmp ssl crypto z base pthread)
 
 
 #################################
-add_executable(TestRtmpSendFlv TestRtmpSendFlv.cpp)
-target_link_libraries(TestRtmpSendFlv rtmpsend rtmp ssl crypto z base pthread)
-
-
-#################################
 add_executable(TestLiveRtmpStream TestLiveRtmpStream.cpp)
 target_link_libraries(TestLiveRtmpStream rtmpsend rtmp ssl crypto z base pthread)
