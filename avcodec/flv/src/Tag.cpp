@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 
 #include "FlvParser.h"
 #include "Tag.h"
@@ -35,7 +36,7 @@ void CTag::Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pPar
 	return;
 }
 
-u_char *CTag::GetTagHeader()
+u_char *CTag::GetTagHeaderData()
 {
 	return m_pTagHeader;
 }
@@ -43,6 +44,11 @@ u_char *CTag::GetTagHeader()
 u_char *CTag::GetTagData()
 {
 	return m_pTagData;
+}
+
+TagHeader *CTag::GetTagHeader()
+{
+	return &m_header;
 }
 
 int CTag::GetType()
@@ -108,4 +114,25 @@ void CTag::GetNalUnitLength(int &len)
 		m_pFlvParser->GetNalUnitLength(len);
 	}
 }
+
+void CTag::PrintTagHeader()
+{
+	printf("\nTag type: %u - ", m_header.nType);
+            
+    if(m_header.nType == 0x08) {
+    	printf("Audio data\n");
+    } else if (m_header.nType == 0x09) {
+    	printf("Video data\n");
+    } else if (m_header.nType == 0x12) {
+    	printf("Script data object\n");
+    }
+
+    printf("  Data size: %lu\n", (unsigned long)m_header.nDataSize);
+    printf("  Timestamp: %lu\n", (unsigned long)m_header.nTimeStamp);
+    printf("  Timestamp extended: %u\n", m_header.nTSEx);
+    printf("  StreamID: %lu\n", (unsigned long)m_header.nStreamID);
+
+    return;
+}
+
 

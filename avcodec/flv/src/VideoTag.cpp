@@ -6,6 +6,32 @@
 
 
 
+const char *frame_types[] = {
+    "not defined by standard",
+    "keyframe (for AVC, a seekable frame)",
+    "inter frame (for AVC, a non-seekable frame)",
+    "disposable inter frame (H.263 only)",
+    "generated keyframe (reserved for server use only)",
+    "video info/command frame"
+};
+
+const char *codec_ids[] = {
+    "not defined by standard",
+    "JPEG (currently unused)",
+    "Sorenson H.263",
+    "Screen video",
+    "On2 VP6",
+    "On2 VP6 with alpha channel",
+    "Screen video version 2",
+    "AVC"
+};
+
+const char *avc_packet_types[] = {
+    "AVC sequence header",
+    "AVC NALU",
+    "AVC end of sequence (lower level NALU sequence ender is not required or supported)"
+};
+
 CVideoTag::CVideoTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser)
 {
 	Init(pHeader, pBuf, nLeftLen, pParser);
@@ -18,6 +44,10 @@ CVideoTag::CVideoTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser 
 	if (CTag::GetType() == 0x09 && m_nCodecID == 7) {
 		ParseH264Tag();
 	}
+}
+
+CVideoTag::~CVideoTag()
+{
 }
 
 int CVideoTag::ParseH264Tag()
@@ -104,6 +134,22 @@ int CVideoTag::ParseNalu(u_char *pTagData)
 	}
 
 	return 1;
+}
+
+void CVideoTag::PrintVideoTag()
+{
+	printf("  Video tag:\n");
+    printf("    Frame type: %u - %s\n", m_nFrameType, frame_types[m_nFrameType]);
+    printf("    Codec ID: %u - %s\n", m_nCodecID, codec_ids[m_nCodecID]);
+
+    if(m_nCodecID == 7) {
+    	// printf("    AVC video tag:\n");
+	    // printf("      AVC packet type: %u - %s\n", tag->avc_packet_type, avc_packet_types[tag->avc_packet_type]);
+	    // printf("      AVC composition time: %i\n", tag->composition_time);
+	    // printf("      AVC nalu length: %i\n", tag->nalu_len);
+    }
+
+	return;
 }
 
 

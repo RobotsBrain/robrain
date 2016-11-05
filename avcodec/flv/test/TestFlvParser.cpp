@@ -42,6 +42,8 @@ void Process(fstream & fin, const char *filename)
 		nFlvPos -= nUsedLen;
 	}
 
+	PrintInfo(&parser);
+	
 	DumpH264(&parser, "test.h264");
 	DumpAAC(&parser, "test.aac");
 	DumpFlv(&parser, filename);

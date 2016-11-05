@@ -25,7 +25,11 @@ public:
 
 	void Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser);
 
-	u_char *GetTagHeader();
+	u_char *GetTagHeaderData();
+
+	void PrintTagHeader();
+
+	TagHeader *GetTagHeader();
 	int GetType();
 	u_char *GetTagData();
 	uint32_t GetDataSize();

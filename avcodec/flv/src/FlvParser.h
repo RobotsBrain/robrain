@@ -1,5 +1,5 @@
-#ifndef FLVPARSER_H
-#define FLVPARSER_H
+#ifndef __FLVPARSER_H__
+#define __FLVPARSER_H__
 
 #include <stdint.h>
 #include <string>

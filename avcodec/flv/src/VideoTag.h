@@ -10,7 +10,11 @@ class CVideoTag : public CTag
 {
 public:
 	CVideoTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser);
+	~CVideoTag();
 
+	void PrintVideoTag();
+
+private:
 	int ParseH264Tag();
 	int ParseH264Configuration(u_char *pTagData);
 	int ParseNalu(u_char *pTagData);

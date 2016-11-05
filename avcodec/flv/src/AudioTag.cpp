@@ -1,7 +1,45 @@
+#include <stdio.h>
+
 #include "Common.h"
 #include "AudioTag.h"
 
 
+
+const char *sound_formats[] = {
+    "Linear PCM, platform endian",
+    "ADPCM",
+    "MP3",
+    "Linear PCM, little endian",
+    "Nellymoser 16-kHz mono",
+    "Nellymoser 8-kHz mono",
+    "Nellymoser",
+    "G.711 A-law logarithmic PCM",
+    "G.711 mu-law logarithmic PCM",
+    "not defined by standard",
+    "AAC",
+    "Speex",
+    "not defined by standard",
+    "not defined by standard",
+    "MP3 8-Khz",
+    "Device-specific sound"
+};
+
+const char *sound_rates[] = {
+    "5.5-Khz",
+    "11-Khz",
+    "22-Khz",
+    "44-Khz"
+};
+
+const char *sound_sizes[] = {
+    "8 bit",
+    "16 bit"
+};
+
+const char *sound_types[] = {
+    "Mono",
+    "Stereo"
+};
 
 CAudioTag::CAudioTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser)
 {
@@ -17,6 +55,10 @@ CAudioTag::CAudioTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser 
 	if (m_nSoundFormat == 10) {	// AAC
 		ParseAACTag();
 	}
+}
+
+CAudioTag::~CAudioTag()
+{
 }
 
 int CAudioTag::ParseAACTag()
@@ -88,6 +130,16 @@ int CAudioTag::ParseRawAAC(u_char *pTagData)
 	CTag::WriteMediaData(pTagData + 2, 7, dataSize);
 
 	return 1;
+}
+
+void CAudioTag::PrintAudioTag()
+{
+	printf("  Audio tag:\n");
+    printf("    Sound format: %u - %s\n", m_nSoundFormat, sound_formats[m_nSoundFormat]);
+    printf("    Sound rate: %u - %s\n", m_nSoundRate, sound_rates[m_nSoundRate]);
+
+    printf("    Sound size: %u - %s\n", m_nSoundSize, sound_sizes[m_nSoundSize]);
+    printf("    Sound type: %u - %s\n", m_nSoundType, sound_types[m_nSoundType]);
 }
 
 

@@ -9,6 +9,61 @@ using namespace std;
 
 
 
+static void PrintFlvHeader(FlvHeader flvHeader)
+{
+	printf("FLV file version %u\n", flvHeader.nVersion);
+
+    printf("  Contains audio tags: ");
+
+    if (flvHeader.bHaveAudio) {
+        printf("Yes\n");
+    } else {
+        printf("No\n");
+    }
+
+    printf("  Contains video tags: ");
+
+    if (flvHeader.bHaveVideo) {
+        printf("Yes\n");
+    } else {
+        printf("No\n");
+    }
+
+    printf("  Data offset: %lu\n", (unsigned long)flvHeader.nHeadSize);
+
+    return;
+}
+
+void PrintInfo(CFlvParser *pFlvParser)
+{
+	vector <CTag *> vpTag;
+	FlvHeader flvHeader;
+
+	pFlvParser->GetTags(vpTag);
+	pFlvParser->GetFlvHeader(flvHeader);
+
+	PrintFlvHeader(flvHeader);
+
+	vector <CTag *>::iterator it_tag;
+
+	for (it_tag = vpTag.begin(); it_tag < vpTag.end(); it_tag++) {
+
+		(*it_tag)->PrintTagHeader();
+
+		int type = (*it_tag)->GetType();
+
+		if(type == 0x08) {
+			((CAudioTag *)(*it_tag))->PrintAudioTag();
+		} else if (type == 0x09) {
+			((CVideoTag *)(*it_tag))->PrintVideoTag();
+		} else if (type == 0x12) {
+
+		}
+	}
+
+	return;
+}
+
 int DumpH264(CFlvParser *pFlvParser, const std::string &path)
 {
 	fstream f;
@@ -85,7 +140,7 @@ int DumpFlv(CFlvParser *pFlvParser, const std::string &path)
 		unsigned int nn = WriteU32(nLastTagSize);
 		f.write((char *)&nn, 4);
 
-		u_char *pTagHeader = (*it_tag)->GetTagHeader();
+		u_char *pTagHeader = (*it_tag)->GetTagHeaderData();
 		u_char *pTagData = (*it_tag)->GetTagData();
 		uint32_t datasize = (*it_tag)->GetDataSize();
 
