@@ -31,9 +31,8 @@ public:
 	void SetNalUnitLength(int len);
 	void GetNalUnitLength(int &len);
 
-	int DumpH264(const std::string &path);
-	int DumpAAC(const std::string &path);
-	int DumpFlv(const std::string &path);
+	void GetTags(std::vector <CTag *> &vpTag);
+	void GetFlvHeader(FlvHeader &flvHeader);
 
 private:
 	FlvHeader *CreateFlvHeader(u_char *pBuf);

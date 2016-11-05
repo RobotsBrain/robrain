@@ -6,6 +6,7 @@
 #include <fstream>
 
 #include "FlvParser.h"
+#include "FlvDumpFile.h"
 
 using namespace std;
 
@@ -41,14 +42,12 @@ void Process(fstream & fin, const char *filename)
 		nFlvPos -= nUsedLen;
 	}
 
-	parser.DumpH264("parser.264");
-	parser.DumpAAC("parser.aac");
+	DumpH264(&parser, "test.h264");
+	DumpAAC(&parser, "test.aac");
+	DumpFlv(&parser, filename);
 
-	//dump into flv
-	parser.DumpFlv(filename);
-
-	delete[]pBak;
-	delete[]pBuf;
+	delete[] pBak;
+	delete[] pBuf;
 
 	return;
 }
