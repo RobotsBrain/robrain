@@ -1,5 +1,9 @@
+#ifndef __COMMON_H__
+#define __COMMON_H__
+
 #include <sys/types.h>
 #include <stdint.h>
+
 
 
 static const unsigned int nH264StartCode = 0x01000000;
@@ -43,3 +47,6 @@ static unsigned int WriteU32(unsigned int n)
 
 	return nn;
 }
+
+
+#endif

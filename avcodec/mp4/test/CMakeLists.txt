@@ -1,4 +1,4 @@
-set(EXECUTABLE_OUTPUT_PATH ${OUTDIR}/avcodec/test)
+set(EXECUTABLE_OUTPUT_PATH ${OUTDIR}/avcodec/mp4/test)
 
 include_directories(
 	${TOPDIR}/basics/base/include

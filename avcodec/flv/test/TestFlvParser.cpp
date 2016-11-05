@@ -45,7 +45,7 @@ void Process(fstream & fin, const char *filename)
 	parser.DumpAAC("parser.aac");
 
 	//dump into flv
-	// parser.DumpFlv(filename);
+	parser.DumpFlv(filename);
 
 	delete[]pBak;
 	delete[]pBuf;

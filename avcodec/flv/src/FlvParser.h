@@ -33,7 +33,7 @@ public:
 
 	int DumpH264(const std::string &path);
 	int DumpAAC(const std::string &path);
-	// int DumpFlv(const std::string &path);
+	int DumpFlv(const std::string &path);
 
 private:
 	FlvHeader *CreateFlvHeader(u_char *pBuf);

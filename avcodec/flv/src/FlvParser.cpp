@@ -202,7 +202,6 @@ int CFlvParser::DumpAAC(const std::string &path)
 	return 1;
 }
 
-#if 0
 int CFlvParser::DumpFlv(const std::string &path)
 {
 	fstream f;
@@ -213,50 +212,46 @@ int CFlvParser::DumpFlv(const std::string &path)
 	unsigned int nLastTagSize = 0;
 
 	// write flv-tag
-	vector < Tag * >::iterator it_tag;
+	vector <CTag *>::iterator it_tag;
+
 	for (it_tag = m_vpTag.begin(); it_tag < m_vpTag.end(); it_tag++) {
 		unsigned int nn = WriteU32(nLastTagSize);
 		f.write((char *)&nn, 4);
 
+		u_char *pTagHeader = (*it_tag)->GetTagHeader();
+		u_char *pTagData = (*it_tag)->GetTagData();
+		uint32_t datasize = (*it_tag)->GetDataSize();
+
 		//check duplicate start code
-		if ((*it_tag)->_header.nType == 0x09
-			&& *((*it_tag)->_pTagData + 1) == 0x01) {
+		if ((*it_tag)->GetType() == 0x09 && *(pTagData + 1) == 0x01) {
 			bool duplicate = false;
-			u_char *pStartCode = (*it_tag)->_pTagData + 5 + m_nNalUnitLength;
-			//printf("tagsize=%d\n",(*it_tag)->_header.nDataSize);
+			u_char *pStartCode = pTagData + 5 + m_nNalUnitLength;
+
 			unsigned nalu_len = 0;
 			u_char *p_nalu_len = (u_char *)&nalu_len;
+
 			switch (m_nNalUnitLength) {
 			case 4:
-				nalu_len = ShowU32((*it_tag)->_pTagData + 5);
+				nalu_len = ShowU32(pTagData + 5);
 				break;
 
 			case 3:
-				nalu_len = ShowU24((*it_tag)->_pTagData + 5);
+				nalu_len = ShowU24(pTagData + 5);
 				break;
 
 			case 2:
-				nalu_len = ShowU16((*it_tag)->_pTagData + 5);
+				nalu_len = ShowU16(pTagData + 5);
 				break;
 
 			default:
-				nalu_len = ShowU8((*it_tag)->_pTagData + 5);
+				nalu_len = ShowU8(pTagData + 5);
 				break;
 			}
-			/*
-			   printf("nalu_len=%u\n",nalu_len);
-			   printf("%x,%x,%x,%x,%x,%x,%x,%x,%x\n",(*it_tag)->_pTagData[5],(*it_tag)->_pTagData[6],
-			   (*it_tag)->_pTagData[7],(*it_tag)->_pTagData[8],(*it_tag)->_pTagData[9],
-			   (*it_tag)->_pTagData[10],(*it_tag)->_pTagData[11],(*it_tag)->_pTagData[12],
-			   (*it_tag)->_pTagData[13]);
-			 */
 
 			u_char *pStartCodeRecord = pStartCode;
 			int i;
 
-			for (i = 0;
-				 i < (*it_tag)->_header.nDataSize - 5 - m_nNalUnitLength - 4;
-				 ++i) {
+			for (i = 0; i < datasize - 5 - m_nNalUnitLength - 4; ++i) {
 				if (pStartCode[i] == 0x00 && pStartCode[i + 1] == 0x00
 					&& pStartCode[i + 2] == 0x00 && pStartCode[i + 3] == 0x01) {
 					if (pStartCode[i + 4] == 0x67) {
@@ -282,63 +277,50 @@ int CFlvParser::DumpFlv(const std::string &path)
 
 			if (duplicate) {
 				nalu_len -= i;
-				(*it_tag)->_header.nDataSize -= i;
-				u_char *p =
-					(u_char *)&((*it_tag)->_header.nDataSize);
-				(*it_tag)->_pTagHeader[1] = p[2];
-				(*it_tag)->_pTagHeader[2] = p[1];
-				(*it_tag)->_pTagHeader[3] = p[0];
-				//printf("after,tagsize=%d\n",(int)ShowU24((*it_tag)->_pTagHeader + 1));
-				//printf("%x,%x,%x\n",(*it_tag)->_pTagHeader[1],(*it_tag)->_pTagHeader[2],(*it_tag)->_pTagHeader[3]);
+				datasize -= i;
+				u_char *p = (u_char *)&(datasize);
+				pTagHeader[1] = p[2];
+				pTagHeader[2] = p[1];
+				pTagHeader[3] = p[0];
 
-				f.write((char *)(*it_tag)->_pTagHeader, 11);
+				f.write((char *)pTagHeader, 11);
+
 				switch (m_nNalUnitLength) {
 				case 4:
-					*((*it_tag)->_pTagData + 5) = p_nalu_len[3];
-					*((*it_tag)->_pTagData + 6) = p_nalu_len[2];
-					*((*it_tag)->_pTagData + 7) = p_nalu_len[1];
-					*((*it_tag)->_pTagData + 8) = p_nalu_len[0];
+					*(pTagData + 5) = p_nalu_len[3];
+					*(pTagData + 6) = p_nalu_len[2];
+					*(pTagData + 7) = p_nalu_len[1];
+					*(pTagData + 8) = p_nalu_len[0];
 					break;
 
 				case 3:
-					*((*it_tag)->_pTagData + 5) = p_nalu_len[2];
-					*((*it_tag)->_pTagData + 6) = p_nalu_len[1];
-					*((*it_tag)->_pTagData + 7) = p_nalu_len[0];
+					*(pTagData + 5) = p_nalu_len[2];
+					*(pTagData + 6) = p_nalu_len[1];
+					*(pTagData + 7) = p_nalu_len[0];
 					break;
 
 				case 2:
-					*((*it_tag)->_pTagData + 5) = p_nalu_len[1];
-					*((*it_tag)->_pTagData + 6) = p_nalu_len[0];
+					*(pTagData + 5) = p_nalu_len[1];
+					*(pTagData + 6) = p_nalu_len[0];
 					break;
 
 				default:
-					*((*it_tag)->_pTagData + 5) = p_nalu_len[0];
+					*(pTagData + 5) = p_nalu_len[0];
 					break;
 				}
-				//printf("after,nalu_len=%d\n",(int)ShowU32((*it_tag)->_pTagData + 5));
-				f.write((char *)(*it_tag)->_pTagData, pStartCode - (*it_tag)->_pTagData);
-				/*
-				   printf("%x,%x,%x,%x,%x,%x,%x,%x,%x\n",(*it_tag)->_pTagData[0],(*it_tag)->_pTagData[1],(*it_tag)->_pTagData[2],
-				   (*it_tag)->_pTagData[3],(*it_tag)->_pTagData[4],(*it_tag)->_pTagData[5],(*it_tag)->_pTagData[6],
-				   (*it_tag)->_pTagData[7],(*it_tag)->_pTagData[8]);
-				 */
-				f.write((char *)pStartCode + i,
-						(*it_tag)->_header.nDataSize - (pStartCode -
-														(*it_tag)->_pTagData));
-				/*
-				   printf("write size:%d\n", (pStartCode - (*it_tag)->_pTagData) +
-				   ((*it_tag)->_header.nDataSize - (pStartCode - (*it_tag)->_pTagData)));
-				 */
+
+				f.write((char *)pTagData, pStartCode - pTagData);
+				f.write((char *)pStartCode + i, datasize - (pStartCode - pTagData));
 			} else {
-				f.write((char *)(*it_tag)->_pTagHeader, 11);
-				f.write((char *)(*it_tag)->_pTagData, (*it_tag)->_header.nDataSize);
+				f.write((char *)pTagHeader, 11);
+				f.write((char *)pTagData, datasize);
 			}
 		} else {
-			f.write((char *)(*it_tag)->_pTagHeader, 11);
-			f.write((char *)(*it_tag)->_pTagData, (*it_tag)->_header.nDataSize);
+			f.write((char *)pTagHeader, 11);
+			f.write((char *)pTagData, datasize);
 		}
 
-		nLastTagSize = 11 + (*it_tag)->_header.nDataSize;
+		nLastTagSize = 11 + datasize;
 	}
 
 	unsigned int nn = WriteU32(nLastTagSize);
@@ -349,4 +331,3 @@ int CFlvParser::DumpFlv(const std::string &path)
 	return 1;
 }
 
-#endif
