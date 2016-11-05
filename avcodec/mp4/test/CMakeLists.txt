@@ -2,7 +2,7 @@ set(EXECUTABLE_OUTPUT_PATH ${OUTDIR}/avcodec/test)
 
 include_directories(
 	${TOPDIR}/basics/base/include
-	${TOPDIR}/avcodec/src
+	${TOPDIR}/avcodec/mp4/src
 	${TOPDIR}/opensource/prebuild/include/mp4v2/include
 )
 

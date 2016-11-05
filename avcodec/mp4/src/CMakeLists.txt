@@ -1,5 +1,5 @@
 include_directories(
-	${TOPDIR}/avcodec/include
+	${TOPDIR}/avcodec/mp4/include
 	${TOPDIR}/opensource/prebuild/include/mp4v2/include
 )
 
