@@ -160,9 +160,33 @@ void CFlvParser::GetTags(std::vector <CTag *> &vpTag)
 
 void CFlvParser::GetFlvHeader(FlvHeader &flvHeader)
 {
-	memcpy(&flvHeader, m_pFlvHeader, sizeof(FlvHeader));
+    memcpy(&flvHeader, m_pFlvHeader, sizeof(FlvHeader));
 
 	return;
 }
 
 
+void CFlvParser::PrintFlvHeader()
+{
+	printf("FLV file version %u\n", m_pFlvHeader->nVersion);
+
+    printf("  Contains audio tags: ");
+
+    if (m_pFlvHeader->bHaveAudio) {
+        printf("Yes\n");
+    } else {
+        printf("No\n");
+    }
+
+    printf("  Contains video tags: ");
+
+    if (m_pFlvHeader->bHaveVideo) {
+        printf("Yes\n");
+    } else {
+        printf("No\n");
+    }
+
+    printf("  Data offset: %lu\n", (unsigned long)m_pFlvHeader->nHeadSize);
+
+    return;
+}

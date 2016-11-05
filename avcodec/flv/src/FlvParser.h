@@ -34,6 +34,8 @@ public:
 	void GetTags(std::vector <CTag *> &vpTag);
 	void GetFlvHeader(FlvHeader &flvHeader);
 
+	void PrintFlvHeader();
+
 private:
 	FlvHeader *CreateFlvHeader(u_char *pBuf);
 	void DestroyFlvHeader();

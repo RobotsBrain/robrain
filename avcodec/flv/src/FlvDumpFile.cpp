@@ -9,40 +9,13 @@ using namespace std;
 
 
 
-static void PrintFlvHeader(FlvHeader flvHeader)
-{
-	printf("FLV file version %u\n", flvHeader.nVersion);
-
-    printf("  Contains audio tags: ");
-
-    if (flvHeader.bHaveAudio) {
-        printf("Yes\n");
-    } else {
-        printf("No\n");
-    }
-
-    printf("  Contains video tags: ");
-
-    if (flvHeader.bHaveVideo) {
-        printf("Yes\n");
-    } else {
-        printf("No\n");
-    }
-
-    printf("  Data offset: %lu\n", (unsigned long)flvHeader.nHeadSize);
-
-    return;
-}
-
 void PrintInfo(CFlvParser *pFlvParser)
 {
 	vector <CTag *> vpTag;
-	FlvHeader flvHeader;
 
 	pFlvParser->GetTags(vpTag);
-	pFlvParser->GetFlvHeader(flvHeader);
 
-	PrintFlvHeader(flvHeader);
+	pFlvParser->PrintFlvHeader();
 
 	vector <CTag *>::iterator it_tag;
 
@@ -85,7 +58,7 @@ int DumpH264(CFlvParser *pFlvParser, const std::string &path)
 
 	f.close();
 
-	return 1;
+	return 0;
 }
 
 int DumpAAC(CFlvParser *pFlvParser, const std::string &path)
@@ -113,7 +86,7 @@ int DumpAAC(CFlvParser *pFlvParser, const std::string &path)
 
 	f.close();
 
-	return 1;
+	return 0;
 }
 
 int DumpFlv(CFlvParser *pFlvParser, const std::string &path)
@@ -251,7 +224,7 @@ int DumpFlv(CFlvParser *pFlvParser, const std::string &path)
 
 	f.close();
 
-	return 1;
+	return 0;
 }
 
 

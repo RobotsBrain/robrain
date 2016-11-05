@@ -72,7 +72,7 @@ int CAudioTag::ParseAACTag()
 		ParseRawAAC(pd);
 	}
 
-	return 1;
+	return 0;
 }
 
 int CAudioTag::ParseAudioSpecificConfig()
@@ -85,7 +85,7 @@ int CAudioTag::ParseAudioSpecificConfig()
 
 	CTag::SetAudioSpecificConfig(aacProfile, sampleRateIndex, channelConfig);
 
-	return 1;
+	return 0;
 }
 
 int CAudioTag::ParseRawAAC(u_char *pTagData)
@@ -129,7 +129,7 @@ int CAudioTag::ParseRawAAC(u_char *pTagData)
 	CTag::WriteMediaData(p64 + 1, 0, 7);
 	CTag::WriteMediaData(pTagData + 2, 7, dataSize);
 
-	return 1;
+	return 0;
 }
 
 void CAudioTag::PrintAudioTag()

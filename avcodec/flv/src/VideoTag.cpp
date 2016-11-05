@@ -64,7 +64,7 @@ int CVideoTag::ParseH264Tag()
 
 	}
 
-	return 1;
+	return 0;
 }
 
 int CVideoTag::ParseH264Configuration(u_char *pTagData)
@@ -87,7 +87,7 @@ int CVideoTag::ParseH264Configuration(u_char *pTagData)
 	CTag::WriteMediaData((u_char *)&nH264StartCode, 4 + sps_size, 4);
 	CTag::WriteMediaData(pd + 11 + 2 + sps_size + 2 + 1, 4 + sps_size + 4, pps_size);
 
-	return 1;
+	return 0;
 }
 
 int CVideoTag::ParseNalu(u_char *pTagData)
@@ -133,7 +133,7 @@ int CVideoTag::ParseNalu(u_char *pTagData)
 		nOffset += (nNalUnitLength + nNaluLen);
 	}
 
-	return 1;
+	return 0;
 }
 
 void CVideoTag::PrintVideoTag()
