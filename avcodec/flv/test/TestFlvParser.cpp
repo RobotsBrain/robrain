@@ -41,12 +41,11 @@ void Process(fstream & fin, const char *filename)
 		nFlvPos -= nUsedLen;
 	}
 
-	parser.Stat();
 	parser.DumpH264("parser.264");
 	parser.DumpAAC("parser.aac");
 
 	//dump into flv
-	parser.DumpFlv(filename);
+	// parser.DumpFlv(filename);
 
 	delete[]pBak;
 	delete[]pBuf;

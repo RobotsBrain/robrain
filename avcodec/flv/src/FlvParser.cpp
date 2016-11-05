@@ -5,6 +5,9 @@
 #include <iostream>
 #include <fstream>
 
+#include "Common.h"
+#include "AudioTag.h"
+#include "VideoTag.h"
 #include "FlvParser.h"
 
 using namespace std;
@@ -13,67 +16,15 @@ using namespace std;
 
 
 
-int CFlvParser::CAudioTag::_aacProfile;
-int CFlvParser::CAudioTag::_sampleRateIndex;
-int CFlvParser::CAudioTag::_channelConfig;
-
-static const unsigned int nH264StartCode = 0x01000000;
-
-static unsigned int ShowU32(u_char *pBuf) 
-{
-	return (pBuf[0] << 24) | (pBuf[1] << 16) | (pBuf[2] << 8) | pBuf[3];
-}
-
-static unsigned int ShowU24(u_char *pBuf) 
-{
-	return (pBuf[0] << 16) | (pBuf[1] << 8) | (pBuf[2]);
-}
-
-static unsigned int ShowU16(u_char *pBuf) 
-{
-	return (pBuf[0] << 8) | (pBuf[1]);
-}
-
-static unsigned int ShowU8(u_char *pBuf) 
-{
-	return (pBuf[0]);
-}
-
-static void WriteU64(uint64_t &x, int length, int value) 
-{
-	uint64_t mask = 0xFFFFFFFFFFFFFFFF >> (64 - length);
-	x = (x << length) | ((uint64_t) value & mask);
-}
-
-static unsigned int WriteU32(unsigned int n) 
-{
-	unsigned int nn = 0;
-	u_char *p = (u_char *)&n;
-	u_char *pp = (u_char *)&nn;
-	
-	pp[0] = p[3];
-	pp[1] = p[2];
-	pp[2] = p[1];
-	pp[3] = p[0];
-
-	return nn;
-}
-
-/******************************************************************************************/
-
 CFlvParser::CFlvParser()
+: m_pFlvHeader(NULL)
 {
-	m_pFlvHeader = NULL;
 }
 
 CFlvParser::~CFlvParser()
 {
-	for (int i = 0; i < m_vpTag.size(); i++) {
-		DestroyTag(m_vpTag[i]);
-		delete m_vpTag[i];
-	}
-
-	DestroyFlvHeader(m_pFlvHeader);
+	DestroyTag();
+	DestroyFlvHeader();
 }
 
 int CFlvParser::Parse(u_char *pBuf, int nBufSize, int &nUsedLen)
@@ -93,13 +44,13 @@ int CFlvParser::Parse(u_char *pBuf, int nBufSize, int &nUsedLen)
 
 		nOffset += 4;
 
-		Tag *pTag = CreateTag(pBuf + nOffset, nBufSize - nOffset);
+		CTag *pTag = CreateTag(pBuf + nOffset, nBufSize - nOffset);
 		if (pTag == NULL) {
 			nOffset -= 4;
 			break;
 		}
 
-		nOffset += (11 + pTag->_header.nDataSize);
+		nOffset += (11 + pTag->GetDataSize());
 
 		m_vpTag.push_back(pTag);
 	}
@@ -109,49 +60,7 @@ int CFlvParser::Parse(u_char *pBuf, int nBufSize, int &nUsedLen)
 	return 0;
 }
 
-int CFlvParser::Stat()
-{
-	for (int i = 0; i < m_vpTag.size(); i++) {
-		switch (m_vpTag[i]->_header.nType) {
-		case 0x08:
-			m_sStat.nAudioNum++;
-			break;
-
-		case 0x09:
-			StatVideo(m_vpTag[i]);
-			break;
-
-		case 0x12:
-			m_sStat.nMetaNum++;
-			break;
-
-		default:
-			;
-		}
-	}
-
-	cout << "vnum: " << m_sStat.nVideoNum << " , anum: " << m_sStat.
-		nAudioNum << " , mnum: " << m_sStat.nMetaNum << endl;
-
-	cout << "maxTimeStamp: " << m_sStat.
-		nMaxTimeStamp << " ,nLengthSize: " << m_sStat.nLengthSize << endl;
-
-	return 1;
-}
-
-int CFlvParser::StatVideo(Tag *pTag)
-{
-	m_sStat.nVideoNum++;
-	m_sStat.nMaxTimeStamp = pTag->_header.nTimeStamp;
-
-	if (pTag->_pTagData[0] == 0x17 && pTag->_pTagData[1] == 0x00) {
-		m_sStat.nLengthSize = (pTag->_pTagData[9] & 0x03) + 1;
-	}
-
-	return 1;
-}
-
-CFlvParser::FlvHeader *CFlvParser::CreateFlvHeader(u_char *pBuf)
+FlvHeader *CFlvParser::CreateFlvHeader(u_char *pBuf)
 {
 	FlvHeader *pHeader = new FlvHeader;
 
@@ -166,29 +75,17 @@ CFlvParser::FlvHeader *CFlvParser::CreateFlvHeader(u_char *pBuf)
 	return pHeader;
 }
 
-int CFlvParser::DestroyFlvHeader(FlvHeader *pHeader)
+void CFlvParser::DestroyFlvHeader()
 {
-	if (pHeader == NULL) {
-		return 0;
+	if (m_pFlvHeader != NULL) {
+		delete m_pFlvHeader->pFlvHeader;
+		delete m_pFlvHeader;
 	}
 
-	delete pHeader->pFlvHeader;
-	delete pHeader;
-
-	return 1;
-}
-
-void CFlvParser::SetAudioSpecificConfig()
-{
 	return;
 }
 
-void CFlvParser::GetAudioSpecificConfig()
-{
-	return;
-}
-
-CFlvParser::Tag *CFlvParser::CreateTag(u_char *pBuf, int nLeftLen)
+CTag *CFlvParser::CreateTag(u_char *pBuf, int nLeftLen)
 {
 	TagHeader header;
 
@@ -206,7 +103,7 @@ CFlvParser::Tag *CFlvParser::CreateTag(u_char *pBuf, int nLeftLen)
 		return NULL;
 	}
 
-	Tag *pTag = NULL;
+	CTag *pTag = NULL;
 
 	switch (header.nType) {
 	case 0x09:
@@ -218,237 +115,62 @@ CFlvParser::Tag *CFlvParser::CreateTag(u_char *pBuf, int nLeftLen)
 		break;
 
 	default:
-		pTag = new Tag();
-		pTag->Init(&header, pBuf, nLeftLen);
+		pTag = new CTag();
+		pTag->Init(&header, pBuf, nLeftLen, this);
 	}
 
 	return pTag;
 }
 
-int CFlvParser::DestroyTag(Tag *pTag)
+void CFlvParser::DestroyTag()
 {
-	if (pTag->_pMedia != NULL) {
-		delete[]pTag->_pMedia;
+	for (int i = 0; i < m_vpTag.size(); i++) {
+		delete m_vpTag[i];
 	}
-
-	if (pTag->_pTagData != NULL) {
-		delete[]pTag->_pTagData;
-	}
-
-	if (pTag->_pTagHeader != NULL) {
-		delete[]pTag->_pTagHeader;
-	}
-
-	return 1;
-}
-
-void CFlvParser::Tag::Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen)
-{
-	memcpy(&_header, pHeader, sizeof(TagHeader));
-
-	_pTagHeader = new u_char[11];
-	memcpy(_pTagHeader, pBuf, 11);
-
-	_pTagData = new u_char[_header.nDataSize];
-	memcpy(_pTagData, pBuf + 11, _header.nDataSize);
 
 	return;
 }
 
-CFlvParser::CVideoTag::CVideoTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser)
+void CFlvParser::SetAudioSpecificConfig(int aacProfile, int sampleRateIndex, int channelConfig)
 {
-	Init(pHeader, pBuf, nLeftLen);
-
-	u_char *pd = _pTagData;
-
-	_nFrameType = (pd[0] & 0xf0) >> 4;
-	_nCodecID = pd[0] & 0x0f;
-
-	if (_header.nType == 0x09 && _nCodecID == 7) {
-		ParseH264Tag(pParser);
-	}
+	m_aacProfile = aacProfile;
+	m_sampleRateIndex = sampleRateIndex;
+	m_channelConfig = channelConfig;
 }
 
-CFlvParser::CAudioTag::CAudioTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser)
+void CFlvParser::GetAudioSpecificConfig(int &aacProfile, int &sampleRateIndex, int &channelConfig)
 {
-	Init(pHeader, pBuf, nLeftLen);
-
-	u_char *pd = _pTagData;
-
-	_nSoundFormat = (pd[0] & 0xf0) >> 4;
-	_nSoundRate = (pd[0] & 0x0c) >> 2;
-	_nSoundSize = (pd[0] & 0x02) >> 1;
-	_nSoundType = (pd[0] & 0x01);
-
-	if (_nSoundFormat == 10) {	// AAC
-		ParseAACTag(pParser);
-	}
+	aacProfile = m_aacProfile;
+	sampleRateIndex = m_sampleRateIndex;
+	channelConfig = m_channelConfig;
 }
 
-int CFlvParser::CAudioTag::ParseAACTag(CFlvParser *pParser)
+void CFlvParser::SetNalUnitLength(int len)
 {
-	u_char *pd = _pTagData;
-	int nAACPacketType = pd[1];
-
-	if (nAACPacketType == 0) {
-		ParseAudioSpecificConfig(pParser, pd);
-	} else if (nAACPacketType == 1) {
-		ParseRawAAC(pParser, pd);
-	}
-
-	return 1;
+	m_nNalUnitLength = len;
 }
 
-int CFlvParser::CAudioTag::ParseAudioSpecificConfig(CFlvParser *pParser, u_char *pTagData)
+void CFlvParser::GetNalUnitLength(int &len)
 {
-	u_char *pd = _pTagData;
-
-	_aacProfile = ((pd[2] & 0xf8) >> 3) - 1;
-	_sampleRateIndex = ((pd[2] & 0x07) << 1) | (pd[3] >> 7);
-	_channelConfig = (pd[3] >> 3) & 0x0f;
-
-	_pMedia = NULL;
-	_nMediaLen = 0;
-
-	return 1;
-}
-
-int CFlvParser::CAudioTag::ParseRawAAC(CFlvParser *pParser, u_char *pTagData)
-{
-	uint64_t bits = 0;
-	int dataSize = _header.nDataSize - 2;
-
-	WriteU64(bits, 12, 0xFFF);
-	WriteU64(bits, 1, 0);
-	WriteU64(bits, 2, 0);
-	WriteU64(bits, 1, 1);
-	WriteU64(bits, 2, _aacProfile);
-	WriteU64(bits, 4, _sampleRateIndex);
-	WriteU64(bits, 1, 0);
-	WriteU64(bits, 3, _channelConfig);
-	WriteU64(bits, 1, 0);
-	WriteU64(bits, 1, 0);
-	WriteU64(bits, 1, 0);
-	WriteU64(bits, 1, 0);
-	WriteU64(bits, 13, 7 + dataSize);
-	WriteU64(bits, 11, 0x7FF);
-	WriteU64(bits, 2, 0);
-
-	_nMediaLen = 7 + dataSize;
-	_pMedia = new u_char[_nMediaLen];
-	u_char p64[8];
-	p64[0] = (u_char)(bits >> 56);
-	p64[1] = (u_char)(bits >> 48);
-	p64[2] = (u_char)(bits >> 40);
-	p64[3] = (u_char)(bits >> 32);
-	p64[4] = (u_char)(bits >> 24);
-	p64[5] = (u_char)(bits >> 16);
-	p64[6] = (u_char)(bits >> 8);
-	p64[7] = (u_char)(bits);
-
-	memcpy(_pMedia, p64 + 1, 7);
-	memcpy(_pMedia + 7, pTagData + 2, dataSize);
-
-	return 1;
-}
-
-int CFlvParser::CVideoTag::ParseH264Tag(CFlvParser *pParser)
-{
-	u_char *pd = _pTagData;
-	int nAVCPacketType = pd[1];
-	int nCompositionTime = ShowU24(pd + 2);
-
-	if (nAVCPacketType == 0) {
-		ParseH264Configuration(pParser, pd);
-	} else if (nAVCPacketType == 1) {
-		ParseNalu(pParser, pd);
-	} else if (nAVCPacketType == 2) {
-
-	}
-
-	return 1;
-}
-
-int CFlvParser::CVideoTag::ParseH264Configuration(CFlvParser *pParser, u_char *pTagData)
-{
-	u_char *pd = pTagData;
-
-	pParser->m_nNalUnitLength = (pd[9] & 0x03) + 1;
-
-	int sps_size, pps_size;
-
-	sps_size = ShowU16(pd + 11);
-	pps_size = ShowU16(pd + 11 + (2 + sps_size) + 1);
-
-	_nMediaLen = 4 + sps_size + 4 + pps_size;
-	_pMedia = new u_char[_nMediaLen];
-
-	memcpy(_pMedia, &nH264StartCode, 4);
-	memcpy(_pMedia + 4, pd + 11 + 2, sps_size);
-	memcpy(_pMedia + 4 + sps_size, &nH264StartCode, 4);
-	memcpy(_pMedia + 4 + sps_size + 4, pd + 11 + 2 + sps_size + 2 + 1, pps_size);
-
-	return 1;
-}
-
-int CFlvParser::CVideoTag::ParseNalu(CFlvParser *pParser, u_char *pTagData)
-{
-	u_char *pd = pTagData;
-	int nOffset = 0;
-
-	_pMedia = new u_char[_header.nDataSize + 10];
-	_nMediaLen = 0;
-
-	nOffset = 5;
-
-	while (1) {
-		if (nOffset >= _header.nDataSize) {
-			break;
-		}
-
-		int nNaluLen;
-
-		switch (pParser->m_nNalUnitLength) {
-		case 4:
-			nNaluLen = ShowU32(pd + nOffset);
-			break;
-
-		case 3:
-			nNaluLen = ShowU24(pd + nOffset);
-			break;
-
-		case 2:
-			nNaluLen = ShowU16(pd + nOffset);
-			break;
-
-		default:
-			nNaluLen = ShowU8(pd + nOffset);
-			break;
-		}
-
-		memcpy(_pMedia + _nMediaLen, &nH264StartCode, 4);
-		memcpy(_pMedia + _nMediaLen + 4, pd + nOffset + pParser->m_nNalUnitLength, nNaluLen);
-
-		_nMediaLen += (4 + nNaluLen);
-		nOffset += (pParser->m_nNalUnitLength + nNaluLen);
-	}
-
-	return 1;
+	len = m_nNalUnitLength;
 }
 
 /***********************************************************************************************/
+
 
 int CFlvParser::DumpH264(const std::string &path)
 {
 	fstream f;
 	f.open(path.c_str(), ios_base::out | ios_base::binary);
 
-	vector < Tag * >::iterator it_tag;
-	for (it_tag = m_vpTag.begin(); it_tag != m_vpTag.end(); it_tag++) {
-		if ((*it_tag)->_header.nType != 0x09)
-			continue;
+	vector <CTag *>::iterator it_tag;
 
-		f.write((char *)(*it_tag)->_pMedia, (*it_tag)->_nMediaLen);
+	for (it_tag = m_vpTag.begin(); it_tag != m_vpTag.end(); it_tag++) {
+		if ((*it_tag)->GetType() != 0x09) {
+			continue;
+		}
+
+		f.write((char *)(*it_tag)->GetMedia(), (*it_tag)->GetMediaLen());
 	}
 
 	f.close();
@@ -461,17 +183,18 @@ int CFlvParser::DumpAAC(const std::string &path)
 	fstream f;
 	f.open(path.c_str(), ios_base::out | ios_base::binary);
 
-	vector < Tag * >::iterator it_tag;
+	vector <CTag *>::iterator it_tag;
+
 	for (it_tag = m_vpTag.begin(); it_tag != m_vpTag.end(); it_tag++) {
-		if ((*it_tag)->_header.nType != 0x08)
+		if ((*it_tag)->GetType() != 0x08)
 			continue;
 
-		CAudioTag *pAudioTag = (CAudioTag *) (*it_tag);
-		if (pAudioTag->_nSoundFormat != 10)
-			continue;
+		CAudioTag *pAudioTag = (CAudioTag *)(*it_tag);
+		// if (pAudioTag->_nSoundFormat != 10)
+		// 	continue;
 
-		if (pAudioTag->_nMediaLen != 0)
-			f.write((char *)(*it_tag)->_pMedia, (*it_tag)->_nMediaLen);
+		if (pAudioTag->GetMediaLen() != 0)
+			f.write((char *)(*it_tag)->GetMedia(), (*it_tag)->GetMediaLen());
 	}
 
 	f.close();
@@ -479,6 +202,7 @@ int CFlvParser::DumpAAC(const std::string &path)
 	return 1;
 }
 
+#if 0
 int CFlvParser::DumpFlv(const std::string &path)
 {
 	fstream f;
@@ -625,4 +349,4 @@ int CFlvParser::DumpFlv(const std::string &path)
 	return 1;
 }
 
-
+#endif
