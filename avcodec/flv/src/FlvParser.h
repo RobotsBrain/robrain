@@ -5,18 +5,10 @@
 #include <string>
 #include <vector>
 
+#include "Flv.h"
 #include "Tag.h"
 
 
-
-typedef struct {
-	int nVersion;
-	int bHaveVideo;
-	int bHaveAudio;
-	int nHeadSize;
-
-	u_char *pFlvHeader;
-} FlvHeader;
 
 class CFlvParser {
 public:

@@ -48,5 +48,45 @@ static unsigned int WriteU32(unsigned int n)
 	return nn;
 }
 
+class u4 
+{
+public:
+	u4(unsigned int i) 
+	{
+		_u[0] = i >> 24;
+		_u[1] = (i >> 16) & 0xff;
+		_u[2] = (i >> 8) & 0xff;
+		_u[3] = i & 0xff;
+  	} 
+
+public:
+	unsigned char _u[4];
+};
+
+class u3 
+{
+public:
+	u3(unsigned int i) 
+	{
+		_u[0] = i >> 16;
+		_u[1] = (i >> 8) & 0xff;
+		_u[2] = i & 0xff;
+  	} 
+
+public:
+	unsigned char _u[3];
+};
+
+class u2 
+{
+public:
+	u2(unsigned int i) {
+		_u[0] = i >> 8;
+		_u[1] = i & 0xff;
+  	} 
+
+public:
+	unsigned char _u[2];
+};
 
 #endif
