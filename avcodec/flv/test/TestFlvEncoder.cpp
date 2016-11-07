@@ -118,24 +118,33 @@ int ConvertH264()
 {
 	int nOffset = 0;
 	int count = 0;
-
 	unsigned int nTimeStamp = 0;
+
+	g_cnvt.Start(false, true);
+
 	while (1) {
 		int nNaluSize = 0;
 		if (GetOneNalu(g_pBufferIn + nOffset, g_nFileSize - nOffset,
 					   g_pBufferOut, nNaluSize) == 0)
 			break;
 
-		// g_cnvt.ConvertH264((char *)g_pBufferOut, nNaluSize, nTimeStamp);
+		g_cnvt.ConvertH264(g_pBufferOut, nNaluSize, nTimeStamp);
 
-		if (g_pBufferOut[4] != 0x67 && g_pBufferOut[4] != 0x68)
+		if (g_pBufferOut[4] != 0x67 && g_pBufferOut[4] != 0x68) {
 			nTimeStamp += 33;
+		}
+
 		nOffset += nNaluSize;
-		if (nOffset >= g_nFileSize - 4)
+
+		if (nOffset >= g_nFileSize - 4) {
 			break;
+		}
+
 		count++;
 	}
 
+	DumpFlv(&g_cnvt, "h264.flv");
+	
 	return 1;
 }
 
@@ -158,6 +167,7 @@ int ConvertAAC()
 
 		nTimeStamp += double (1024 * 1000) / double (44100);
 		nOffset += nAACFrameSize;
+
 		if (nOffset >= g_nFileSize - 4) {
 			break;
 		}
