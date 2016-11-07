@@ -14,4 +14,12 @@ typedef struct {
 	u_char *pFlvHeader;
 } FlvHeader;
 
+class CFlv
+{
+public:
+	CFlv();
+	~CFlv();
+	
+};
+
 #endif
