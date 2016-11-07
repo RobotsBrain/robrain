@@ -6,8 +6,6 @@
 
 
 
-class CFlv;
-
 typedef struct {
 	int nType;
 	int nDataSize;

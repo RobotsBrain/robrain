@@ -12,11 +12,6 @@ link_directories(
 
 
 #################################
-add_executable(TestRtmpSendH264 TestRtmpSendH264.cpp)
-target_link_libraries(TestRtmpSendH264 rtmpsend rtmp ssl crypto z base pthread)
-
-
-#################################
 add_executable(TestRtmpRecv TestRtmpRecv.cpp)
 target_link_libraries(TestRtmpRecv rtmpsend rtmp ssl crypto z base pthread)
 

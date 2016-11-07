@@ -143,8 +143,10 @@ int ConvertH264()
 		count++;
 	}
 
-	DumpFlv(&g_cnvt, "h264.flv");
+	g_cnvt.Stop();
 	
+	DumpFlv(&g_cnvt, "h264.flv");
+
 	return 1;
 }
 
@@ -175,6 +177,8 @@ int ConvertAAC()
 		count++;
 	}
 	
+	g_cnvt.Stop();
+
 	DumpFlv(&g_cnvt, "aac.flv");
 
 	return 1;
