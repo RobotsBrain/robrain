@@ -119,6 +119,7 @@ int DumpFlv(CFlv *pFlv, const std::string &path)
 
 		//check duplicate start code
 		if ((*it_tag)->GetType() == 0x09 && *(pTagData + 1) == 0x01) {
+#if 0
 			bool duplicate = false;
 			u_char *pStartCode = pTagData + 5 + nNalUnitLength;
 
@@ -147,24 +148,25 @@ int DumpFlv(CFlv *pFlv, const std::string &path)
 			int i;
 
 			for (i = 0; i < datasize - 5 - nNalUnitLength - 4; ++i) {
+
 				if (pStartCode[i] == 0x00 && pStartCode[i + 1] == 0x00
 					&& pStartCode[i + 2] == 0x00 && pStartCode[i + 3] == 0x01) {
 
 					if (pStartCode[i + 4] == 0x67) {
-						//printf("duplicate sps found!\n");
+						printf("duplicate sps found!\n");
 						i += 4;
 						continue;
 					} else if (pStartCode[i + 4] == 0x68) {
-						//printf("duplicate pps found!\n");
+						printf("duplicate pps found!\n");
 						i += 4;
 						continue;
 					} else if (pStartCode[i + 4] == 0x06) {
-						//printf("duplicate sei found!\n");
+						printf("duplicate sei found!\n");
 						i += 4;
 						continue;
 					} else {
 						i += 4;
-						//printf("offset=%d\n",i);
+						printf("offset=%d\n", i);
 						duplicate = true;
 						break;
 					}
@@ -211,6 +213,10 @@ int DumpFlv(CFlv *pFlv, const std::string &path)
 				f.write((char *)pTagHeader, 11);
 				f.write((char *)pTagData, datasize);
 			}
+#else
+			f.write((char *)pTagHeader, 11);
+			f.write((char *)pTagData, datasize);
+#endif
 		} else {
 			f.write((char *)pTagHeader, 11);
 			f.write((char *)pTagData, datasize);

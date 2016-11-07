@@ -1,18 +1,16 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <iostream>
 #include <fstream>
+
+#include "base/Log.h"
 
 #include "FlvEncoder.h"
 #include "FlvDumpFile.h"
 
 using namespace std;
-
-fstream g_fileIn;
-int g_mode = 0;
-CFlvEncoder g_cnvt;
-unsigned char *g_pBufferIn, *g_pBufferOut;
-int g_nFileSize = 0;
 
 
 
@@ -72,6 +70,261 @@ int GetOneAACFrame(u_char *pBufIn, int nInSize, u_char *pAACFrame, int &nAACFram
 
 	return 1;
 }
+
+class CVideo
+{
+public:
+	CVideo(string filename, CFlvEncoder *pencoder);
+	~CVideo();
+
+	int Write();
+
+private:
+	int 		m_TimeStamp;
+	fstream 	m_File;
+	int 		m_nFileSize;
+	u_char 		*m_pBufferIn;
+	u_char 		*m_pBufferOut;
+	int 		m_nOffset;
+	int 		m_count;
+	CFlvEncoder *m_pencoder;
+};
+
+CVideo::CVideo(string filename, CFlvEncoder *pencoder)
+: m_TimeStamp(0)
+, m_File(NULL)
+, m_nFileSize(0)
+, m_pBufferIn(NULL)
+, m_pBufferOut(NULL)
+, m_nOffset(0)
+, m_count(0)
+, m_pencoder(pencoder)
+{
+	m_File.open(filename.c_str(), ios::binary | ios::in);
+
+	m_File.seekg(0, ios::end);
+	m_nFileSize = m_File.tellg();
+
+	m_File.seekg(0, ios_base::beg);
+
+	m_pBufferIn = new u_char[m_nFileSize];
+	m_pBufferOut = new u_char[m_nFileSize];
+
+	m_File.read((char *)m_pBufferIn, m_nFileSize);
+}
+
+CVideo::~CVideo()
+{
+	delete m_pBufferIn;
+	delete m_pBufferOut;
+
+	m_File.close();
+}
+
+int CVideo::Write()
+{
+	int nNaluSize = 0;
+
+	if (GetOneNalu(m_pBufferIn + m_nOffset, m_nFileSize - m_nOffset, m_pBufferOut, nNaluSize) == 0) {
+		DEBUG("\n");
+		return -1;
+	}
+
+	m_pencoder->ConvertH264(m_pBufferOut, nNaluSize, m_TimeStamp);
+
+	if (m_pBufferOut[4] != 0x67 && m_pBufferOut[4] != 0x68) {
+		m_TimeStamp += 33;
+	}
+
+	m_nOffset += nNaluSize;
+
+	if (m_nOffset >= m_nFileSize - 4) {
+		DEBUG("\n");
+		return -1;
+	}
+
+	m_count++;
+
+	return m_TimeStamp;
+}
+
+class CAudio
+{
+public:
+	CAudio(string filename, CFlvEncoder *pencoder);
+	~CAudio();
+
+	int Write();
+
+private:
+	int 		m_TimeStamp;
+	fstream 	m_File;
+	int 		m_nFileSize;
+	u_char 		*m_pBufferIn;
+	u_char 		*m_pBufferOut;
+	int 		m_nOffset;
+	int 		m_count;
+	CFlvEncoder *m_pencoder;
+};
+
+CAudio::CAudio(string filename, CFlvEncoder *pencoder)
+: m_TimeStamp(0)
+, m_File(NULL)
+, m_nFileSize(0)
+, m_pBufferIn(NULL)
+, m_pBufferOut(NULL)
+, m_nOffset(0)
+, m_count(0)
+, m_pencoder(pencoder)
+{
+	m_File.open(filename.c_str(), ios::binary | ios::in);
+
+	m_File.seekg(0, ios::end);
+	m_nFileSize = m_File.tellg();
+
+	m_File.seekg(0, ios_base::beg);
+
+	m_pBufferIn = new u_char[m_nFileSize];
+	m_pBufferOut = new u_char[m_nFileSize];
+
+	m_File.read((char *)m_pBufferIn, m_nFileSize);
+}
+
+CAudio::~CAudio()
+{
+	delete m_pBufferIn;
+	delete m_pBufferOut;
+
+	m_File.close();
+}
+
+int CAudio::Write()
+{
+	int nAACFrameSize = 0;
+
+	if (GetOneAACFrame(m_pBufferIn + m_nOffset, m_nFileSize - m_nOffset, m_pBufferOut, nAACFrameSize) == 0) {
+		DEBUG("\n");
+		return -1;
+	}
+
+	printf("nAACFrameSize = %d\n", nAACFrameSize);
+	m_pencoder->ConvertAAC(m_pBufferOut, nAACFrameSize, m_TimeStamp);
+
+	m_TimeStamp += double (1024 * 1000) / double (44100);
+	m_nOffset += nAACFrameSize;
+
+	if (m_nOffset >= m_nFileSize - 4) {
+		DEBUG("\n");
+		return -1;
+	}
+
+	m_count++;
+
+	return m_TimeStamp;
+}
+
+int main(int argc, char *argv[])
+{
+  	int ch;
+  	string videofile;
+  	string audiofile;
+  	bool bAudio = false, bVideo = false;
+  
+  	while((ch = getopt(argc, argv,"a:v:")) != -1) {
+
+	    switch(ch) {
+	    case 'a':
+	      	audiofile = optarg;
+	      	bAudio = true;
+	        break;
+
+	    case 'v':
+	    	videofile = optarg;
+	    	bVideo = true;
+	        break;
+
+	    default:
+	    	break;
+	   	}
+	}
+
+	CAudio *pAudio = NULL;
+	CVideo *pVideo = NULL;
+	uint32_t atime = 0, vtime = 0;
+	bool bastop = false, bvstop = false;
+	CFlvEncoder FlvEncoder;
+
+	if(bAudio) {
+		pAudio = new CAudio(audiofile, &FlvEncoder);
+	}
+
+	if(bVideo) {
+		pVideo = new CVideo(videofile, &FlvEncoder);
+	}
+
+	int timestamp = 0;
+
+	FlvEncoder.Start(bAudio, bVideo);
+
+	while(1) {
+		if(bAudio && bVideo) {
+			if(atime <= vtime && !bastop) {
+				if((timestamp = pAudio->Write()) < 0) {
+					bastop = true;
+				} else {
+					atime = timestamp;
+				} 
+			} else if(!bvstop) {
+				if((timestamp = pVideo->Write()) < 0) {
+					bvstop = true;
+				} else {
+					vtime = timestamp;
+				}	
+			}
+
+			if(bastop && bvstop) {
+				break;
+			}
+		} else if(bAudio) {
+			if((timestamp = pAudio->Write()) < 0) {
+				break;
+			}
+				
+			atime = timestamp;
+		} else if(bVideo) {
+			if((timestamp = pVideo->Write()) < 0) {
+				break;
+			}
+			
+			vtime = timestamp;
+		}
+	}
+
+	FlvEncoder.Stop();
+
+	if(bAudio && bVideo) {
+		DumpFlv(&FlvEncoder, "encoder_test.flv");
+	} else if(bAudio) {
+		DumpFlv(&FlvEncoder, "aac.flv");
+	} else if(bVideo) {
+		DumpFlv(&FlvEncoder, "h264.flv");
+	}
+
+	if(pAudio != NULL)
+		delete pAudio;
+
+	if(pVideo != NULL)
+		delete pVideo;
+
+   	return 0;
+}
+
+#if 0
+// fstream g_fileIn;
+// int g_mode = 0;
+// CFlvEncoder g_cnvt;
+// unsigned char *g_pBufferIn, *g_pBufferOut;
+// int g_nFileSize = 0;
 
 int Initialize(int argc, char *argv[])
 {
@@ -206,5 +459,6 @@ int main(int argc, char *argv[])
 
 	return 1;
 }
+#endif
 
 

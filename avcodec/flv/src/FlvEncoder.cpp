@@ -70,10 +70,12 @@ bool CFlvEncoder::Stop()
 {
 	if (m_pSPS != NULL) {
 		delete m_pSPS;
+		m_pSPS = NULL;
 	}
 
 	if (m_pPPS != NULL) {
 		delete m_pPPS;
+		m_pPPS = NULL;
 	}
 
 	if (m_bHaveVideo != 0) {
