@@ -9,6 +9,15 @@
 
 
 CFlvEncoder::CFlvEncoder()
+: m_bHaveAudio(false)
+, m_bHaveVideo(false)
+, m_bWriteAACSeqHeader(false)
+, m_bWriteAVCSeqHeader(false)
+, m_pSPS(NULL)
+, m_nSPSSize(0)
+, m_pPPS(NULL)
+, m_nPPSSize(0)
+, m_nVideoTimeStamp(0)
 {
 }
 
@@ -107,26 +116,6 @@ int CFlvEncoder::WriteAACHeader(u_char *pAAC, uint32_t nTimeStamp)
 	u_char *data = new u_char[nDataSize + 11];
 
 	SetupTagHeader(0x08, nDataSize, nTimeStamp, 0, header, data);
-	// header.nType = 0x08;
-	// header.nDataSize = datasize;
-	// header.nTimeStamp = nTimeStamp;
-	// header.nTSEx = 0;
-	// header.nStreamID = 0;
-	// header.nTotalTS = (uint32_t)((header.nTSEx << 24)) + header.nTimeStamp; // Fixme
-
-	// data[0] = 0x08;
-
-	// u3 datasize_u3(header.nDataSize);
-	// memcpy(data + 1, datasize_u3._u, 3);
-
-	// u3 tt_u3(nTimeStamp);
-	// memcpy(data + 4, tt_u3._u, 3);
-
-	// u_char cTTex = nTimeStamp >> 24;
-	// memcpy(data + 7, &cTTex, 1);
-
-	// u3 sid_u3(header.nStreamID);
-	// memcpy(data + 8, sid_u3._u, 3);
 
 	u_char cAudioParam = 0xAF;
 	memcpy(data + 11, &cAudioParam, 1);
@@ -166,29 +155,6 @@ void CFlvEncoder::WriteAACFrame(u_char *pFrame, int nFrameSize, uint32_t nTimeSt
 	u_char *data = new u_char[nDataSize + 11];
 
 	SetupTagHeader(0x08, nDataSize, nTimeStamp, 0, header, data);
-
-	// header.nType = 0x08;
-	// header.nDataSize = 1 + 1 + (nFrameSize - 7);
-	// header.nTimeStamp = nTimeStamp;
-	// header.nTSEx = 0;
-	// header.nStreamID = 0;
-	// header.nTotalTS = (uint32_t)((header.nTSEx << 24)) + header.nTimeStamp; // Fixme
-
-	// u_char *data = new u_char[header.nDataSize + 11];
-
-	// data[0] = 0x08;
-
-	// u3 datasize_u3(header.nDataSize);
-	// memcpy(data + 1, datasize_u3._u, 3);
-
-	// u3 tt_u3(nTimeStamp);
-	// memcpy(data + 4, tt_u3._u, 3);
-
-	// u_char cTTex = nTimeStamp >> 24;
-	// memcpy(data + 7, &cTTex, 1);
-
-	// u3 sid_u3(header.nStreamID);
-	// memcpy(data + 8, sid_u3._u, 3);
 
 	u_char cAudioParam = 0xAF;
 	memcpy(data + 11, &cAudioParam, 1);
@@ -232,29 +198,6 @@ void CFlvEncoder::WriteH264Header(uint32_t nTimeStamp)
 
 	SetupTagHeader(0x09, nDataSize, nTimeStamp, 0, header, data);
 
-	// 
-
-	// header.nType = 0x09;
-	// header.nDataSize = nDataSize;
-	// header.nTimeStamp = nTimeStamp;
-	// header.nTSEx = 0;
-	// header.nStreamID = 0;
-	// header.nTotalTS = (uint32_t)((header.nTSEx << 24)) + header.nTimeStamp;
-
-	// data[0] = 0x09;
-
-	// u3 datasize_u3(nDataSize);
-	// memcpy(data + 1, datasize_u3._u, 3);
-
-	// u3 tt_u3(nTimeStamp);
-	// memcpy(data + 4, tt_u3._u, 3);
-
-	// unsigned char cTTex = nTimeStamp >> 24;
-	// memcpy(data + 7, &cTTex, 1);
-
-	// u3 sid_u3(0);
-	// memcpy(data + 8, sid_u3._u, 3);
-
 	u_char cVideoParam = 0x17;
 	memcpy(data + 11, &cVideoParam, 1);
 
@@ -295,35 +238,12 @@ void CFlvEncoder::WriteH264Header(uint32_t nTimeStamp)
 
 void CFlvEncoder::WriteH264Frame(u_char *pNalu, int nNaluSize, uint32_t nTimeStamp)
 {
+	TagHeader header;
 	int nNaluType = pNalu[4] & 0x1f;
 	int nDataSize = 1 + 1 + 3 + 4 + (nNaluSize - 4);
-
 	u_char *data = new u_char[nDataSize + 11];
 
-	TagHeader header;
-
 	SetupTagHeader(0x09, nDataSize, nTimeStamp, 0, header, data);
-
-	// header.nType = 0x09;
-	// header.nDataSize = nDataSize;
-	// header.nTimeStamp = nTimeStamp;
-	// header.nTSEx = 0;
-	// header.nStreamID = 0;
-	// header.nTotalTS = (uint32_t)((header.nTSEx << 24)) + header.nTimeStamp;
-
-	// data[0] = 0x09;
-
-	// u3 datasize_u3(nDataSize);
-	// memcpy(data + 1, datasize_u3._u, 3);
-
-	// u3 tt_u3(nTimeStamp);
-	// memcpy(data + 4, tt_u3._u, 3);
-
-	// unsigned char cTTex = nTimeStamp >> 24;
-	// memcpy(data + 7, &cTTex, 1);
-
-	// u3 sid_u3(0);
-	// memcpy(data + 8, sid_u3._u, 3);
 
 	if (nNaluType == 5) {
 		data[11] = 0x17;
@@ -354,34 +274,11 @@ void CFlvEncoder::WriteH264Frame(u_char *pNalu, int nNaluSize, uint32_t nTimeSta
 
 void CFlvEncoder::WriteH264EndofSeq()
 {
+	TagHeader header;
 	int nDataSize = 1 + 1 + 3;
-
 	u_char *data = new u_char[nDataSize + 11];
 
-	TagHeader header;
-
 	SetupTagHeader(0x09, nDataSize, m_nVideoTimeStamp, 0, header, data);
-
-	// header.nType = 0x09;
-	// header.nDataSize = nDataSize;
-	// header.nTimeStamp = m_nVideoTimeStamp;
-	// header.nTSEx = 0;
-	// header.nStreamID = 0;
-	// header.nTotalTS = (uint32_t)((header.nTSEx << 24)) + header.nTimeStamp;
-
-	// data[0] = 0x09;
-
-	// u3 datasize_u3(nDataSize);
-	// memcpy(data + 1, datasize_u3._u, 3);
-
-	// u3 tt_u3(m_nVideoTimeStamp);
-	// memcpy(data + 4, tt_u3._u, 3);
-
-	// unsigned char cTTex = m_nVideoTimeStamp >> 24;
-	// memcpy(data + 7, &cTTex, 1);
-
-	// u3 sid_u3(0);
-	// memcpy(data + 8, sid_u3._u, 3);
 
 	data[11] = 0x27;
 	data[12] = 0x02;

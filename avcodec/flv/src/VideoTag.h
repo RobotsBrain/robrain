@@ -25,6 +25,9 @@ private:
 
 	int m_nFrameType;
 	int m_nCodecID;
+	int m_nAVCPacketType;
+	int m_nCompositionTime;
+	int m_nNaluSize;
 };
 
 #endif

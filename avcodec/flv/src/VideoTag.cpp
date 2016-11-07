@@ -54,14 +54,16 @@ CVideoTag::~CVideoTag()
 int CVideoTag::ParseH264Tag()
 {
 	u_char *pd = CTag::GetTagData();
-	int nAVCPacketType = pd[1];
-	int nCompositionTime = ShowU24(pd + 2);
 
-	if (nAVCPacketType == 0) {
+	m_nAVCPacketType = pd[1];
+	m_nCompositionTime = ShowU24(pd + 2);
+
+	if (m_nAVCPacketType == 0) {
 		ParseH264Configuration(pd);
-	} else if (nAVCPacketType == 1) {
+	} else if (m_nAVCPacketType == 1) {
+		m_nNaluSize = ShowU32(pd + 5);
 		ParseNalu(pd);
-	} else if (nAVCPacketType == 2) {
+	} else if (m_nAVCPacketType == 2) {
 
 	}
 
@@ -148,10 +150,10 @@ void CVideoTag::PrintVideoTag()
     printf("    Codec ID: %u - %s\n", m_nCodecID, codec_ids[m_nCodecID]);
 
     if(m_nCodecID == 7) {
-    	// printf("    AVC video tag:\n");
-	    // printf("      AVC packet type: %u - %s\n", tag->avc_packet_type, avc_packet_types[tag->avc_packet_type]);
-	    // printf("      AVC composition time: %i\n", tag->composition_time);
-	    // printf("      AVC nalu length: %i\n", tag->nalu_len);
+    	printf("    AVC video tag:\n");
+	    printf("      AVC packet type: %u - %s\n", m_nAVCPacketType, avc_packet_types[m_nAVCPacketType]);
+	    printf("      AVC composition time: %i\n", m_nCompositionTime);
+	    printf("      AVC nalu length: %i\n", m_nNaluSize);
     }
 
 	return;

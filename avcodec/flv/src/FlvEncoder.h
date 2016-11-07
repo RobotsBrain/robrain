@@ -32,8 +32,8 @@ private:
 	void WriteH264EndofSeq();
 
 private:
-	bool m_bHaveAudio;
-	bool m_bHaveVideo;
+	bool 	m_bHaveAudio;
+	bool 	m_bHaveVideo;
 
 	bool 	m_bWriteAACSeqHeader;
 	bool 	m_bWriteAVCSeqHeader;
