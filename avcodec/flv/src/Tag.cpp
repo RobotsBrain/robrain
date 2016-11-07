@@ -21,7 +21,7 @@ CTag::~CTag()
 	delete[] m_pMedia;
 }
 
-void CTag::Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser)
+void CTag::Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser)
 {
 	memcpy(&m_header, pHeader, sizeof(TagHeader));
 

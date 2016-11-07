@@ -6,7 +6,7 @@
 
 
 
-class CFlvParser;
+class CFlv;
 
 typedef struct {
 	int nType;
@@ -23,7 +23,7 @@ public:
 	CTag();
 	virtual ~CTag();
 
-	void Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser);
+	void Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser);
 
 	u_char *GetTagHeaderData();
 
@@ -52,7 +52,7 @@ private:
 	u_char 		*m_pTagData;
 	u_char 		*m_pMedia;
 	int 		m_nMediaLen;
-	CFlvParser  *m_pFlvParser;
+	CFlv	    *m_pFlvParser;
 };
 
 #endif

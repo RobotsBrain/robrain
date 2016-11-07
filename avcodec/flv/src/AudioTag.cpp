@@ -41,7 +41,7 @@ const char *sound_types[] = {
     "Stereo"
 };
 
-CAudioTag::CAudioTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser)
+CAudioTag::CAudioTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser)
 {
 	Init(pHeader, pBuf, nLeftLen, pParser);
 

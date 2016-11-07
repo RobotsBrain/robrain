@@ -10,18 +10,12 @@
 
 
 
-class CFlvParser {
+class CFlvParser : public CFlv {
 public:
 	CFlvParser();
 	virtual ~CFlvParser();
 
 	int Parse(u_char *pBuf, int nBufSize, int &nUsedLen);
-
-	void SetAudioSpecificConfig(int aacProfile, int sampleRateIndex, int channelConfig);
-	void GetAudioSpecificConfig(int &aacProfile, int &sampleRateIndex, int &channelConfig);
-
-	void SetNalUnitLength(int len);
-	void GetNalUnitLength(int &len);
 
 	void GetTags(std::vector <CTag *> &vpTag);
 	void GetFlvHeader(FlvHeader &flvHeader);
@@ -38,11 +32,6 @@ private:
 private:
 	FlvHeader 				*m_pFlvHeader;
 	std::vector <CTag *>	m_vpTag;
-
-	int 			m_aacProfile;
-	int 			m_sampleRateIndex;
-	int 			m_channelConfig;
-	int 			m_nNalUnitLength;
 };
 
 #endif // FLVPARSER_H

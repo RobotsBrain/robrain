@@ -8,7 +8,7 @@
 class CAudioTag : public CTag 
 {
 public:
-	CAudioTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser);
+	CAudioTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser);
 	~CAudioTag();
 	
 	void PrintAudioTag();

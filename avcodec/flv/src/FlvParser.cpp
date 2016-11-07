@@ -127,30 +127,6 @@ void CFlvParser::DestroyTag()
 	return;
 }
 
-void CFlvParser::SetAudioSpecificConfig(int aacProfile, int sampleRateIndex, int channelConfig)
-{
-	m_aacProfile = aacProfile;
-	m_sampleRateIndex = sampleRateIndex;
-	m_channelConfig = channelConfig;
-}
-
-void CFlvParser::GetAudioSpecificConfig(int &aacProfile, int &sampleRateIndex, int &channelConfig)
-{
-	aacProfile = m_aacProfile;
-	sampleRateIndex = m_sampleRateIndex;
-	channelConfig = m_channelConfig;
-}
-
-void CFlvParser::SetNalUnitLength(int len)
-{
-	m_nNalUnitLength = len;
-}
-
-void CFlvParser::GetNalUnitLength(int &len)
-{
-	len = m_nNalUnitLength;
-}
-
 void CFlvParser::GetTags(std::vector <CTag *> &vpTag)
 {
 	vpTag = m_vpTag;
@@ -164,7 +140,6 @@ void CFlvParser::GetFlvHeader(FlvHeader &flvHeader)
 
 	return;
 }
-
 
 void CFlvParser::PrintFlvHeader()
 {

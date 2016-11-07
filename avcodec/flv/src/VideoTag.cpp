@@ -32,7 +32,7 @@ const char *avc_packet_types[] = {
     "AVC end of sequence (lower level NALU sequence ender is not required or supported)"
 };
 
-CVideoTag::CVideoTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser)
+CVideoTag::CVideoTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser)
 {
 	Init(pHeader, pBuf, nLeftLen, pParser);
 

@@ -8,7 +8,7 @@
 
 
 
-class CFlvEncoder
+class CFlvEncoder : public CFlv
 {
 public:
 	CFlvEncoder();

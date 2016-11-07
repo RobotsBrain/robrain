@@ -19,7 +19,18 @@ class CFlv
 public:
 	CFlv();
 	~CFlv();
+
+	void SetAudioSpecificConfig(int aacProfile, int sampleRateIndex, int channelConfig);
+	void GetAudioSpecificConfig(int &aacProfile, int &sampleRateIndex, int &channelConfig);
+
+	void SetNalUnitLength(int len);
+	void GetNalUnitLength(int &len);
 	
+private:
+	int 			m_aacProfile;
+	int 			m_sampleRateIndex;
+	int 			m_channelConfig;
+	int 			m_nNalUnitLength;
 };
 
 #endif

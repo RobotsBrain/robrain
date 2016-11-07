@@ -9,7 +9,7 @@
 class CVideoTag : public CTag 
 {
 public:
-	CVideoTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlvParser *pParser);
+	CVideoTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser);
 	~CVideoTag();
 
 	void PrintVideoTag();
