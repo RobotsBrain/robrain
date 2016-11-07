@@ -9,13 +9,13 @@ using namespace std;
 
 
 
-void PrintInfo(CFlvParser *pFlvParser)
+void PrintInfo(CFlv *pFlv)
 {
 	vector <CTag *> vpTag;
 
-	pFlvParser->GetTags(vpTag);
+	pFlv->GetTags(vpTag);
 
-	pFlvParser->PrintFlvHeader();
+	pFlv->PrintFlvHeader();
 
 	vector <CTag *>::iterator it_tag;
 
@@ -37,14 +37,14 @@ void PrintInfo(CFlvParser *pFlvParser)
 	return;
 }
 
-int DumpH264(CFlvParser *pFlvParser, const std::string &path)
+int DumpH264(CFlv *pFlv, const std::string &path)
 {
 	fstream f;
 	f.open(path.c_str(), ios_base::out | ios_base::binary);
 
 	vector <CTag *> vpTag;
 
-	pFlvParser->GetTags(vpTag);
+	pFlv->GetTags(vpTag);
 
 	vector <CTag *>::iterator it_tag;
 
@@ -61,14 +61,14 @@ int DumpH264(CFlvParser *pFlvParser, const std::string &path)
 	return 0;
 }
 
-int DumpAAC(CFlvParser *pFlvParser, const std::string &path)
+int DumpAAC(CFlv *pFlv, const std::string &path)
 {
 	fstream f;
 	f.open(path.c_str(), ios_base::out | ios_base::binary);
 
 	vector <CTag *> vpTag;
 
-	pFlvParser->GetTags(vpTag);
+	pFlv->GetTags(vpTag);
 
 	vector <CTag *>::iterator it_tag;
 
@@ -89,7 +89,7 @@ int DumpAAC(CFlvParser *pFlvParser, const std::string &path)
 	return 0;
 }
 
-int DumpFlv(CFlvParser *pFlvParser, const std::string &path)
+int DumpFlv(CFlv *pFlv, const std::string &path)
 {
 	fstream f;
 	f.open(path.c_str(), ios_base::out | ios_base::binary);
@@ -98,9 +98,9 @@ int DumpFlv(CFlvParser *pFlvParser, const std::string &path)
 	int nNalUnitLength = 0;
 	FlvHeader flvHeader;
 
-	pFlvParser->GetTags(vpTag);
-	pFlvParser->GetNalUnitLength(nNalUnitLength);
-	pFlvParser->GetFlvHeader(flvHeader);
+	pFlv->GetTags(vpTag);
+	pFlv->GetNalUnitLength(nNalUnitLength);
+	pFlv->GetFlvHeader(flvHeader);
 
 	// write flv-header
 	f.write((char *)flvHeader.pFlvHeader, flvHeader.nHeadSize);

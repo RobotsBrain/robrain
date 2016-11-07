@@ -32,9 +32,10 @@ const char *avc_packet_types[] = {
     "AVC end of sequence (lower level NALU sequence ender is not required or supported)"
 };
 
-CVideoTag::CVideoTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser)
+CVideoTag::CVideoTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pFlv)
+: m_pFlv(pFlv)
 {
-	Init(pHeader, pBuf, nLeftLen, pParser);
+	Init(pHeader, pBuf, nLeftLen);
 
 	u_char *pd = CTag::GetTagData();
 
@@ -73,7 +74,9 @@ int CVideoTag::ParseH264Configuration(u_char *pTagData)
 
 	int nNalUnitLength = (pd[9] & 0x03) + 1;
 
-	CTag::SetNalUnitLength(nNalUnitLength);
+	if(m_pFlv != NULL) {
+		m_pFlv->SetNalUnitLength(nNalUnitLength);
+	}
 
 	int sps_size, pps_size;
 
@@ -96,7 +99,9 @@ int CVideoTag::ParseNalu(u_char *pTagData)
 	int nOffset = 0;
 	int nNalUnitLength = 0;
 
-	CTag::GetNalUnitLength(nNalUnitLength);;
+	if(m_pFlv != NULL) {
+		m_pFlv->GetNalUnitLength(nNalUnitLength);
+	}
 
 	CTag::AllocMediaBuffer(CTag::GetDataSize() + 10);
 

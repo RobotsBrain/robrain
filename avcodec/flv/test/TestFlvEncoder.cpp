@@ -3,16 +3,18 @@
 #include <iostream>
 #include <fstream>
 
-#include "Converter.h"
+#include "FlvEncoder.h"
+#include "FlvDumpFile.h"
 
 using namespace std;
 
 fstream g_fileIn;
-char g_flvFile[260];
 int g_mode = 0;
-CConverter g_cnvt;
+CFlvEncoder g_cnvt;
 unsigned char *g_pBufferIn, *g_pBufferOut;
 int g_nFileSize = 0;
+
+
 
 int GetOneNalu(unsigned char *pBufIn, int nInSize, unsigned char *pNalu, int &nNaluSize)
 {
@@ -85,8 +87,6 @@ int Initialize(int argc, char *argv[])
 		return 0;
 	}
 
-	strcpy(g_flvFile, argv[3]);
-
 	g_fileIn.seekg(0, ios::end);
 	std::streampos ps = g_fileIn.tellg();
 	g_nFileSize = ps;
@@ -119,9 +119,6 @@ int ConvertH264()
 	int nOffset = 0;
 	int count = 0;
 
-	if (g_cnvt.Open(g_flvFile) == 0)
-		return 0;
-
 	unsigned int nTimeStamp = 0;
 	while (1) {
 		int nNaluSize = 0;
@@ -129,7 +126,7 @@ int ConvertH264()
 					   g_pBufferOut, nNaluSize) == 0)
 			break;
 
-		g_cnvt.ConvertH264((char *)g_pBufferOut, nNaluSize, nTimeStamp);
+		// g_cnvt.ConvertH264((char *)g_pBufferOut, nNaluSize, nTimeStamp);
 
 		if (g_pBufferOut[4] != 0x67 && g_pBufferOut[4] != 0x68)
 			nTimeStamp += 33;
@@ -138,7 +135,6 @@ int ConvertH264()
 			break;
 		count++;
 	}
-	g_cnvt.Close();
 
 	return 1;
 }
@@ -147,11 +143,10 @@ int ConvertAAC()
 {
 	int nOffset = 0;
 	int count = 0;
-
-	if (g_cnvt.Open(g_flvFile, 1, 0) == 0)
-		return 0;
-
 	unsigned int nTimeStamp = 0;
+
+	g_cnvt.Start(true, false);
+
 	while (1) {
 		int nAACFrameSize = 0;
 		if (GetOneAACFrame(g_pBufferIn + nOffset, g_nFileSize - nOffset,
@@ -159,24 +154,26 @@ int ConvertAAC()
 			break;
 
 		printf("nAACFrameSize = %d\n", nAACFrameSize);
-		g_cnvt.ConvertAAC((char *)g_pBufferOut, nAACFrameSize, nTimeStamp);
+		g_cnvt.ConvertAAC(g_pBufferOut, nAACFrameSize, nTimeStamp);
 
 		nTimeStamp += double (1024 * 1000) / double (44100);
 		nOffset += nAACFrameSize;
-		if (nOffset >= g_nFileSize - 4)
+		if (nOffset >= g_nFileSize - 4) {
 			break;
+		}
+
 		count++;
 	}
-	g_cnvt.Close();
+	
+	DumpFlv(&g_cnvt, "aac.flv");
 
 	return 1;
 }
 
 int main(int argc, char *argv[])
 {
-	if (argc != 4) {
-		cout << "Usage:\n\t" << "converter" << " [mode] [h.264 or aac file]" <<
-			" [output file]" << endl;
+	if (argc != 3) {
+		cout << "Usage:\n\t" << "converter" << " [mode] [h.264 or aac file]" << endl;
 		cout << "\tmode = 1 is h.264 to flv" << endl;
 		cout << "\tmode = 2 is aac to flv\n" << endl;
 		return 0;

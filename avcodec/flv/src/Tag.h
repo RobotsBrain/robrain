@@ -23,7 +23,7 @@ public:
 	CTag();
 	virtual ~CTag();
 
-	void Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser);
+	void Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen);
 
 	u_char *GetTagHeaderData();
 
@@ -40,19 +40,12 @@ public:
 	u_char *GetMedia();
 	int GetMediaLen();
 
-	void SetAudioSpecificConfig(int aacProfile, int sampleRateIndex, int channelConfig);
-	void GetAudioSpecificConfig(int &aacProfile, int &sampleRateIndex, int &channelConfig);
-
-	void SetNalUnitLength(int len);
-	void GetNalUnitLength(int &len);
-
 private:
 	TagHeader 	m_header;
 	u_char 		*m_pTagHeader;
 	u_char 		*m_pTagData;
 	u_char 		*m_pMedia;
 	int 		m_nMediaLen;
-	CFlv	    *m_pFlvParser;
 };
 
 #endif

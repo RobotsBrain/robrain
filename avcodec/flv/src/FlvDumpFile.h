@@ -3,14 +3,14 @@
 
 #include <string>
 
-#include "FlvParser.h"
+#include "Flv.h"
 
 
 
-void PrintInfo(CFlvParser *pFlvParser);
+void PrintInfo(CFlv *pFlvParser);
 
-int DumpH264(CFlvParser *pFlvParser, const std::string &path);
-int DumpAAC(CFlvParser *pFlvParser, const std::string &path);
-int DumpFlv(CFlvParser *pFlvParser, const std::string &path);
+int DumpH264(CFlv *pFlvParser, const std::string &path);
+int DumpAAC(CFlv *pFlvParser, const std::string &path);
+int DumpFlv(CFlv *pFlvParser, const std::string &path);
 
 #endif

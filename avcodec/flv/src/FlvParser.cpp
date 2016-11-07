@@ -14,24 +14,33 @@ using namespace std;
 
 
 CFlvParser::CFlvParser()
-: m_pFlvHeader(NULL)
+: m_bFlvHeader(false)
 {
 }
 
 CFlvParser::~CFlvParser()
 {
-	DestroyTag();
-	DestroyFlvHeader();
 }
 
 int CFlvParser::Parse(u_char *pBuf, int nBufSize, int &nUsedLen)
 {
 	int nOffset = 0;
 
-	if (m_pFlvHeader == NULL) {
+	if (!m_bFlvHeader) {
 		CheckBuffer(9);
-		m_pFlvHeader = CreateFlvHeader(pBuf + nOffset);
-		nOffset += m_pFlvHeader->nHeadSize;
+
+		FlvHeader Header;
+		u_char *p = pBuf + nOffset;
+
+		Header.nVersion = p[3];
+		Header.bHaveAudio = (p[4] >> 2) & 0x01;
+		Header.bHaveVideo = (p[4] >> 0) & 0x01;
+		Header.nHeadSize = ShowU32(p + 5);
+
+		CFlv::WriteHeaderData(Header, pBuf);
+
+		nOffset += Header.nHeadSize;
+		m_bFlvHeader = true;
 	}
 
 	while (1) {
@@ -49,37 +58,12 @@ int CFlvParser::Parse(u_char *pBuf, int nBufSize, int &nUsedLen)
 
 		nOffset += (11 + pTag->GetDataSize());
 
-		m_vpTag.push_back(pTag);
+		CFlv::WriteTag(pTag);
 	}
 
 	nUsedLen = nOffset;
 
 	return 0;
-}
-
-FlvHeader *CFlvParser::CreateFlvHeader(u_char *pBuf)
-{
-	FlvHeader *pHeader = new FlvHeader;
-
-	pHeader->nVersion = pBuf[3];
-	pHeader->bHaveAudio = (pBuf[4] >> 2) & 0x01;
-	pHeader->bHaveVideo = (pBuf[4] >> 0) & 0x01;
-	pHeader->nHeadSize = ShowU32(pBuf + 5);
-
-	pHeader->pFlvHeader = new u_char[pHeader->nHeadSize];
-	memcpy(pHeader->pFlvHeader, pBuf, pHeader->nHeadSize);
-
-	return pHeader;
-}
-
-void CFlvParser::DestroyFlvHeader()
-{
-	if (m_pFlvHeader != NULL) {
-		delete m_pFlvHeader->pFlvHeader;
-		delete m_pFlvHeader;
-	}
-
-	return;
 }
 
 CTag *CFlvParser::CreateTag(u_char *pBuf, int nLeftLen)
@@ -112,56 +96,10 @@ CTag *CFlvParser::CreateTag(u_char *pBuf, int nLeftLen)
 
 	default:
 		pTag = new CTag();
-		pTag->Init(&header, pBuf, nLeftLen, this);
+		pTag->Init(&header, pBuf, nLeftLen);
 	}
 
 	return pTag;
 }
 
-void CFlvParser::DestroyTag()
-{
-	for (int i = 0; i < m_vpTag.size(); i++) {
-		delete m_vpTag[i];
-	}
 
-	return;
-}
-
-void CFlvParser::GetTags(std::vector <CTag *> &vpTag)
-{
-	vpTag = m_vpTag;
-
-	return;
-}
-
-void CFlvParser::GetFlvHeader(FlvHeader &flvHeader)
-{
-    memcpy(&flvHeader, m_pFlvHeader, sizeof(FlvHeader));
-
-	return;
-}
-
-void CFlvParser::PrintFlvHeader()
-{
-	printf("FLV file version %u\n", m_pFlvHeader->nVersion);
-
-    printf("  Contains audio tags: ");
-
-    if (m_pFlvHeader->bHaveAudio) {
-        printf("Yes\n");
-    } else {
-        printf("No\n");
-    }
-
-    printf("  Contains video tags: ");
-
-    if (m_pFlvHeader->bHaveVideo) {
-        printf("Yes\n");
-    } else {
-        printf("No\n");
-    }
-
-    printf("  Data offset: %lu\n", (unsigned long)m_pFlvHeader->nHeadSize);
-
-    return;
-}

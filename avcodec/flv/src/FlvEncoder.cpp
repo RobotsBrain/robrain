@@ -18,16 +18,15 @@ CFlvEncoder::~CFlvEncoder()
 
 bool CFlvEncoder::Start(bool bHaveAudio, bool bHaveVideo)
 {
-	m_bHaveAudio = bHaveAudio;
-	m_bHaveVideo = bHaveVideo;
+	FlvHeader Header;
 
-	m_FlvHeader.nVersion = 0x01;
-	m_FlvHeader.bHaveVideo = bHaveVideo;
-	m_FlvHeader.bHaveAudio = bHaveAudio;
-	m_FlvHeader.nHeadSize = 0x9;
-	m_FlvHeader.pFlvHeader = new u_char[m_FlvHeader.nHeadSize];
+	Header.nVersion = 0x01;
+	Header.bHaveVideo = bHaveVideo;
+	Header.bHaveAudio = bHaveAudio;
+	Header.nHeadSize = 0x9;
+	Header.pFlvHeader = new u_char[Header.nHeadSize];
 
-	u_char *pFlvHeader = m_FlvHeader.pFlvHeader;
+	u_char *pFlvHeader = Header.pFlvHeader;
 
 	pFlvHeader[0] = 'F';
 	pFlvHeader[1] = 'L';
@@ -46,6 +45,10 @@ bool CFlvEncoder::Start(bool bHaveAudio, bool bHaveVideo)
 	unsigned int size = 9;
 	u4 size_u4(size);
 	memcpy(pFlvHeader + 5, size_u4._u, sizeof(unsigned int));
+
+	CFlv::WriteHeaderData(Header, pFlvHeader);
+
+	delete[] Header.pFlvHeader;
 
 	return true;
 }
@@ -97,14 +100,14 @@ int CFlvEncoder::WriteAACHeader(u_char *pAAC, uint32_t nTimeStamp)
 
 	AudioSpecificConfig[0] = (aacProfile << 3) + (sampleRateIndex >> 1);
 	AudioSpecificConfig[1] = ((sampleRateIndex & 0x01) << 7) + (channelConfig << 3);
-	
+
 	memcpy(data + 13, (char *)AudioSpecificConfig, 2);
 
 	CTag *pTag = NULL;
 
 	pTag = new CAudioTag(&header, data, header.nDataSize + 11, this);
 
-	m_vpTag.push_back(pTag);
+	CFlv::WriteTag(pTag);
 
 	delete[] data;
 
@@ -152,7 +155,7 @@ void CFlvEncoder::WriteAACFrame(u_char *pFrame, int nFrameSize, uint32_t nTimeSt
 
 	pTag = new CAudioTag(&header, data, header.nDataSize + 11, this);
 
-	m_vpTag.push_back(pTag);
+	CFlv::WriteTag(pTag);
 
 	delete[] data;
 
@@ -174,4 +177,153 @@ int CFlvEncoder::ConvertAAC(u_char *pAAC, int nAACFrameSize, uint32_t nTimeStamp
 	return 0;
 }
 
+#if 0
+void CFlvEncoder::WriteH264Header(unsigned int nTimeStamp)
+{
+	u4 prev_u4(_nPrevTagSize);
+	_fileOut.write((char *)prev_u4._u, 4);
+
+	char cTagType = 0x09;
+	_fileOut.write(&cTagType, 1);
+	int nDataSize = 1 + 1 + 3 + 6 + 2 + (_nSPSSize - 4) + 1 + 2 + (_nPPSSize - 4);
+
+	u3 datasize_u3(nDataSize);
+	_fileOut.write((char *)datasize_u3._u, 3);
+
+	u3 tt_u3(nTimeStamp);
+	_fileOut.write((char *)tt_u3._u, 3);
+
+	unsigned char cTTex = nTimeStamp >> 24;
+	_fileOut.write((char *)&cTTex, 1);
+
+	u3 sid_u3(_nStreamID);
+	_fileOut.write((char *)sid_u3._u, 3);
+
+	unsigned char cVideoParam = 0x17;
+	_fileOut.write((char *)&cVideoParam, 1);
+	unsigned char cAVCPacketType = 0;	/* seq header */
+	_fileOut.write((char *)&cAVCPacketType, 1);
+
+	u3 CompositionTime_u3(0);
+	_fileOut.write((char *)CompositionTime_u3._u, 3);
+
+	Write(1);
+	Write(_pSPS[5]);
+	Write(_pSPS[6]);
+	Write(_pSPS[7]);
+	Write((unsigned char)(0xff));
+	Write((unsigned char)(0xE1));
+
+	u2 spssize_u2(_nSPSSize - 4);
+	_fileOut.write((char *)spssize_u2._u, 2);
+	_fileOut.write((char *)(_pSPS + 4), _nSPSSize - 4);
+	Write((unsigned char)(0x01));
+
+	u2 ppssize_u2(_nPPSSize - 4);
+	_fileOut.write((char *)ppssize_u2._u, 2);
+	_fileOut.write((char *)(_pPPS + 4), _nPPSSize - 4);
+
+	_nPrevTagSize = 11 + nDataSize;
+}
+
+void CFlvEncoder::WriteH264Frame(char *pNalu, int nNaluSize, unsigned int nTimeStamp)
+{
+	int nNaluType = pNalu[4] & 0x1f;
+	if (nNaluType == 7 || nNaluType == 8) {
+		return;
+	}
+
+	u4 prev_u4(_nPrevTagSize);
+	Write(prev_u4);
+
+	Write(0x09);
+	int nDataSize;
+	nDataSize = 1 + 1 + 3 + 4 + (nNaluSize - 4);
+	u3 datasize_u3(nDataSize);
+	Write(datasize_u3);
+	u3 tt_u3(nTimeStamp);
+	Write(tt_u3);
+	Write((unsigned char)(nTimeStamp >> 24));
+
+	u3 sid(_nStreamID);
+	Write(sid);
+
+	if (nNaluType == 5) {
+		Write(0x17);
+	} else {
+		Write(0x27);
+	}
+
+	Write((unsigned char)(1));
+	u3 com_time_u3(0);
+	Write(com_time_u3);
+
+	u4 nalusize_u4(nNaluSize - 4);
+	Write(nalusize_u4);
+
+	_fileOut.write((char *)(pNalu + 4), nNaluSize - 4);
+
+	_nPrevTagSize = 11 + nDataSize;
+}
+
+void CFlvEncoder::WriteH264EndofSeq()
+{
+	u4 prev_u4(_nPrevTagSize);
+	Write(prev_u4);
+
+	Write(0x09);
+	int nDataSize;
+	nDataSize = 1 + 1 + 3;
+	u3 datasize_u3(nDataSize);
+	Write(datasize_u3);
+	u3 tt_u3(_nVideoTimeStamp);
+	Write(tt_u3);
+	Write((unsigned char)(_nVideoTimeStamp >> 24));
+
+	u3 sid(_nStreamID);
+	Write(sid);
+
+	Write(0x27);
+	Write(0x02);
+
+	u3 com_time_u3(0);
+	Write(com_time_u3);
+}
+
+int CFlvEncoder::ConvertH264(char *pNalu, int nNaluSize, unsigned int nTimeStamp)
+{
+	_nVideoTimeStamp = nTimeStamp;
+
+	if (pNalu == NULL || nNaluSize <= 4) {
+		return 0;
+	}
+
+	int nNaluType = pNalu[4] & 0x1f;
+	if (_pSPS == NULL && nNaluType == 0x07) {
+		_pSPS = new unsigned char[nNaluSize];
+		_nSPSSize = nNaluSize;
+		memcpy(_pSPS, pNalu, nNaluSize);
+	}
+
+	if (_pPPS == NULL && nNaluType == 0x08) {
+		_pPPS = new unsigned char[nNaluSize];
+		_nPPSSize = nNaluSize;
+		memcpy(_pPPS, pNalu, nNaluSize);
+	}
+
+	if (_pSPS != NULL && _pPPS != NULL && _bWriteAVCSeqHeader == 0) {
+		WriteH264Header(nTimeStamp);
+		_bWriteAVCSeqHeader = 1;
+	}
+
+	if (_bWriteAVCSeqHeader == 0) {
+		return 1;
+	}
+
+	WriteH264Frame(pNalu, nNaluSize, nTimeStamp);
+
+	return 1;
+}
+
+#endif
 

@@ -10,28 +10,19 @@
 
 
 
-class CFlvParser : public CFlv {
+class CFlvParser : public CFlv
+{
 public:
 	CFlvParser();
 	virtual ~CFlvParser();
 
 	int Parse(u_char *pBuf, int nBufSize, int &nUsedLen);
 
-	void GetTags(std::vector <CTag *> &vpTag);
-	void GetFlvHeader(FlvHeader &flvHeader);
-
-	void PrintFlvHeader();
-
 private:
-	FlvHeader *CreateFlvHeader(u_char *pBuf);
-	void DestroyFlvHeader();
-
 	CTag *CreateTag(u_char *pBuf, int nLeftLen);
-	void DestroyTag();
 
 private:
-	FlvHeader 				*m_pFlvHeader;
-	std::vector <CTag *>	m_vpTag;
+	bool m_bFlvHeader;
 };
 
-#endif // FLVPARSER_H
+#endif

@@ -41,9 +41,10 @@ const char *sound_types[] = {
     "Stereo"
 };
 
-CAudioTag::CAudioTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser)
+CAudioTag::CAudioTag(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pFlv)
+: m_pFlv(pFlv)
 {
-	Init(pHeader, pBuf, nLeftLen, pParser);
+	Init(pHeader, pBuf, nLeftLen);
 
 	u_char *pd = CTag::GetTagData();
 
@@ -83,7 +84,9 @@ int CAudioTag::ParseAudioSpecificConfig()
 	int sampleRateIndex = ((pd[2] & 0x07) << 1) | (pd[3] >> 7);
 	int channelConfig = (pd[3] >> 3) & 0x0f;
 
-	CTag::SetAudioSpecificConfig(aacProfile, sampleRateIndex, channelConfig);
+	if(m_pFlv != NULL) {
+		m_pFlv->SetAudioSpecificConfig(aacProfile, sampleRateIndex, channelConfig);
+	}
 
 	return 0;
 }
@@ -96,7 +99,10 @@ int CAudioTag::ParseRawAAC(u_char *pTagData)
 	int channelConfig = 0;
 	int dataSize = CTag::GetDataSize() - 2;
 
-	CTag::GetAudioSpecificConfig(aacProfile, sampleRateIndex, channelConfig);
+	if(m_pFlv != NULL) {
+		m_pFlv->GetAudioSpecificConfig(aacProfile, sampleRateIndex, channelConfig);
+	}
+
 	CTag::AllocMediaBuffer(7 + dataSize);
 
 	WriteU64(bits, 12, 0xFFF);

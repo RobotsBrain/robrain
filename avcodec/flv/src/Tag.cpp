@@ -10,7 +10,6 @@ CTag::CTag()
 , m_pTagData(NULL)
 , m_pMedia(NULL)
 , m_nMediaLen(0)
-, m_pFlvParser(NULL)
 {
 }
 
@@ -21,7 +20,7 @@ CTag::~CTag()
 	delete[] m_pMedia;
 }
 
-void CTag::Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser)
+void CTag::Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen)
 {
 	memcpy(&m_header, pHeader, sizeof(TagHeader));
 
@@ -30,8 +29,6 @@ void CTag::Init(TagHeader *pHeader, u_char *pBuf, int nLeftLen, CFlv *pParser)
 
 	m_pTagData = new u_char[m_header.nDataSize];
 	memcpy(m_pTagData, pBuf + 11, m_header.nDataSize);
-
-	m_pFlvParser = pParser;
 
 	return;
 }
@@ -85,34 +82,6 @@ void CTag::WriteMediaData(u_char *src, int offset, int size)
 	m_nMediaLen += size;
 
 	return;
-}
-
-void CTag::SetAudioSpecificConfig(int aacProfile, int sampleRateIndex, int channelConfig)
-{
-	if(m_pFlvParser != NULL) {
-		m_pFlvParser->SetAudioSpecificConfig(aacProfile, sampleRateIndex, channelConfig);
-	}
-}
-
-void CTag::GetAudioSpecificConfig(int &aacProfile, int &sampleRateIndex, int &channelConfig)
-{
-	if(m_pFlvParser != NULL) {
-		m_pFlvParser->GetAudioSpecificConfig(aacProfile, sampleRateIndex, channelConfig);
-	}
-}
-
-void CTag::SetNalUnitLength(int len)
-{
-	if(m_pFlvParser != NULL) {
-		m_pFlvParser->SetNalUnitLength(len);
-	}
-}
-
-void CTag::GetNalUnitLength(int &len)
-{
-	if(m_pFlvParser != NULL) {
-		m_pFlvParser->GetNalUnitLength(len);
-	}
 }
 
 void CTag::PrintTagHeader()
