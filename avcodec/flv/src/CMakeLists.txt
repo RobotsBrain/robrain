@@ -4,4 +4,4 @@ include_directories(
 
 file(GLOB_RECURSE HEADERFILES "../include/*")
 aux_source_directory(. DIR_SRCS)
-add_library(flv ${DIR_SRCS} ${HEADERFILES})
+add_library(flvcodec ${DIR_SRCS} ${HEADERFILES})

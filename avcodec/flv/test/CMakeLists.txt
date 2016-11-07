@@ -12,9 +12,9 @@ link_directories(
 
 #################################
 add_executable(TestFlvParser TestFlvParser.cpp)
-target_link_libraries(TestFlvParser flv base pthread)
+target_link_libraries(TestFlvParser flvcodec base pthread)
 
 
 #################################
 add_executable(TestFlvEncoder TestFlvEncoder.cpp)
-target_link_libraries(TestFlvEncoder flv base pthread)
+target_link_libraries(TestFlvEncoder flvcodec base pthread)

@@ -16,9 +16,9 @@ int g_nFileSize = 0;
 
 
 
-int GetOneNalu(unsigned char *pBufIn, int nInSize, unsigned char *pNalu, int &nNaluSize)
+int GetOneNalu(u_char *pBufIn, int nInSize, u_char *pNalu, int &nNaluSize)
 {
-	unsigned char *p = pBufIn;
+	u_char *p = pBufIn;
 	int nStartPos = 0, nEndPos = 0;
 
 	while (1) {
@@ -56,7 +56,7 @@ int GetOneNalu(unsigned char *pBufIn, int nInSize, unsigned char *pNalu, int &nN
 	return 1;
 }
 
-int GetOneAACFrame(unsigned char *pBufIn, int nInSize, unsigned char *pAACFrame, int &nAACFrameSize)
+int GetOneAACFrame(u_char *pBufIn, int nInSize, u_char *pAACFrame, int &nAACFrameSize)
 {
 	unsigned char *p = pBufIn;
 
