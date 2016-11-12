@@ -6,21 +6,20 @@
 
 #include "mp4v2/mp4v2.h"
 
-
-
 class Mp4Encoder {
-public:
+  public:
 	Mp4Encoder();
 	~Mp4Encoder();
 
-	void Start(const char *filename, int width, int height, 
-				int vtimescale = 90000, int framerate = 25, int atimescale = 48000);
+	void Start(const char *filename, int width, int height,
+			   int vtimescale = 90000, int framerate = 25, int atimescale =
+			   48000);
 	void Stop();
 
-	int WriteH264Data(u_char *pData, int size);
-	int WriteAacData(u_char *pData, int size);
+	int WriteH264Data(u_char * pData, int size);
+	int WriteAacData(u_char * pData, int size);
 
-private:
+  private:
 	int m_nWidth;
 	int m_nHeight;
 	int m_nFrameRate;

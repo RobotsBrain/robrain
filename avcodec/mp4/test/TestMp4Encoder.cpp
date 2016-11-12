@@ -11,9 +11,7 @@
 
 using namespace std;
 
-
-
-int GetOneNalu(u_char *pBufIn, int nInSize, u_char *pNalu, int &nNaluSize)
+int GetOneNalu(u_char * pBufIn, int nInSize, u_char * pNalu, int &nNaluSize)
 {
 	u_char *p = pBufIn;
 	int nStartPos = 0, nEndPos = 0;
@@ -53,7 +51,8 @@ int GetOneNalu(u_char *pBufIn, int nInSize, u_char *pNalu, int &nNaluSize)
 	return 1;
 }
 
-int GetOneAACFrame(u_char *pBufIn, int nInSize, u_char *pAACFrame, int &nAACFrameSize)
+int GetOneAACFrame(u_char * pBufIn, int nInSize, u_char * pAACFrame,
+				   int &nAACFrameSize)
 {
 	unsigned char *p = pBufIn;
 
@@ -70,34 +69,33 @@ int GetOneAACFrame(u_char *pBufIn, int nInSize, u_char *pAACFrame, int &nAACFram
 	return 1;
 }
 
-class CVideo
-{
-public:
-	CVideo(string filename, Mp4Encoder *pencoder);
+class CVideo {
+  public:
+	CVideo(string filename, Mp4Encoder * pencoder);
 	~CVideo();
 
 	int Write();
 
-private:
-	int 		m_TimeStamp;
-	fstream 	m_File;
-	int 		m_nFileSize;
-	u_char 		*m_pBufferIn;
-	u_char 		*m_pBufferOut;
-	int 		m_nOffset;
-	int 		m_count;
+  private:
+	int m_TimeStamp;
+	fstream m_File;
+	int m_nFileSize;
+	u_char *m_pBufferIn;
+	u_char *m_pBufferOut;
+	int m_nOffset;
+	int m_count;
 	Mp4Encoder *m_pencoder;
 };
 
-CVideo::CVideo(string filename, Mp4Encoder *pencoder)
-: m_TimeStamp(0)
-, m_File(NULL)
-, m_nFileSize(0)
-, m_pBufferIn(NULL)
-, m_pBufferOut(NULL)
-, m_nOffset(0)
-, m_count(0)
-, m_pencoder(pencoder)
+CVideo::CVideo(string filename, Mp4Encoder * pencoder)
+:	m_TimeStamp(0)
+	, m_File(NULL)
+	, m_nFileSize(0)
+	, m_pBufferIn(NULL)
+	, m_pBufferOut(NULL)
+	, m_nOffset(0)
+	, m_count(0)
+	, m_pencoder(pencoder)
 {
 	m_File.open(filename.c_str(), ios::binary | ios::in);
 
@@ -124,7 +122,9 @@ int CVideo::Write()
 {
 	int nNaluSize = 0;
 
-	if (GetOneNalu(m_pBufferIn + m_nOffset, m_nFileSize - m_nOffset, m_pBufferOut, nNaluSize) == 0) {
+	if (GetOneNalu
+		(m_pBufferIn + m_nOffset, m_nFileSize - m_nOffset, m_pBufferOut,
+		 nNaluSize) == 0) {
 		DEBUG("\n");
 		return -1;
 	}
@@ -147,34 +147,33 @@ int CVideo::Write()
 	return m_TimeStamp;
 }
 
-class CAudio
-{
-public:
-	CAudio(string filename, Mp4Encoder *pencoder);
+class CAudio {
+  public:
+	CAudio(string filename, Mp4Encoder * pencoder);
 	~CAudio();
 
 	int Write();
 
-private:
-	int 		m_TimeStamp;
-	fstream 	m_File;
-	int 		m_nFileSize;
-	u_char 		*m_pBufferIn;
-	u_char 		*m_pBufferOut;
-	int 		m_nOffset;
-	int 		m_count;
+  private:
+	int m_TimeStamp;
+	fstream m_File;
+	int m_nFileSize;
+	u_char *m_pBufferIn;
+	u_char *m_pBufferOut;
+	int m_nOffset;
+	int m_count;
 	Mp4Encoder *m_pencoder;
 };
 
-CAudio::CAudio(string filename, Mp4Encoder *pencoder)
-: m_TimeStamp(0)
-, m_File(NULL)
-, m_nFileSize(0)
-, m_pBufferIn(NULL)
-, m_pBufferOut(NULL)
-, m_nOffset(0)
-, m_count(0)
-, m_pencoder(pencoder)
+CAudio::CAudio(string filename, Mp4Encoder * pencoder)
+:	m_TimeStamp(0)
+	, m_File(NULL)
+	, m_nFileSize(0)
+	, m_pBufferIn(NULL)
+	, m_pBufferOut(NULL)
+	, m_nOffset(0)
+	, m_count(0)
+	, m_pencoder(pencoder)
 {
 	m_File.open(filename.c_str(), ios::binary | ios::in);
 
@@ -201,7 +200,9 @@ int CAudio::Write()
 {
 	int nAACFrameSize = 0;
 
-	if (GetOneAACFrame(m_pBufferIn + m_nOffset, m_nFileSize - m_nOffset, m_pBufferOut, nAACFrameSize) == 0) {
+	if (GetOneAACFrame
+		(m_pBufferIn + m_nOffset, m_nFileSize - m_nOffset, m_pBufferOut,
+		 nAACFrameSize) == 0) {
 		DEBUG("\n");
 		return -1;
 	}
@@ -224,27 +225,27 @@ int CAudio::Write()
 
 int main(int argc, char *argv[])
 {
-  	int ch;
-  	string videofile;
-  	string audiofile;
-  	bool bAudio = false, bVideo = false;
-  
-  	while((ch = getopt(argc, argv,"a:v:")) != -1) {
+	int ch;
+	string videofile;
+	string audiofile;
+	bool bAudio = false, bVideo = false;
 
-	    switch(ch) {
-	    case 'a':
-	      	audiofile = optarg;
-	      	bAudio = true;
-	        break;
+	while ((ch = getopt(argc, argv, "a:v:")) != -1) {
 
-	    case 'v':
-	    	videofile = optarg;
-	    	bVideo = true;
-	        break;
+		switch (ch) {
+		case 'a':
+			audiofile = optarg;
+			bAudio = true;
+			break;
 
-	    default:
-	    	break;
-	   	}
+		case 'v':
+			videofile = optarg;
+			bVideo = true;
+			break;
+
+		default:
+			break;
+		}
 	}
 
 	CAudio *pAudio = NULL;
@@ -253,11 +254,11 @@ int main(int argc, char *argv[])
 	bool bastop = false, bvstop = false;
 	Mp4Encoder FlvEncoder;
 
-	if(bAudio) {
+	if (bAudio) {
 		pAudio = new CAudio(audiofile, &FlvEncoder);
 	}
 
-	if(bVideo) {
+	if (bVideo) {
 		pVideo = new CVideo(videofile, &FlvEncoder);
 	}
 
@@ -265,51 +266,49 @@ int main(int argc, char *argv[])
 
 	FlvEncoder.Start("test.mp4", 320, 240);
 
-	while(1) {
-		if(bAudio && bVideo) {
-			if(atime <= vtime && !bastop) {
-				if((timestamp = pAudio->Write()) < 0) {
+	while (1) {
+		if (bAudio && bVideo) {
+			if (atime <= vtime && !bastop) {
+				if ((timestamp = pAudio->Write()) < 0) {
 					bastop = true;
 				} else {
 					atime = timestamp;
-				} 
-			} else if(!bvstop) {
-				if((timestamp = pVideo->Write()) < 0) {
+				}
+			} else if (!bvstop) {
+				if ((timestamp = pVideo->Write()) < 0) {
 					bvstop = true;
 				} else {
 					vtime = timestamp;
-				}	
+				}
 			}
 
-			if(bastop && bvstop) {
+			if (bastop && bvstop) {
 				break;
 			}
-		} else if(bAudio) {
-			if((timestamp = pAudio->Write()) < 0) {
+		} else if (bAudio) {
+			if ((timestamp = pAudio->Write()) < 0) {
 				break;
 			}
-				
+
 			atime = timestamp;
-		} else if(bVideo) {
-			if((timestamp = pVideo->Write()) < 0) {
+		} else if (bVideo) {
+			if ((timestamp = pVideo->Write()) < 0) {
 				break;
 			}
-			
+
 			vtime = timestamp;
 		}
 	}
 
 	FlvEncoder.Stop();
 
-	if(pAudio != NULL)
+	if (pAudio != NULL)
 		delete pAudio;
 
-	if(pVideo != NULL)
+	if (pVideo != NULL)
 		delete pVideo;
 
-   	return 0;
+	return 0;
 }
-
-
 
 // http://www.cnblogs.com/chutianyao/archive/2012/04/13/2446140.html
