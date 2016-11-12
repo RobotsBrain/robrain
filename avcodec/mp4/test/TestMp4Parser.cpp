@@ -27,7 +27,7 @@ public:
 								 const unsigned short wPackLen);
 
 private:
-	CMp4File * pFile;
+	CMp4File *pFile;
 	FILE *pOutVideoFile;
 	FILE *pOutAudioFile;
 };
@@ -93,43 +93,29 @@ void CDemo::OnAudioCallBack(const CMp4File * pcParser,
 	}
 }
 
-CDemo *g_pDemo_1 = NULL;
-
-void quit()
-{
-	if (g_pDemo_1) {
-		g_pDemo_1->StopParse();
-		delete g_pDemo_1;
-		g_pDemo_1 = NULL;
-	}
-}
-
 int main(int argc, char **argv)
 {
 	unsigned short wRet = MP4PARSER_NO_ERROR;
 
-	g_pDemo_1 = new CDemo();
+	CDemo *g_pDemo_1 = new CDemo();
 
 	if (NULL == g_pDemo_1) {
-		quit();
 		return -1;
 	}
 
 	wRet = g_pDemo_1->SetFile("test.mp4");
 	if (MP4PARSER_NO_ERROR != wRet) {
-		quit();
 		return -1;
 	}
 
 	wRet = g_pDemo_1->StartParse();
 	if (MP4PARSER_NO_ERROR != wRet) {
-		quit();
 		return -1;
 	}
 
-	while(1) {
-		sleep(5);
-	}
+	g_pDemo_1->StopParse();
+	delete g_pDemo_1;
+	g_pDemo_1 = NULL;
 
 	return 0;
 }
