@@ -31,6 +31,9 @@ add_subdirectory(${TOPDIR}/avcodec/mp4/test ${BUILDDIR}/avcodec/mp4/test)
 add_subdirectory(${TOPDIR}/avcodec/flv/src ${BUILDDIR}/avcodec/flv/src)
 add_subdirectory(${TOPDIR}/avcodec/flv/test ${BUILDDIR}/avcodec/flv/test)
 
+add_subdirectory(${TOPDIR}/avcodec/ts/src ${BUILDDIR}/avcodec/ts/src)
+add_subdirectory(${TOPDIR}/avcodec/ts/test ${BUILDDIR}/avcodec/ts/test)
+
 add_subdirectory(${TOPDIR}/transmit/live555_rtsp/src ${BUILDDIR}/transmit/live555_rtsp/src)
 add_subdirectory(${TOPDIR}/transmit/live555_rtsp/test ${BUILDDIR}/transmit/live555_rtsp/test)
 
