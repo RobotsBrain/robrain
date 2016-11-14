@@ -220,6 +220,13 @@ int CAudio::Write()
 	return m_TimeStamp;
 }
 
+fstream m_File;
+
+void WriteData(u_char *data, int size)
+{
+	m_File.write((char *)data, size);
+}
+
 int main(int argc, char *argv[])
 {
 	int ch;
@@ -260,7 +267,9 @@ int main(int argc, char *argv[])
 
 	int timestamp = 0;
 
-	pVideo_Audio_Ts_File = OpenFile("h264_aac.ts", "wb");
+	m_File.open("test.ts", ios::binary | ios::out);
+
+	SetCallback(WriteData);
 
 	while (1) {
 		if (bAudio && bVideo) {
@@ -296,11 +305,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (pVideo_Audio_Ts_File)
-  	{
-	  	CloseFile(pVideo_Audio_Ts_File);
-	  	pVideo_Audio_Ts_File = NULL;
-  	}
+	m_File.close();
 
 	if (pAudio != NULL)
 		delete pAudio;

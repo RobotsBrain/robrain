@@ -1,7 +1,7 @@
-#pragma once
+#ifndef __TS_H__
+#define __TS_H__
 
-#include "FileIo.h"
-#include "crc.h"
+
 
 #define TS_PACKET_HEADER               4
 #define TS_PACKET_SIZE                 188
@@ -17,7 +17,7 @@
 #define MAX_ONE_FRAME_SIZE             1024 * 1024
 
 //ts 包头
-typedef struct Tag_PacketHeader {
+typedef struct {
 	unsigned char sync_byte         :8  ;         //同步字节, 固定为0x47,表示后面的是一个TS分组
 	unsigned char tras_error        :1  ;         //传输误码指示符   
 	unsigned char play_init         :1  ;         //有效荷载单元起始指示符
@@ -29,7 +29,7 @@ typedef struct Tag_PacketHeader {
 } TsPacketHeader; 
 
 //PAT结构体：节目相关表
-typedef struct Tag_TsPat {
+typedef struct {
 	unsigned char table_id :8 ;                  //固定为0x00 ，标志是该表是PAT
 	unsigned char section_syntax_indicator: 1;   //段语法标志位，固定为1
 	unsigned char zero : 1;                      //0 
@@ -49,7 +49,7 @@ typedef struct Tag_TsPat {
 } TsPat; 
 
 //PMT结构体：节目映射表
-typedef struct Tag_TsPmt {
+typedef struct {
 	unsigned char table_id  : 8;                 //固定为0x02, 表示PMT表
 	unsigned char section_syntax_indicator : 1;  //固定为0x01
 	unsigned char zero: 1;                       //0x00
@@ -79,7 +79,7 @@ typedef struct Tag_TsPmt {
 } TsPmt; 
 
 //连续性计数器,也就是说 有多少个 pat包，几个pmt包 ，几个MP3 包，几个 h264包，0x00 - 0x0f ，然后折回到0x00 用于查看丢包                            
-typedef struct Tag_Continuity_Counter {
+typedef struct {
 	unsigned char continuity_counter_pat;
 	unsigned char continuity_counter_pmt;
 	unsigned char continuity_counter_video;
@@ -87,7 +87,7 @@ typedef struct Tag_Continuity_Counter {
 } Continuity_Counter;
 
 //自适应段标志
-typedef struct Tag_Ts_Adaptation_field {
+typedef struct {
 	unsigned char discontinuty_indicator:1;                //1表明当前传送流分组的不连续状态为真
 	unsigned char random_access_indicator:1;               //表明下一个有相同PID的PES分组应该含有PTS字段和一个原始流访问点
 	unsigned char elementary_stream_priority_indicator:1;  //优先级
@@ -106,7 +106,7 @@ typedef struct Tag_Ts_Adaptation_field {
 } Ts_Adaptation_field;
 
 //PTS_DTS结构体：本程序设置都有 “11”
-typedef struct Tag_TsPtsDts {
+typedef struct {
 	unsigned char reserved_1 : 4;
 	unsigned char pts_32_30  : 3;                //显示时间戳
 	unsigned char marker_bit1: 1;
@@ -124,7 +124,7 @@ typedef struct Tag_TsPtsDts {
 } TsPtsDts;
 
 //PES包结构体，包括PES包头和ES数据 ,头 19 个字节
-typedef struct Tag_TsPes {
+typedef struct {
 	unsigned int   packet_start_code_prefix : 24;//起始：0x000001
 	unsigned char  stream_id : 8;                //基本流的类型和编号
 	unsigned int   PES_packet_length : 16;       //包长度,就是帧数据的长度，可能为0,要自己算,做多16位，如果超出则需要自己算
@@ -150,3 +150,5 @@ typedef struct Tag_TsPes {
 int WriteStruct_Packetheader(unsigned char *Buf, unsigned int PID, unsigned char play_init, unsigned char ada_field_C);
 int WriteStruct_Pat(unsigned char *Buf);
 int WriteStruct_Pmt(unsigned char *Buf);
+
+#endif

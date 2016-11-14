@@ -1,3 +1,9 @@
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+
+#include "Ts.h"
 #include "Mux.h"
 
 
@@ -8,17 +14,11 @@ TsPes m_audio_tspes;
 unsigned int WritePacketNum = 0;
 unsigned long  Timestamp_video = 0;    //一帧视频所用时间
 unsigned long  Timestamp_audio = 0;    //一帧音频所用时间 
+STREAMCALLBACK m_cbk = NULL;
 
-int Write_Pat(unsigned char * buf)
+void SetCallback(STREAMCALLBACK pcbk)
 {
-	WriteStruct_Pat(buf);
-	return WriteFile(pVideo_Audio_Ts_File,(char *)buf,TS_PACKET_SIZE);
-}
-
-int Write_Pmt(unsigned char * buf)
-{
-	WriteStruct_Pmt(buf);
-	return WriteFile(pVideo_Audio_Ts_File,(char *)buf,TS_PACKET_SIZE);
+	m_cbk = pcbk;
 }
 
 int WriteAdaptive_flags_Head(Ts_Adaptation_field  * ts_adaptation_field,unsigned int Videopts)
@@ -34,7 +34,7 @@ int WriteAdaptive_flags_Head(Ts_Adaptation_field  * ts_adaptation_field,unsigned
 	ts_adaptation_field->adaptation_field_extension_flag = 0;
 
 	//需要自己算
-	ts_adaptation_field->pcr  = Videopts * 300;
+	ts_adaptation_field->pcr = Videopts * 300;
 	ts_adaptation_field->adaptation_field_length = 7;                          //占用7位
 
 	ts_adaptation_field->opcr = 0;
@@ -166,7 +166,7 @@ int CreateAdaptive_Ts(Ts_Adaptation_field * ts_adaptation_field,unsigned char * 
 	return 1;
 }
 
-int PES2TS(TsPes *ts_pes, unsigned int Video_Audio_PID, Ts_Adaptation_field *ts_adaptation_field_Head, Ts_Adaptation_field * ts_adaptation_field_Tail,
+int PES2TS(TsPes *ts_pes, unsigned int avPid, Ts_Adaptation_field *ts_adaptation_field_Head, Ts_Adaptation_field *ts_adaptation_field_Tail,
 		   unsigned long  Videopts, unsigned long Adudiopts)
 {
 	TsPacketHeader ts_header;
@@ -174,17 +174,19 @@ int PES2TS(TsPes *ts_pes, unsigned int Video_Audio_PID, Ts_Adaptation_field *ts_
 	unsigned int FirstPacketLoadLength = 0 ;                                   //分片包的第一个包的负载长度
 	unsigned int NeafPacketCount = 0;                                          //分片包的个数
 	unsigned int AdaptiveLength = 0;                                           //要填写0XFF的长度
-	unsigned char * NeafBuf = NULL;                                            //分片包 总负载的指针
+	unsigned char *NeafBuf = NULL;                                            //分片包 总负载的指针
 	unsigned char TSbuf[TS_PACKET_SIZE];
 
-	memset(TSbuf,0,TS_PACKET_SIZE); 
+	memset(TSbuf, 0, TS_PACKET_SIZE); 
 	FirstPacketLoadLength = 188 - 4 - 1 - ts_adaptation_field_Head->adaptation_field_length - 14; //计算分片包的第一个包的负载长度
 	NeafPacketCount += 1;                                                                   //第一个分片包  
 
 	//一个包的情况
 	if (ts_pes->Pes_Packet_Length_Beyond < FirstPacketLoadLength) {                         //这里是 sps ，pps ，sei等
-		memset(TSbuf,0xFF,TS_PACKET_SIZE);
-		WriteStruct_Packetheader(TSbuf,Video_Audio_PID,0x01,0x03);                          //PID = TS_H264_PID,有效荷载单元起始指示符_play_init = 0x01, ada_field_C,0x03,含有调整字段和有效负载 ；
+		memset(TSbuf, 0xFF, TS_PACKET_SIZE);
+
+		WriteStruct_Packetheader(TSbuf, avPid, 0x01, 0x03);                          //PID = TS_H264_PID,有效荷载单元起始指示符_play_init = 0x01, ada_field_C,0x03,含有调整字段和有效负载 ；
+		
 		ts_pos += 4;
 		TSbuf[ts_pos + 0] = 184 - ts_pes->Pes_Packet_Length_Beyond - 9 - 5 - 1 ;
 		TSbuf[ts_pos + 1] = 0x00;
@@ -226,8 +228,10 @@ int PES2TS(TsPes *ts_pes, unsigned int Video_Audio_PID, Ts_Adaptation_field *ts_
 		memcpy(TSbuf + ts_pos,ts_pes->Es,ts_pes->Pes_Packet_Length_Beyond);  
 
 		//将包写入文件
-		fwrite(TSbuf,188,1,pVideo_Audio_Ts_File);                               //将一包数据写入文件
+		m_cbk(TSbuf, TS_PACKET_SIZE);
+
 		WritePacketNum ++;                                                      //已经写入文件的包个数++
+		
 		return WritePacketNum;
 	}
 	
@@ -235,16 +239,19 @@ int PES2TS(TsPes *ts_pes, unsigned int Video_Audio_PID, Ts_Adaptation_field *ts_
 	NeafPacketCount += 1;                                                                   //最后一个分片包
 	AdaptiveLength = 188 - 4 - 1 - ((ts_pes->Pes_Packet_Length_Beyond - FirstPacketLoadLength)% 184)  ;  //要填写0XFF的长度
 	if ((WritePacketNum % 40) == 0) {                                                        //每40个包打一个 pat,一个pmt
-		Write_Pat(m_One_Frame_Buf);                                                         //创建PAT
-		Write_Pmt(m_One_Frame_Buf);                                                         //创建PMT
+		WriteStruct_Pat(m_One_Frame_Buf);
+		m_cbk(m_One_Frame_Buf, TS_PACKET_SIZE);
+
+		WriteStruct_Pmt(m_One_Frame_Buf);
+		m_cbk(m_One_Frame_Buf, TS_PACKET_SIZE);
 	}
 	//开始处理第一个包,分片包的个数最少也会是两个 
-	WriteStruct_Packetheader(TSbuf,Video_Audio_PID,0x01,0x03);                              //PID = TS_H264_PID,有效荷载单元起始指示符_play_init = 0x01, ada_field_C,0x03,含有调整字段和有效负载 ；
+	WriteStruct_Packetheader(TSbuf, avPid, 0x01, 0x03);                              //PID = TS_H264_PID,有效荷载单元起始指示符_play_init = 0x01, ada_field_C,0x03,含有调整字段和有效负载 ；
 	ts_pos += 4;
 	TSbuf[ts_pos] = ts_adaptation_field_Head->adaptation_field_length;                      //自适应字段的长度，自己填写的
 	ts_pos += 1;                                                       
 
-	CreateAdaptive_Ts(ts_adaptation_field_Head,TSbuf + ts_pos,(188 - 4 - 1 - 14));          //填写自适应字段
+	CreateAdaptive_Ts(ts_adaptation_field_Head, TSbuf + ts_pos, (188 - 4 - 1 - 14));          //填写自适应字段
 	ts_pos += ts_adaptation_field_Head->adaptation_field_length;                            //填写自适应段所需要的长度
 
 	TSbuf[ts_pos + 0] = (ts_pes->packet_start_code_prefix >> 16) & 0xFF;
@@ -285,34 +292,33 @@ int PES2TS(TsPes *ts_pes, unsigned int Video_Audio_PID, Ts_Adaptation_field *ts_
 	NeafBuf += FirstPacketLoadLength;
 	ts_pes->Pes_Packet_Length_Beyond -= FirstPacketLoadLength;
 	//将包写入文件
-	fwrite(TSbuf,188,1,pVideo_Audio_Ts_File);                               //将一包数据写入文件
+	m_cbk(TSbuf, TS_PACKET_SIZE);
+
 	WritePacketNum ++;                                                      //已经写入文件的包个数++
 
 	while(ts_pes->Pes_Packet_Length_Beyond) {
 		ts_pos = 0;
-		memset(TSbuf,0,TS_PACKET_SIZE); 
+		memset(TSbuf, 0, TS_PACKET_SIZE); 
 
 		if ((WritePacketNum % 40) == 0) {                                                     //每40个包打一个 pat,一个pmt
-			Write_Pat(m_One_Frame_Buf);                                                         //创建PAT
-			Write_Pmt(m_One_Frame_Buf);                                                         //创建PMT
+			WriteStruct_Pat(m_One_Frame_Buf);
+			m_cbk(m_One_Frame_Buf, TS_PACKET_SIZE);
+
+			WriteStruct_Pmt(m_One_Frame_Buf);
+			m_cbk(m_One_Frame_Buf, TS_PACKET_SIZE);
 		}
 
 		if(ts_pes->Pes_Packet_Length_Beyond >= 184) {
 			//处理中间包   
-			WriteStruct_Packetheader(TSbuf,Video_Audio_PID,0x00,0x01);     //PID = TS_H264_PID,不是有效荷载单元起始指示符_play_init = 0x00, ada_field_C,0x01,仅有有效负载；    
+			WriteStruct_Packetheader(TSbuf, avPid, 0x00, 0x01);     //PID = TS_H264_PID,不是有效荷载单元起始指示符_play_init = 0x00, ada_field_C,0x01,仅有有效负载；    
 			ts_pos += 4;
             memcpy(TSbuf + ts_pos,NeafBuf,184); 
 			NeafBuf += 184;
 			ts_pes->Pes_Packet_Length_Beyond -= 184;
-			fwrite(TSbuf,188,1,pVideo_Audio_Ts_File); 
+			m_cbk(TSbuf, TS_PACKET_SIZE);
 		} else {
-			if(ts_pes->Pes_Packet_Length_Beyond == 183||ts_pes->Pes_Packet_Length_Beyond == 182) {
-				if ((WritePacketNum % 40) == 0) {                                                     //每40个包打一个 pat,一个pmt
-					Write_Pat(m_One_Frame_Buf);                                                         //创建PAT
-					Write_Pmt(m_One_Frame_Buf);                                                         //创建PMT
-				}
-
-				WriteStruct_Packetheader(TSbuf,Video_Audio_PID,0x00,0x03);   //PID = TS_H264_PID,不是有效荷载单元起始指示符_play_init = 0x00, ada_field_C,0x03,含有调整字段和有效负载；
+			if(ts_pes->Pes_Packet_Length_Beyond == 183 || ts_pes->Pes_Packet_Length_Beyond == 182) {
+				WriteStruct_Packetheader(TSbuf, avPid, 0x00, 0x03);   //PID = TS_H264_PID,不是有效荷载单元起始指示符_play_init = 0x00, ada_field_C,0x03,含有调整字段和有效负载；
 				ts_pos += 4;
 				TSbuf[ts_pos + 0] = 0x01;
 				TSbuf[ts_pos + 1] = 0x00;
@@ -321,25 +327,19 @@ int PES2TS(TsPes *ts_pes, unsigned int Video_Audio_PID, Ts_Adaptation_field *ts_
 				  
 				NeafBuf += 182;
 				ts_pes->Pes_Packet_Length_Beyond -= 182;
-				fwrite(TSbuf,188,1,pVideo_Audio_Ts_File); 
 			} else {
-				if ((WritePacketNum % 40) == 0) {                                                      //每40个包打一个 pat,一个pmt
-					Write_Pat(m_One_Frame_Buf);                                                         //创建PAT
-					Write_Pmt(m_One_Frame_Buf);                                                         //创建PMT
-				}
-
-				WriteStruct_Packetheader(TSbuf,Video_Audio_PID,0x00,0x03);  //PID = TS_H264_PID,不是有效荷载单元起始指示符_play_init = 0x00, ada_field_C,0x03,含有调整字段和有效负载；
+				WriteStruct_Packetheader(TSbuf, avPid, 0x00, 0x03);  //PID = TS_H264_PID,不是有效荷载单元起始指示符_play_init = 0x00, ada_field_C,0x03,含有调整字段和有效负载；
 				ts_pos += 4;
-				TSbuf[ts_pos + 0] = 184-ts_pes->Pes_Packet_Length_Beyond-1 ;
+				TSbuf[ts_pos + 0] = 184 - ts_pes->Pes_Packet_Length_Beyond - 1 ;
 				TSbuf[ts_pos + 1] = 0x00;
 				ts_pos += 2;
-				memset(TSbuf + ts_pos,0xFF,(184 - ts_pes->Pes_Packet_Length_Beyond - 2)); 
-				ts_pos += (184-ts_pes->Pes_Packet_Length_Beyond-2);
-				memcpy(TSbuf + ts_pos,NeafBuf,ts_pes->Pes_Packet_Length_Beyond);
+				memset(TSbuf + ts_pos, 0xFF, (184 - ts_pes->Pes_Packet_Length_Beyond - 2)); 
+				ts_pos += (184 - ts_pes->Pes_Packet_Length_Beyond - 2);
+				memcpy(TSbuf + ts_pos, NeafBuf, ts_pes->Pes_Packet_Length_Beyond);
 				ts_pes->Pes_Packet_Length_Beyond = 0;
-				fwrite(TSbuf,188,1,pVideo_Audio_Ts_File);   //将一包数据写入文件
-				WritePacketNum ++;  
 			}
+
+			m_cbk(TSbuf, TS_PACKET_SIZE);
 		}
 
 		WritePacketNum ++;  
@@ -404,6 +404,62 @@ int AAC2PES(TsPes *tsaacpes, unsigned long Adudiopts, unsigned char *pData, int 
 	return 0;
 }
 
+int H2642PES(TsPes *tsh264pes, unsigned long Videopts, unsigned char *pData, int iDataSize)
+{
+	memset(tsh264pes->Es, 0, MAX_ONE_FRAME_SIZE);
+
+	memcpy(tsh264pes->Es, pData, iDataSize);
+
+	tsh264pes->packet_start_code_prefix = 0x000001;
+	tsh264pes->stream_id = TS_H264_STREAM_ID;                               //E0~EF表示是视频的,C0~DF是音频,H264-- E0
+	tsh264pes->PES_packet_length = 0 ;                                      //一帧数据的长度 不包含 PES包头 ,这个8 是 自适应的长度,填0 可以自动查找
+	tsh264pes->Pes_Packet_Length_Beyond = iDataSize;
+
+	tsh264pes->marker_bit = 0x02;
+	tsh264pes->PES_scrambling_control = 0x00;                               //人选字段 存在，不加扰
+	tsh264pes->PES_priority = 0x00;
+	tsh264pes->data_alignment_indicator = 0x00;
+	tsh264pes->copyright = 0x00;
+	tsh264pes->original_or_copy = 0x00;
+	tsh264pes->PTS_DTS_flags = 0x02;                                         //10'：PTS字段存在,DTS不存在
+	tsh264pes->ESCR_flag = 0x00;
+	tsh264pes->ES_rate_flag = 0x00;
+	tsh264pes->DSM_trick_mode_flag = 0x00;
+	tsh264pes->additional_copy_info_flag = 0x00;
+	tsh264pes->PES_CRC_flag = 0x00;
+	tsh264pes->PES_extension_flag = 0x00;
+	tsh264pes->PES_header_data_length = 0x05;                                //后面的数据 包括了PTS所占的字节数
+
+	//清 0 
+	tsh264pes->tsptsdts.pts_32_30  = 0;
+	tsh264pes->tsptsdts.pts_29_15 = 0;
+	tsh264pes->tsptsdts.pts_14_0 = 0;
+
+	tsh264pes->tsptsdts.reserved_1 = 0x0003;                                 //填写 pts信息
+	
+	// Videopts大于30bit，使用最高三位 
+	if(Videopts > 0x7FFFFFFF) {
+		tsh264pes->tsptsdts.pts_32_30 = (Videopts >> 30) & 0x07;                 
+		tsh264pes->tsptsdts.marker_bit1 = 0x01;
+	} else {
+		tsh264pes->tsptsdts.marker_bit1 = 0;
+	}
+
+	// Videopts大于15bit，使用更多的位来存储
+	if(Videopts > 0x7FFF) {
+		tsh264pes->tsptsdts.pts_29_15 = (Videopts >> 15) & 0x007FFF ;
+		tsh264pes->tsptsdts.marker_bit2 = 0x01;
+	} else {
+		tsh264pes->tsptsdts.marker_bit2 = 0;
+	}
+
+	//使用最后15位
+	tsh264pes->tsptsdts.pts_14_0 = Videopts & 0x007FFF;
+	tsh264pes->tsptsdts.marker_bit3 = 0x01;
+
+	return 0;
+}
+
 int WriteAAC2Ts(unsigned char *pData, int iDataSize)
 {
 	Ts_Adaptation_field  ts_adaptation_field_Head;
@@ -426,15 +482,17 @@ int WriteAAC2Ts(unsigned char *pData, int iDataSize)
 
 int WriteH2642Ts(unsigned int framerate, unsigned char *pData, int iDataSize)
 {
-	unsigned int   videoframetype = 0;    //视频帧类型
+	unsigned int frametype = 0;    //视频帧类型
 	Ts_Adaptation_field  ts_adaptation_field_Head;
 	Ts_Adaptation_field  ts_adaptation_field_Tail;
 
-	H2642PES(&m_video_tspes, Timestamp_video, &videoframetype, pData, iDataSize);
+	frametype = pData[4] & 0x1f;
+
+	H2642PES(&m_video_tspes, Timestamp_video, pData, iDataSize);
 
 	if (m_video_tspes.Pes_Packet_Length_Beyond != 0) {
 	    printf("PES_VIDEO  :  SIZE = %d\n", m_video_tspes.Pes_Packet_Length_Beyond);
-		if (videoframetype == FRAME_I || videoframetype == FRAME_P || videoframetype == FRAME_B) {
+		if (frametype >= NAL_SLICE && frametype <= NAL_SLICE_IDR) {
 			//填写自适应段标志
 			WriteAdaptive_flags_Head(&ts_adaptation_field_Head, Timestamp_video); //填写自适应段标志帧头
 			WriteAdaptive_flags_Tail(&ts_adaptation_field_Tail); //填写自适应段标志帧尾
