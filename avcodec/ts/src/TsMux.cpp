@@ -4,9 +4,21 @@
 #include <stdio.h>
 
 #include "Ts.h"
-#include "Mux.h"
+#include "TsMux.h"
 
 
+enum nal_unit_type_e {
+	NAL_UNKNOWN     = 0,
+	NAL_SLICE       = 1,
+	NAL_SLICE_DPA   = 2,
+	NAL_SLICE_DPB   = 3,
+	NAL_SLICE_DPC   = 4,
+	NAL_SLICE_IDR   = 5,    /* ref_idc != 0 */
+	NAL_SEI         = 6,    /* ref_idc == 0 */
+	NAL_SPS         = 7,
+	NAL_PPS         = 8
+	/* ref_idc == 0 for 6,9,10,11,12 */
+};
 
 unsigned char m_One_Frame_Buf[MAX_ONE_FRAME_SIZE];
 TsPes m_video_tspes;

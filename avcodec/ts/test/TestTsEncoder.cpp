@@ -8,7 +8,7 @@
 
 #include "base/Log.h"
 
-#include "Mux.h"
+#include "TsMux.h"
 
 using namespace std;
 
