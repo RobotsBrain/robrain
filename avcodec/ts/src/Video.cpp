@@ -13,8 +13,7 @@ NALU_t *AllocNALU(int buffersize)
 
 	n->max_size = buffersize;									//Assign buffer size 
 
-	if ((n->buf = (unsigned char*)calloc (buffersize, sizeof (char))) == NULL)
-	{
+	if ((n->buf = (unsigned char*)calloc (buffersize, sizeof (char))) == NULL) {
 		free (n);
 		printf ("AllocNALU Error: Allocate Meory To NALU_t Buffer Failed ");
 		getchar();
@@ -35,26 +34,6 @@ void FreeNALU(NALU_t *n)
 	}
 }
 
-int FindStartCode2 (unsigned char *Buf)
-{
-	if(Buf[0]!=0 || Buf[1]!=0 || Buf[2] !=1)               //Check whether buf is 0x000001
-	{
-		return 0;
-	} else {
-		return 1;
-	}
-}
-
-int FindStartCode3 (unsigned char *Buf)
-{
-	if(Buf[0]!=0 || Buf[1]!=0 || Buf[2] !=0 || Buf[3] !=1)  //Check whether buf is 0x00000001
-	{
-		return 0;
-	} else {
-		return 1;
-	}
-}
-
 int GetAnnexbNALU(NALU_t *nalu, void *pData, int iDataSize)
 {
 	int pos = iDataSize;                  //一个nal到下一个nal 数据移动的指针
@@ -65,7 +44,7 @@ int GetAnnexbNALU(NALU_t *nalu, void *pData, int iDataSize)
 	static int info3 = 0;
 
 	if ((Buf = (unsigned char*)calloc(nalu->max_size, sizeof(char))) == NULL) {
-		printf("GetAnnexbNALU Error: Could not allocate Buf memory\n");
+		printf("Error: Could not allocate Buf memory\n");
 	}
 	memcpy(Buf, pData, iDataSize);
 
@@ -107,45 +86,42 @@ int GetFrameType(NALU_t * nal)
 
 	bs_init( &s,OneFrameBuf_H264 + nal->startcodeprefix_len + 1  ,nal->len - 1 );
 
-	if (nal->nal_unit_type == NAL_SLICE || nal->nal_unit_type ==  NAL_SLICE_IDR )
-	{
+	if (nal->nal_unit_type == NAL_SLICE || nal->nal_unit_type ==  NAL_SLICE_IDR) {
 		/* i_first_mb */
-		bs_read_ue( &s );
+		bs_read_ue(&s);
 		/* picture type */
-		frame_type =  bs_read_ue( &s );
-		switch(frame_type)
-		{
-		case 0: case 5: /* P */
+		frame_type =  bs_read_ue(&s);
+		switch(frame_type) {
+		case 0: 
+		case 5: /* P */
 			nal->Frametype = FRAME_P;
 			break;
-		case 1: case 6: /* B */
+		case 1: 
+		case 6: /* B */
 			nal->Frametype = FRAME_B;
 			break;
-		case 3: case 8: /* SP */
+		case 3: 
+		case 8: /* SP */
 			nal->Frametype = FRAME_P;
 			break;
-		case 2: case 7: /* I */
+		case 2: 
+		case 7: /* I */
 			nal->Frametype = FRAME_I;
 			break;
-		case 4: case 9: /* SI */
+		case 4: 
+		case 9: /* SI */
 			nal->Frametype = FRAME_I;
 			break;
 		}
-	}
-	else if (nal->nal_unit_type == NAL_SEI)
-	{
+	} else if (nal->nal_unit_type == NAL_SEI) {
 		nal->Frametype = NAL_SEI;
-	}
-	else if(nal->nal_unit_type == NAL_SPS)
-	{
+	} else if(nal->nal_unit_type == NAL_SPS) {
 		nal->Frametype = NAL_SPS;
-	}
-	else if(nal->nal_unit_type == NAL_PPS)
-	{
+	} else if(nal->nal_unit_type == NAL_PPS) {
 		nal->Frametype = NAL_PPS;
 	}
-	if (OneFrameBuf_H264)
-	{
+
+	if (OneFrameBuf_H264) {
 		free(OneFrameBuf_H264);
 		OneFrameBuf_H264 = NULL;
 	}

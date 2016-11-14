@@ -127,7 +127,7 @@ int CVideo::Write()
 		return -1;
 	}
 
-	WriteBuf2TsFile(25, 1, m_pBufferOut, nNaluSize, 0);
+	WriteH2642Ts(25, m_pBufferOut, nNaluSize);
 
 	if (m_pBufferOut[4] != 0x67 && m_pBufferOut[4] != 0x68) {
 		m_TimeStamp += 33;
@@ -205,7 +205,7 @@ int CAudio::Write()
 
 	printf("nAACFrameSize = %d\n", nAACFrameSize);
 	
-	WriteBuf2TsFile(8, 0, m_pBufferOut, nAACFrameSize, 0);
+	WriteAAC2Ts(m_pBufferOut, nAACFrameSize);
 
 	m_TimeStamp += double (1024 * 1000) / double (44100);
 	m_nOffset += nAACFrameSize;

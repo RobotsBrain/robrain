@@ -21,19 +21,6 @@ int Write_Pmt(unsigned char * buf)
 	return WriteFile(pVideo_Audio_Ts_File,(char *)buf,TS_PACKET_SIZE);
 }
 
-int Take_Out_Pes(TsPes * tspes, unsigned long time_pts, unsigned int frametype, unsigned int *videoframetype, unsigned char *pData, int iDataSize)
-{
-	unsigned int pes_pos = 0;
-
-	if (frametype == 0x00) { //视频
-		pes_pos = H2642PES(tspes, time_pts, videoframetype, pData, iDataSize);
-	} else {                //音频
-		pes_pos = AAC2PES(tspes, time_pts, pData, iDataSize);
-	}
-
-	return pes_pos;
-}
-
 int WriteAdaptive_flags_Head(Ts_Adaptation_field  * ts_adaptation_field,unsigned int Videopts)
 {
 	//填写自适应段
@@ -91,23 +78,19 @@ int CreateAdaptive_Ts(Ts_Adaptation_field * ts_adaptation_field,unsigned char * 
 		adaptive_pos += 1;                                                  //自适应段的一些标志所占用的1个字节
 		CurrentAdaptiveLength += 1;
 
-		if (ts_adaptation_field->discontinuty_indicator)
-		{
+		if (ts_adaptation_field->discontinuty_indicator) {
 			Adaptiveflags |= 0x80;
 		}
 
-		if (ts_adaptation_field->random_access_indicator)
-		{
+		if (ts_adaptation_field->random_access_indicator) {
 			Adaptiveflags |= 0x40;
 		}
 
-		if (ts_adaptation_field->elementary_stream_priority_indicator)
-		{
+		if (ts_adaptation_field->elementary_stream_priority_indicator) {
 			Adaptiveflags |= 0x20;
 		}
 
-		if (ts_adaptation_field->PCR_flag)
-		{
+		if (ts_adaptation_field->PCR_flag) {
 			unsigned long long pcr_base;
 			unsigned int pcr_ext;
 
@@ -127,8 +110,7 @@ int CreateAdaptive_Ts(Ts_Adaptation_field * ts_adaptation_field,unsigned char * 
 			CurrentAdaptiveLength += 6;
 		}
 
-		if (ts_adaptation_field->OPCR_flag)
-		{
+		if (ts_adaptation_field->OPCR_flag) {
 			unsigned long long opcr_base;
 			unsigned int opcr_ext;
 
@@ -147,8 +129,7 @@ int CreateAdaptive_Ts(Ts_Adaptation_field * ts_adaptation_field,unsigned char * 
 			CurrentAdaptiveLength += 6;
 		}
 
-		if (ts_adaptation_field->splicing_point_flag)
-		{
+		if (ts_adaptation_field->splicing_point_flag) {
 			buf[adaptive_pos] = ts_adaptation_field->splice_countdown;
 
 			Adaptiveflags |= 0x04;
@@ -359,55 +340,116 @@ int PES2TS(TsPes *ts_pes, unsigned int Video_Audio_PID, Ts_Adaptation_field *ts_
 				fwrite(TSbuf,188,1,pVideo_Audio_Ts_File);   //将一包数据写入文件
 				WritePacketNum ++;  
 			}
-		}	
+		}
+
 		WritePacketNum ++;  
 	}
 
 	return WritePacketNum ;
 }
 
-/*实时流写入ts文件*/
-int WriteBuf2TsFile(unsigned int framerate, int iStreamType, unsigned char *pData, int iDataSize, unsigned long lTimeStamp)
+int AAC2PES(TsPes *tsaacpes, unsigned long Adudiopts, unsigned char *pData, int iDataSize)
 {
-	unsigned int   audiosamplerate = 8000;    //音频采样率
+	unsigned int OneFrameLen_AAC = 0;
+
+	//读取出一帧数据
+	OneFrameLen_AAC = iDataSize;
+	memcpy(tsaacpes->Es, pData, iDataSize);
+
+	tsaacpes->packet_start_code_prefix = 0x000001;
+	tsaacpes->stream_id = TS_AAC_STREAM_ID;                                //E0~EF表示是视频的,C0~DF是音频,H264-- E0
+	tsaacpes->PES_packet_length = 0; // OneFrameLen_AAC + 8 ;             //一帧数据的长度 不包含 PES包头 ,8自适应段的长度
+	tsaacpes->Pes_Packet_Length_Beyond = OneFrameLen_AAC;                  //= OneFrameLen_aac;     //这里读错了一帧  
+	tsaacpes->marker_bit = 0x02;
+	tsaacpes->PES_scrambling_control = 0x00;                               //人选字段 存在，不加扰
+	tsaacpes->PES_priority = 0x00;
+	tsaacpes->data_alignment_indicator = 0x00;
+	tsaacpes->copyright = 0x00;
+	tsaacpes->original_or_copy = 0x00;
+	tsaacpes->PTS_DTS_flags = 0x02;                                        //10'：PTS字段存在,DTS不存在
+	tsaacpes->ESCR_flag = 0x00;
+	tsaacpes->ES_rate_flag = 0x00;
+	tsaacpes->DSM_trick_mode_flag = 0x00;
+	tsaacpes->additional_copy_info_flag = 0x00;
+	tsaacpes->PES_CRC_flag = 0x00;
+	tsaacpes->PES_extension_flag = 0x00;
+	tsaacpes->PES_header_data_length = 0x05;                               //后面的数据 包括了PTS所占的字节数
+
+	//清 0 
+	tsaacpes->tsptsdts.pts_32_30 = 0;
+	tsaacpes->tsptsdts.pts_29_15 = 0;
+	tsaacpes->tsptsdts.pts_14_0 = 0;
+
+	tsaacpes->tsptsdts.reserved_1 = 0x03;                                 //填写 pts信息
+	// Adudiopts大于30bit，使用最高三位 
+	if (Adudiopts > 0x7FFFFFFF) {
+		tsaacpes->tsptsdts.pts_32_30 = (Adudiopts >> 30) & 0x07;
+		tsaacpes->tsptsdts.marker_bit1 = 0x01;
+	} else {
+		tsaacpes->tsptsdts.marker_bit1 = 0;
+	}
+
+	// Videopts大于15bit，使用更多的位来存储
+	if (Adudiopts > 0x7FFF) {
+		tsaacpes->tsptsdts.pts_29_15 = (Adudiopts >> 15) & 0x007FFF;
+		tsaacpes->tsptsdts.marker_bit2 = 0x01;
+	} else {
+		tsaacpes->tsptsdts.marker_bit2 = 0;
+	}
+
+	//使用最后15位
+	tsaacpes->tsptsdts.pts_14_0 = Adudiopts & 0x007FFF;
+	tsaacpes->tsptsdts.marker_bit3 = 0x01;
+
+	return 0;
+}
+
+int WriteAAC2Ts(unsigned char *pData, int iDataSize)
+{
+	Ts_Adaptation_field  ts_adaptation_field_Head;
+	Ts_Adaptation_field  ts_adaptation_field_Tail;
+
+	AAC2PES(&m_audio_tspes, Timestamp_audio, pData, iDataSize);
+
+	if (m_audio_tspes.Pes_Packet_Length_Beyond != 0) {
+		printf("PES_AUDIO  :  SIZE = %d\n", m_audio_tspes.Pes_Packet_Length_Beyond);
+		//填写自适应段标志
+		WriteAdaptive_flags_Tail(&ts_adaptation_field_Head); //填写自适应段标志  ,这里注意 音频类型不要算pcr 所以都用帧尾代替就行
+		WriteAdaptive_flags_Tail(&ts_adaptation_field_Tail); //填写自适应段标志帧尾
+		PES2TS(&m_audio_tspes, TS_AAC_PID, &ts_adaptation_field_Head, &ts_adaptation_field_Tail, Timestamp_video, Timestamp_audio);
+		Timestamp_audio += 1024 * 1000 * 90 / 8000;
+		//计算一帧音频所用时间
+	}
+
+	return 0;
+}
+
+int WriteH2642Ts(unsigned int framerate, unsigned char *pData, int iDataSize)
+{
 	unsigned int   videoframetype = 0;    //视频帧类型
 	Ts_Adaptation_field  ts_adaptation_field_Head;
 	Ts_Adaptation_field  ts_adaptation_field_Tail;
-	unsigned int WritePacketNum;
 
-	if (0 == iStreamType) {
-		Take_Out_Pes(&m_audio_tspes, Timestamp_audio, 0x01, NULL, pData, iDataSize);
+	H2642PES(&m_video_tspes, Timestamp_video, &videoframetype, pData, iDataSize);
 
-		if (m_audio_tspes.Pes_Packet_Length_Beyond != 0) {
-			printf("PES_AUDIO  :  SIZE = %d\n", m_audio_tspes.Pes_Packet_Length_Beyond);
+	if (m_video_tspes.Pes_Packet_Length_Beyond != 0) {
+	    printf("PES_VIDEO  :  SIZE = %d\n", m_video_tspes.Pes_Packet_Length_Beyond);
+		if (videoframetype == FRAME_I || videoframetype == FRAME_P || videoframetype == FRAME_B) {
 			//填写自适应段标志
-			WriteAdaptive_flags_Tail(&ts_adaptation_field_Head); //填写自适应段标志  ,这里注意 音频类型不要算pcr 所以都用帧尾代替就行
+			WriteAdaptive_flags_Head(&ts_adaptation_field_Head, Timestamp_video); //填写自适应段标志帧头
 			WriteAdaptive_flags_Tail(&ts_adaptation_field_Tail); //填写自适应段标志帧尾
-			PES2TS(&m_audio_tspes, TS_AAC_PID, &ts_adaptation_field_Head, &ts_adaptation_field_Tail, Timestamp_video, Timestamp_audio);
-			Timestamp_audio += 1024 * 1000 * 90 / 8000;
-			//计算一帧音频所用时间
-		}
-	} else if (1 == iStreamType) {
-		Take_Out_Pes(&m_video_tspes, Timestamp_video, 0x00, &videoframetype, pData, iDataSize);
-
-		if (m_video_tspes.Pes_Packet_Length_Beyond != 0) {
-		    printf("PES_VIDEO  :  SIZE = %d\n", m_video_tspes.Pes_Packet_Length_Beyond);
-			if (videoframetype == FRAME_I || videoframetype == FRAME_P || videoframetype == FRAME_B) {
-				//填写自适应段标志
-				WriteAdaptive_flags_Head(&ts_adaptation_field_Head, Timestamp_video); //填写自适应段标志帧头
-				WriteAdaptive_flags_Tail(&ts_adaptation_field_Tail); //填写自适应段标志帧尾
-				//计算一帧视频所用时间
-				PES2TS(&m_video_tspes, TS_H264_PID, &ts_adaptation_field_Head, &ts_adaptation_field_Tail, Timestamp_video, Timestamp_audio);
-				Timestamp_video += 1000 * 90 / framerate;
-			} else {
-				//填写自适应段标志
-				WriteAdaptive_flags_Tail(&ts_adaptation_field_Head); //填写自适应段标志  ,这里注意 其它帧类型不要算pcr 所以都用帧尾代替就行
-				WriteAdaptive_flags_Tail(&ts_adaptation_field_Tail); //填写自适应段标志帧尾
-				PES2TS(&m_video_tspes, TS_H264_PID, &ts_adaptation_field_Head, &ts_adaptation_field_Tail, Timestamp_video, Timestamp_audio);
-			}
+			//计算一帧视频所用时间
+			PES2TS(&m_video_tspes, TS_H264_PID, &ts_adaptation_field_Head, &ts_adaptation_field_Tail, Timestamp_video, Timestamp_audio);
+			Timestamp_video += 1000 * 90 / framerate;
+		} else {
+			//填写自适应段标志
+			WriteAdaptive_flags_Tail(&ts_adaptation_field_Head); //填写自适应段标志  ,这里注意 其它帧类型不要算pcr 所以都用帧尾代替就行
+			WriteAdaptive_flags_Tail(&ts_adaptation_field_Tail); //填写自适应段标志帧尾
+			PES2TS(&m_video_tspes, TS_H264_PID, &ts_adaptation_field_Head, &ts_adaptation_field_Tail, Timestamp_video, Timestamp_audio);
 		}
 	}
-
-	return 1;
+	
+	return 0;
 }
+
 

@@ -26,7 +26,7 @@ typedef struct Tag_PacketHeader {
 	unsigned char tras_scramb       :2  ;         //传输加扰控制
 	unsigned char ada_field_C       :2  ;         //自适应控制 01仅含有效负载，10仅含调整字段，11含有调整字段和有效负载，先调整字段然后有效负载。为00解码器不进行处理 
 	unsigned char conti_cter        :4  ;         //连续计数器 一个4bit的计数器，范围0-15
-}TsPacketHeader; 
+} TsPacketHeader; 
 
 //PAT结构体：节目相关表
 typedef struct Tag_TsPat {
@@ -46,7 +46,7 @@ typedef struct Tag_TsPat {
 	unsigned int network_PID :13 ;               //网络信息表（NIT）的PID,节目号为0时对应的PID为network_PID,本例中不含有 networke_pid
 	unsigned int program_map_PID : 13;           //节目映射表的PID，节目号大于0时对应的PID，每个节目对应一个
 	unsigned int CRC_32  : 32;             //CRC32校验码
-}TsPat; 
+} TsPat; 
 
 //PMT结构体：节目映射表
 typedef struct Tag_TsPmt {
@@ -76,7 +76,7 @@ typedef struct Tag_TsPmt {
 	unsigned char reserved_6_audio : 4;          //0x0F
 	unsigned int ES_info_length_audio : 12;      //前两位bit为00。该域指示跟随其后的描述相关节目元素的byte数
 	unsigned long long CRC_32: 32;               //CRC32校验码
-}TsPmt; 
+} TsPmt; 
 
 //连续性计数器,也就是说 有多少个 pat包，几个pmt包 ，几个MP3 包，几个 h264包，0x00 - 0x0f ，然后折回到0x00 用于查看丢包                            
 typedef struct Tag_Continuity_Counter {
@@ -84,7 +84,7 @@ typedef struct Tag_Continuity_Counter {
 	unsigned char continuity_counter_pmt;
 	unsigned char continuity_counter_video;
 	unsigned char continuity_counter_audio;
-}Continuity_Counter;
+} Continuity_Counter;
 
 //自适应段标志
 typedef struct Tag_Ts_Adaptation_field {
@@ -103,7 +103,7 @@ typedef struct Tag_Ts_Adaptation_field {
 	unsigned char splice_countdown;
 	unsigned char private_data_len;
 	unsigned char private_data [256];
-}Ts_Adaptation_field;
+} Ts_Adaptation_field;
 
 //PTS_DTS结构体：本程序设置都有 “11”
 typedef struct Tag_TsPtsDts {
@@ -121,7 +121,7 @@ typedef struct Tag_TsPtsDts {
 	unsigned char marker_bit5: 1;
 	unsigned int  dts_14_0 :15;
 	unsigned char marker_bit6 :1 ;
-}TsPtsDts;
+} TsPtsDts;
 
 //PES包结构体，包括PES包头和ES数据 ,头 19 个字节
 typedef struct Tag_TsPes {
@@ -145,7 +145,7 @@ typedef struct Tag_TsPes {
 	TsPtsDts       tsptsdts;                     //ptsdts结构体对象，10个字节
 	unsigned char  Es[MAX_ONE_FRAME_SIZE];       //一帧 原始数据
 	unsigned int   Pes_Packet_Length_Beyond;     //如果PES_packet_length的大小不能满足一帧数据的长度则用这个代替
-}TsPes;
+} TsPes;
 
 int WriteStruct_Packetheader(unsigned char *Buf, unsigned int PID, unsigned char play_init, unsigned char ada_field_C);
 int WriteStruct_Pat(unsigned char *Buf);
