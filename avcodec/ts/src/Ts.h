@@ -18,14 +18,14 @@
 
 //ts 包头
 typedef struct {
-	unsigned char sync_byte         :8  ;         //同步字节, 固定为0x47,表示后面的是一个TS分组
-	unsigned char tras_error        :1  ;         //传输误码指示符   
-	unsigned char play_init         :1  ;         //有效荷载单元起始指示符
-	unsigned char tras_prio	        :1  ;         //传输优先, 1表示高优先级,传输机制可能用到，解码用不着
-	unsigned int  PID               :13 ;         //PID
-	unsigned char tras_scramb       :2  ;         //传输加扰控制
-	unsigned char ada_field_C       :2  ;         //自适应控制 01仅含有效负载，10仅含调整字段，11含有调整字段和有效负载，先调整字段然后有效负载。为00解码器不进行处理 
-	unsigned char conti_cter        :4  ;         //连续计数器 一个4bit的计数器，范围0-15
+	unsigned char sync_byte  	:8;  //同步字节, 固定为0x47,表示后面的是一个TS分组
+	unsigned char tras_error 	:1;  //传输误码指示符   
+	unsigned char play_init     :1;   //有效荷载单元起始指示符
+	unsigned char tras_prio	    :1;   //传输优先, 1表示高优先级,传输机制可能用到，解码用不着
+	unsigned int  PID           :13;  //PID
+	unsigned char tras_scramb 	:2;  //传输加扰控制
+	unsigned char ada_field_C   :2; //自适应控制 01仅含有效负载，10仅含调整字段，11含有调整字段和有效负载，先调整字段然后有效负载。为00解码器不进行处理 
+	unsigned char conti_cter    :4;         //连续计数器 一个4bit的计数器，范围0-15
 } TsPacketHeader; 
 
 //PAT结构体：节目相关表
@@ -108,14 +108,14 @@ typedef struct {
 //PTS_DTS结构体：本程序设置都有 “11”
 typedef struct {
 	unsigned char reserved_1 : 4;
-	unsigned char pts_32_30  : 3;                //显示时间戳
+	unsigned char pts_32_30  : 3;  //显示时间戳
 	unsigned char marker_bit1: 1;
 	unsigned int  pts_29_15 : 15;
 	unsigned char marker_bit2 : 1;
 	unsigned int  pts_14_0 : 15;
 	unsigned char marker_bit3 :1 ;
 	unsigned char reserved_2 : 4;
-	unsigned char dts_32_30: 3;                  //解码时间戳
+	unsigned char dts_32_30: 3;   //解码时间戳
 	unsigned char marker_bit4 :1;
 	unsigned int  dts_29_15 :15;
 	unsigned char marker_bit5: 1;
@@ -125,9 +125,9 @@ typedef struct {
 
 //PES包结构体，包括PES包头和ES数据 ,头 19 个字节
 typedef struct {
-	unsigned int   packet_start_code_prefix : 24;//起始：0x000001
-	unsigned char  stream_id : 8;                //基本流的类型和编号
-	unsigned int   PES_packet_length : 16;       //包长度,就是帧数据的长度，可能为0,要自己算,做多16位，如果超出则需要自己算
+	unsigned int   packet_start_code_prefix: 24;//起始：0x000001
+	unsigned char  stream_id: 8;                //基本流的类型和编号
+	unsigned int   PES_packet_length: 16;       //包长度,就是帧数据的长度，可能为0,要自己算,做多16位，如果超出则需要自己算
 	unsigned char  marker_bit:2;                 //必须是：'10'
 	unsigned char  PES_scrambling_control:2;     //pes包有效载荷的加扰方式
 	unsigned char  PES_priority:1;               //有效负载的优先级
