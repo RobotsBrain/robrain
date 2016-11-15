@@ -12,7 +12,7 @@ using namespace std;
 
 
 
-void Process(fstream & fin, const char *filename)
+void Process(fstream &fin)
 {
 	CFlvParser parser;
 
@@ -46,7 +46,7 @@ void Process(fstream & fin, const char *filename)
 	
 	DumpH264(&parser, "test.h264");
 	DumpAAC(&parser, "test.aac");
-	DumpFlv(&parser, filename);
+	// DumpFlv(&parser, filename);
 
 	delete[] pBak;
 	delete[] pBuf;
@@ -56,8 +56,8 @@ void Process(fstream & fin, const char *filename)
 
 int main(int argc, char *argv[])
 {
-	if (argc != 3) {
-		cout << "FlvParser [input flv] [output flv]" << endl;
+	if (argc != 2) {
+		cout << "FlvParser [input flv]" << endl;
 		return 0;
 	}
 
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	Process(fin, argv[2]);
+	Process(fin);
 
 	fin.close();
 
