@@ -12,6 +12,8 @@
 
 using namespace std;
 
+TsMux *tsMux = NULL;
+
 int GetOneNalu(u_char * pBufIn, int nInSize, u_char * pNalu, int &nNaluSize)
 {
 	u_char *p = pBufIn;
@@ -127,7 +129,7 @@ int CVideo::Write()
 		return -1;
 	}
 
-	WriteH2642Ts(25, m_pBufferOut, nNaluSize);
+	tsMux->WriteH2642Ts(25, m_pBufferOut, nNaluSize);
 
 	if (m_pBufferOut[4] != 0x67 && m_pBufferOut[4] != 0x68) {
 		m_TimeStamp += 33;
@@ -205,7 +207,7 @@ int CAudio::Write()
 
 	printf("nAACFrameSize = %d\n", nAACFrameSize);
 	
-	WriteAAC2Ts(m_pBufferOut, nAACFrameSize);
+	tsMux->WriteAAC2Ts(m_pBufferOut, nAACFrameSize);
 
 	m_TimeStamp += double (1024 * 1000) / double (44100);
 	m_nOffset += nAACFrameSize;
@@ -256,6 +258,7 @@ int main(int argc, char *argv[])
 	CVideo *pVideo = NULL;
 	uint32_t atime = 0, vtime = 0;
 	bool bastop = false, bvstop = false;
+	tsMux = new TsMux();
 
 	if (bAudio) {
 		pAudio = new CAudio(audiofile);
@@ -269,7 +272,7 @@ int main(int argc, char *argv[])
 
 	m_File.open("test.ts", ios::binary | ios::out);
 
-	SetCallback(WriteData);
+	tsMux->SetCallback(WriteData);
 
 	while (1) {
 		if (bAudio && bVideo) {
@@ -304,6 +307,8 @@ int main(int argc, char *argv[])
 			vtime = timestamp;
 		}
 	}
+
+	delete tsMux;
 
 	m_File.close();
 
