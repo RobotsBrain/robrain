@@ -54,7 +54,7 @@ int GetOneNalu(u_char * pBufIn, int nInSize, u_char * pNalu, int &nNaluSize)
 	return 1;
 }
 
-int GetOneAACFrame(u_char * pBufIn, int nInSize, u_char * pAACFrame,
+int GetOneAACFrame(u_char *pBufIn, int nInSize, u_char *pAACFrame,
 				   int &nAACFrameSize)
 {
 	unsigned char *p = pBufIn;
@@ -198,8 +198,7 @@ int CAudio::Write()
 {
 	int nAACFrameSize = 0;
 
-	if (GetOneAACFrame
-		(m_pBufferIn + m_nOffset, m_nFileSize - m_nOffset, m_pBufferOut,
+	if (GetOneAACFrame(m_pBufferIn + m_nOffset, m_nFileSize - m_nOffset, m_pBufferOut,
 		 nAACFrameSize) == 0) {
 		DEBUG("\n");
 		return -1;
