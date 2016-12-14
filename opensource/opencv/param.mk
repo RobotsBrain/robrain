@@ -1,3 +1,0 @@
-FILENAME=opencv-2.4.6.1.tar.gz
-DIRNAME=opencv-2.4.6.1
-DOWNLOADURL=
