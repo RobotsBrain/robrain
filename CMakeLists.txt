@@ -37,11 +37,11 @@ add_subdirectory(${TOPDIR}/avcodec/ts/test ${BUILDDIR}/avcodec/ts/test)
 add_subdirectory(${TOPDIR}/avcodec/aac/src ${BUILDDIR}/avcodec/aac/src)
 add_subdirectory(${TOPDIR}/avcodec/aac/test ${BUILDDIR}/avcodec/aac/test)
 
-add_subdirectory(${TOPDIR}/transmit/live555_rtsp/src ${BUILDDIR}/transmit/live555_rtsp/src)
-add_subdirectory(${TOPDIR}/transmit/live555_rtsp/test ${BUILDDIR}/transmit/live555_rtsp/test)
+#add_subdirectory(${TOPDIR}/stream_media/rtsp/src ${BUILDDIR}/stream_media/rtsp/src)
+#add_subdirectory(${TOPDIR}/stream_media/rtsp/test ${BUILDDIR}/stream_media/rtsp/test)
 
-add_subdirectory(${TOPDIR}/transmit/rtmp/src ${BUILDDIR}/transmit/rtmp/src)
-add_subdirectory(${TOPDIR}/transmit/rtmp/test ${BUILDDIR}/transmit/rtmp/test)
+add_subdirectory(${TOPDIR}/stream_media/rtmp/src ${BUILDDIR}/stream_media/rtmp/src)
+add_subdirectory(${TOPDIR}/stream_media/rtmp/test ${BUILDDIR}/stream_media/rtmp/test)
 
 #add_subdirectory(${TOPDIR}/transmit/rtsp/src ${BUILDDIR}/transmit/rtsp/src)
 #add_subdirectory(${TOPDIR}/transmit/rtsp/test ${BUILDDIR}/transmit/rtsp/test)
