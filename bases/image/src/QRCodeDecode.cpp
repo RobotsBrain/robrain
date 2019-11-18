@@ -23,7 +23,8 @@ bool ParseQrcodeImage(void *raw, int width, int height)
     for(zbar::Image::SymbolIterator symbol = image.symbol_begin();
         symbol != image.symbol_end(); ++symbol) {
 
-        printf("%s %s\n", symbol->get_type_name().c_str(), symbol->get_data().c_str());
+        printf("%s %s\n", symbol->get_type_name().c_str(),
+            symbol->get_data().c_str());
         res = true;
     }
 
