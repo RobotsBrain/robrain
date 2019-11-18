@@ -10,28 +10,28 @@ namespace Base {
 class CComponentManager
 {
 public:
-	static CComponentManager *Instance();
+    static CComponentManager *Instance();
 
-	void RegisterComponent(void *pComponent, string name);
-	void UnRegisterComponent(string name);
+    void RegisterComponent(void *pComponent, string name);
+    void UnRegisterComponent(string name);
 
-	void *FindComponent(string name);
+    void *FindComponent(string name);
 
 private:
-	CComponentManager();
-	~CComponentManager();
-	
-private:
-	typedef map<string, void *> ComponentMap;
+    CComponentManager();
+    ~CComponentManager();
 
-	ComponentMap m_component_map;
+private:
+    typedef map<string, void *> ComponentMap;
+
+    ComponentMap m_component_map;
 };
 
 CComponentManager *CComponentManager::Instance()
 {
-	static CComponentManager ins;
+    static CComponentManager ins;
 
-	return &ins;
+    return &ins;
 }
 
 CComponentManager::CComponentManager()
@@ -44,29 +44,29 @@ CComponentManager::~CComponentManager()
 
 void CComponentManager::RegisterComponent(void *pComponent, string name)
 {
-	ComponentMap::iterator it = m_component_map.find(name);
+    ComponentMap::iterator it = m_component_map.find(name);
     if (it == m_component_map.end()) {
         m_component_map[name] = pComponent;
         return;
     }
 
-	return;
+    return;
 }
 
 void CComponentManager::UnRegisterComponent(string name)
 {
-	ComponentMap::iterator it = m_component_map.find(name);
+    ComponentMap::iterator it = m_component_map.find(name);
     if (it != m_component_map.end()) {
         m_component_map.erase(it);
         return;
     }
 
-	return;
+    return;
 }
 
 void *CComponentManager::FindComponent(string name)
 {
-	ComponentMap::iterator it = m_component_map.find(name);
+    ComponentMap::iterator it = m_component_map.find(name);
     if (it != m_component_map.end()) {
         return it->second;
     }
@@ -76,17 +76,17 @@ void *CComponentManager::FindComponent(string name)
 
 void RegisterComponent(void *pComponent, string name)
 {
-	CComponentManager::Instance()->RegisterComponent(pComponent, name);
+    CComponentManager::Instance()->RegisterComponent(pComponent, name);
 }
 
 void UnRegisterComponent(string name)
 {
-	CComponentManager::Instance()->UnRegisterComponent(name);
+    CComponentManager::Instance()->UnRegisterComponent(name);
 }
 
 void *FindComponent(string name)
 {
-	return CComponentManager::Instance()->FindComponent(name);
+    return CComponentManager::Instance()->FindComponent(name);
 }
 
 } // end namespace

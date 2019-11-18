@@ -10,7 +10,7 @@ namespace Base {
 
 
 CIniFile::CIniFile()
-: m_pImpl(new IniFilePimpl())
+    : m_pImpl(new IniFilePimpl())
 {
 
 }

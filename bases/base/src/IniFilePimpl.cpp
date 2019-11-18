@@ -54,7 +54,7 @@ void trim(string &str)
     //trim head
     int i = 0;
     int len = str.length();
-    
+
     while (isspace(str[i]) && str[i] != '\0') {
         i++;
     }
@@ -84,9 +84,9 @@ IniFilePimpl::IniFilePimpl()
     m_flags.push_back(";");
 }
 
-IniFilePimpl::~IniFilePimpl() 
+IniFilePimpl::~IniFilePimpl()
 {
-	release();
+    release();
 }
 
 int IniFilePimpl::load(const string &filename)
@@ -94,7 +94,7 @@ int IniFilePimpl::load(const string &filename)
     Section *section = NULL;
     FILE *fp = fopen(filename.c_str(), "r");
 
-	release();
+    release();
     m_fname = filename;
 
     if (fp == NULL) {
@@ -199,9 +199,9 @@ int IniFilePimpl::load(const string &filename)
 
 int IniFilePimpl::save(const string &bfname)
 {
-	string data = "";
+    string data = "";
 
-    for (map<string, Section *>::iterator sect = m_sections.begin(); 
+    for (map<string, Section *>::iterator sect = m_sections.begin();
             sect != m_sections.end(); ) {
 
         if (sect->second->comment != "") {
@@ -214,8 +214,8 @@ int IniFilePimpl::save(const string &bfname)
             data += delim;
         }
 
-        for (vector<Item>::iterator item = sect->second->items.begin(); 
-				item != sect->second->items.end(); ++item) {
+        for (vector<Item>::iterator item = sect->second->items.begin();
+                item != sect->second->items.end(); ++item) {
             if (item->comment != "") {
                 data += item->comment;
                 data += delim;
@@ -229,7 +229,7 @@ int IniFilePimpl::save(const string &bfname)
 
         if(sect != m_sections.end()) {
             data += delim;
-        }     
+        }
     }
 
     string savefile = bfname;
@@ -239,10 +239,10 @@ int IniFilePimpl::save(const string &bfname)
     }
 
     FILE *fp = fopen(savefile.c_str(), "w");
-	if(fp == NULL) {
-		printf("open file fail!\n");
-		return -1;
-	}
+    if(fp == NULL) {
+        printf("open file fail!\n");
+        return -1;
+    }
 
     fwrite(data.c_str(), 1, data.length(), fp);
 
@@ -271,7 +271,7 @@ int IniFilePimpl::getValue(const string &section, const string &key, string &val
 }
 
 int IniFilePimpl::setValue(const string &section, const string &key,
-                      const string &value, const string &comment /*=""*/)
+                           const string &value, const string &comment /*=""*/)
 {
     Section *sect = getSection(section);
     string comt = comment;
@@ -392,14 +392,14 @@ void IniFilePimpl::release()
 {
     m_fname = "";
 
-    for (map<string, Section *>::iterator i = m_sections.begin(); 
-        i != m_sections.end(); ++i) {
+    for (map<string, Section *>::iterator i = m_sections.begin();
+            i != m_sections.end(); ++i) {
         delete i->second;
     }
 
     m_sections.clear();
 
-	return;
+    return;
 }
 
 bool IniFilePimpl::isComment(const string &str)

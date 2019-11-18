@@ -275,26 +275,6 @@ void CVideoCapture::EventHandleLoop()
 		uint8_t *yuv_frame = (uint8_t *)m_buffers[buf.index].start;
 
 		if (yuv_frame[0] != '\0') {
-			static bool image = false;
-			static int count = 0;
-			if(!image && count++ > 20) {
-				// Image::Yuv422ToJpeg("image.jpg", yuv_frame, 640, 480, 100);
-				// Image::Yuv420ToJpeg((char *)"image.jpg", yuv_frame, 640, 480, 100);
-				
-				YuvToJpegEncoder *encoder = new YUY2ToJpegEncoder(640, 480, 80);
-				
-				std::vector<unsigned char> jpeg;
-				jpeg.clear();
-
-				int encode_len = encoder->encode(yuv_frame, jpeg);
-				FILE *pjpeg = fopen("image.jpg", "w");
-				fwrite(jpeg.data(), sizeof(unsigned char), encode_len, pjpeg);
-				fclose(pjpeg);
-				delete encoder;
-
-				image = true;
-			}
-
 			int h264_length = m_x264encoder.CompressFrame(-1, yuv_frame, h264_buf);
 			// m_rtpsender.SendH264Nalu(h264_buf, h264_length);
 			if(h264_length > 0) {
@@ -327,3 +307,24 @@ void CVideoCapture::EventHandleLoop()
 }
 
 
+#if 0
+static bool image = false;
+static int count = 0;
+if(!image && count++ > 20) {
+	// Image::Yuv422ToJpeg("image.jpg", yuv_frame, 640, 480, 100);
+	// Image::Yuv420ToJpeg((char *)"image.jpg", yuv_frame, 640, 480, 100);
+	
+	YuvToJpegEncoder *encoder = new YUY2ToJpegEncoder(640, 480, 80);
+	
+	std::vector<unsigned char> jpeg;
+	jpeg.clear();
+
+	int encode_len = encoder->encode(yuv_frame, jpeg);
+	FILE *pjpeg = fopen("image.jpg", "w");
+	fwrite(jpeg.data(), sizeof(unsigned char), encode_len, pjpeg);
+	fclose(pjpeg);
+	delete encoder;
+
+	image = true;
+}
+#endif

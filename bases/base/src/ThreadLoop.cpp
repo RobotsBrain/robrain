@@ -2,7 +2,7 @@
 #include <errno.h>
 
 #ifdef  __linux__
-	#include <sys/prctl.h>
+#include <sys/prctl.h>
 #endif
 
 #include "base/Log.h"
@@ -14,40 +14,40 @@ namespace Base {
 
 
 CThreadLoop::CThreadLoop(std::string name)
-: m_name(name)
-, m_start(false)
+    : m_name(name)
+    , m_start(false)
 {
 }
 
 CThreadLoop::~CThreadLoop()
 {
-	StopThread();
+    StopThread();
 }
-	
+
 bool CThreadLoop::StartThread()
 {
-	int res = false;
+    int res = false;
 
-	if(m_start) {
-		INFO("thread(%s) has started!\n", m_name.c_str());
-		return true;
-	}
+    if(m_start) {
+        INFO("thread(%s) has started!\n", m_name.c_str());
+        return true;
+    }
 
-	pthread_mutex_init(&m_lock, NULL);
-	pthread_cond_init(&m_condition, NULL);
+    pthread_mutex_init(&m_lock, NULL);
+    pthread_cond_init(&m_condition, NULL);
 
-	pthread_attr_t attr;
+    pthread_attr_t attr;
 
-	pthread_attr_init(&attr);  
-     
+    pthread_attr_init(&attr);
+
     pthread_attr_setstacksize(&attr, 1024 * 1024);
 
-    if(pthread_create(&m_tid, &attr, ThreadProc, this) == -1) {  
- 		ERROR("can not create thread\n");
- 		res = false;
+    if(pthread_create(&m_tid, &attr, ThreadProc, this) == -1) {
+        ERROR("can not create thread\n");
+        res = false;
     } else {
-    	m_start = true;
-    	INFO("start thread(%s) success!\n", m_name.c_str());
+        m_start = true;
+        INFO("start thread(%s) success!\n", m_name.c_str());
     }
 
     pthread_attr_destroy(&attr);
@@ -57,14 +57,14 @@ bool CThreadLoop::StartThread()
 
 bool CThreadLoop::StopThread()
 {
-	if(!m_start) {
-		INFO("thread(%s) has stopped!\n", m_name.c_str());
-		return true;
-	}
+    if(!m_start) {
+        INFO("thread(%s) has stopped!\n", m_name.c_str());
+        return true;
+    }
 
-	pthread_cond_broadcast(&m_condition);
+    pthread_cond_broadcast(&m_condition);
 
-	pthread_join(m_tid, NULL);
+    pthread_join(m_tid, NULL);
 
     pthread_mutex_destroy(&m_lock);
     pthread_cond_destroy(&m_condition);
@@ -73,7 +73,7 @@ bool CThreadLoop::StopThread()
 
     INFO("stop thread(%s) success!\n", m_name.c_str());
 
-	return true;
+    return true;
 }
 
 /*****************************************************************************
@@ -103,45 +103,45 @@ pthread_cond_timedwait(&_read_cond, &_read_mutex, &abstime);
 *****************************************************************************/
 int CThreadLoop::WaitForSleep(int timeout_ms)
 {
-	int ret = -1;
-	struct timespec abstime;
-	struct timeval now;
+    int ret = -1;
+    struct timespec abstime;
+    struct timeval now;
 
-	gettimeofday(&now, NULL);
+    gettimeofday(&now, NULL);
 
-	int nsec = now.tv_usec * 1000 + (timeout_ms % 1000) * 1000000;
-	abstime.tv_nsec = nsec % 1000000000;
-	abstime.tv_sec = now.tv_sec + nsec / 1000000000 + timeout_ms / 1000;
+    int nsec = now.tv_usec * 1000 + (timeout_ms % 1000) * 1000000;
+    abstime.tv_nsec = nsec % 1000000000;
+    abstime.tv_sec = now.tv_sec + nsec / 1000000000 + timeout_ms / 1000;
 
-	int err = pthread_cond_timedwait(&m_condition, &m_lock, &abstime);
-	if(err == ETIMEDOUT) {
-		ret = 0;
-	}
-	
-	return ret;
+    int err = pthread_cond_timedwait(&m_condition, &m_lock, &abstime);
+    if(err == ETIMEDOUT) {
+        ret = 0;
+    }
+
+    return ret;
 }
 
 void CThreadLoop::EventHandleLoop()
 {
-	while(1) {
-		WaitForSleep(0);
-	}
-	
-	return;
+    while(1) {
+        WaitForSleep(0);
+    }
+
+    return;
 }
 
 void *CThreadLoop::ThreadProc(void *argv)
 {
-	CThreadLoop *thiz = (CThreadLoop *)argv;
+    CThreadLoop *thiz = (CThreadLoop *)argv;
 
-	if(thiz != NULL) {
+    if(thiz != NULL) {
 #ifdef __linux__
-		prctl(PR_SET_NAME, thiz->m_name.c_str());
+        prctl(PR_SET_NAME, thiz->m_name.c_str());
 #endif
-		thiz->EventHandleLoop();
-	}
+        thiz->EventHandleLoop();
+    }
 
-	return NULL;
+    return NULL;
 }
 
 } // end namespace
