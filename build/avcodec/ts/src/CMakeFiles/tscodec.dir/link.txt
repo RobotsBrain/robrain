@@ -1,0 +1,2 @@
+/usr/bin/ar qc libtscodec.a  CMakeFiles/tscodec.dir/TsMux.cpp.o
+/usr/bin/ranlib libtscodec.a

@@ -1,0 +1,1 @@
+g++      CMakeFiles/TestDumpFile.dir/TestDumpFile.cpp.o  -o ../../../../out/basics/base/test/TestDumpFile -rdynamic ../src/libbase.a 

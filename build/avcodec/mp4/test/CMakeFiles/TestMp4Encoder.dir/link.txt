@@ -1,0 +1,1 @@
+g++      CMakeFiles/TestMp4Encoder.dir/TestMp4Encoder.cpp.o  -o ../../../../out/avcodec/mp4/test/TestMp4Encoder  -L/srv/robrain/opensource/prebuild/libs/u-gxx-5 -Wl,-rpath,/srv/robrain/opensource/prebuild/libs/u-gxx-5 -rdynamic ../src/libmp4codec.a -lmp4v2 ../../../basics/base/src/libbase.a -lpthread 

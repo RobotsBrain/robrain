@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../basics/base/include/base/Lock.h
+pthread.h
+-
+
+../basics/base/include/base/MsgQueue.h
+string
+-
+queue
+-
+Lock.h
+../basics/base/include/base/Lock.h
+
+/srv/robrain/basics/base/test/TestMsgQueue.cpp
+string.h
+-
+stdio.h
+-
+string
+-
+base/MsgQueue.h
+/srv/robrain/basics/base/test/base/MsgQueue.h
+

@@ -1,0 +1,1 @@
+g++      CMakeFiles/TestMsgQueue.dir/TestMsgQueue.cpp.o  -o ../../../../out/basics/base/test/TestMsgQueue -rdynamic ../src/libbase.a 

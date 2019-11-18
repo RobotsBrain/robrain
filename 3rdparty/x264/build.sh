@@ -12,9 +12,9 @@ tar -jxvf ${FILENAME}
 
 # build lib
 cd ${DIRNAME}
-./configure --disable-opencl
+./configure --disable-opencl --disable-asm
 make
 cd ..
 
 cp ${DIRNAME}/x264.h ${CURDIR}/../prebuild/include/x264
-cp ${DIRNAME}/libx264.a ${CURDIR}/../prebuild/libs
+cp ${DIRNAME}/libx264.a ${CURDIR}/../prebuild/libs/ubuntu

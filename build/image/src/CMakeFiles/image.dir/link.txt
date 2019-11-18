@@ -1,0 +1,2 @@
+/usr/bin/ar qc libimage.a  CMakeFiles/image.dir/QRCodeDecode.cpp.o CMakeFiles/image.dir/Yuv2Jpeg.cpp.o
+/usr/bin/ranlib libimage.a

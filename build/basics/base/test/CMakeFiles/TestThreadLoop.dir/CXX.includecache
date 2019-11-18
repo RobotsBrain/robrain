@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../basics/base/include/base/Log.h
+sys/types.h
+-
+unistd.h
+-
+string.h
+-
+stdio.h
+-
+
+../basics/base/include/base/ThreadLoop.h
+pthread.h
+-
+string
+-
+
+/srv/robrain/basics/base/test/TestThreadLoop.cpp
+stdlib.h
+-
+unistd.h
+-
+string.h
+-
+stdio.h
+-
+sys/prctl.h
+-
+base/Log.h
+/srv/robrain/basics/base/test/base/Log.h
+base/ThreadLoop.h
+/srv/robrain/basics/base/test/base/ThreadLoop.h
+

@@ -1,0 +1,1 @@
+g++      CMakeFiles/TestThreadLoop.dir/TestThreadLoop.cpp.o  -o ../../../../out/basics/base/test/TestThreadLoop -rdynamic ../src/libbase.a -lpthread 

@@ -1,0 +1,1 @@
+g++      CMakeFiles/TestLiveRtmpStream.dir/TestLiveRtmpStream.cpp.o  -o ../../../../out/rtmp-client/test/TestLiveRtmpStream  -L/srv/robrain/3rdparty/prebuild/libs/u-gxx-5 -Wl,-rpath,/srv/robrain/3rdparty/prebuild/libs/u-gxx-5 -rdynamic ../src/librtmpclient.a -lrtmp -lflv -lssl -lcrypto -lz -lpthread 

@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../basics/base/include/base/Lock.h
+pthread.h
+-
+
+/srv/robrain/basics/base/test/TestLock.cpp
+iostream
+-
+unistd.h
+-
+base/Lock.h
+/srv/robrain/basics/base/test/base/Lock.h
+

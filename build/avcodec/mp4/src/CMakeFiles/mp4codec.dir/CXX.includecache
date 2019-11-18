@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/srv/robrain/avcodec/mp4/src/Mp4Encoder.cpp
+string.h
+-
+Mp4Encoder.h
+/srv/robrain/avcodec/mp4/src/Mp4Encoder.h
+
+/srv/robrain/avcodec/mp4/src/Mp4Encoder.h
+sys/types.h
+-
+stdint.h
+-
+mp4v2/mp4v2.h
+/srv/robrain/avcodec/mp4/src/mp4v2/mp4v2.h
+
+/srv/robrain/avcodec/mp4/src/Mp4Parser.cpp
+arpa/inet.h
+-
+

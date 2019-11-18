@@ -1,0 +1,2 @@
+/usr/bin/ar qc librtmpclient.a  CMakeFiles/rtmpclient.dir/FetchRtmpStream.cpp.o CMakeFiles/rtmpclient.dir/LiveRtmpStream.cpp.o
+/usr/bin/ranlib librtmpclient.a

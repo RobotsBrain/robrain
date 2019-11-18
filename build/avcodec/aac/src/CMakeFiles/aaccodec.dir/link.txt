@@ -1,0 +1,2 @@
+/usr/bin/ar qc libaaccodec.a  CMakeFiles/aaccodec.dir/Adts.cpp.o
+/usr/bin/ranlib libaaccodec.a

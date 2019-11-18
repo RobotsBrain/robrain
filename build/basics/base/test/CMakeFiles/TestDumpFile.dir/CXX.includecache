@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../basics/base/include/base/DumpFile.h
+stdint.h
+-
+stdio.h
+-
+string
+-
+
+/srv/robrain/basics/base/test/TestDumpFile.cpp
+base/DumpFile.h
+/srv/robrain/basics/base/test/base/DumpFile.h
+
