@@ -1,1 +1,0 @@
-g++      CMakeFiles/TestAacEncoder.dir/TestAacEncoder.cpp.o  -o ../../../../out/avcodec/aac/test/TestAacEncoder  -L/srv/robrain/opensource/prebuild/libs/u-gxx-5 -Wl,-rpath,/srv/robrain/opensource/prebuild/libs/u-gxx-5 -rdynamic -lfaac 

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libmp4codec.a  CMakeFiles/mp4codec.dir/Mp4Encoder.cpp.o CMakeFiles/mp4codec.dir/Mp4Parser.cpp.o
-/usr/bin/ranlib libmp4codec.a

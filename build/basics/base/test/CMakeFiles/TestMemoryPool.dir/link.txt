@@ -1,1 +1,0 @@
-g++      CMakeFiles/TestMemoryPool.dir/TestMemoryPool.cpp.o  -o ../../../../out/basics/base/test/TestMemoryPool -rdynamic ../src/libbase.a 

@@ -1,1 +1,0 @@
-g++      CMakeFiles/TestDoubleLinkList.dir/TestDoubleLinkList.cpp.o  -o ../../../../out/basics/base/test/TestDoubleLinkList -rdynamic ../src/libbase.a 

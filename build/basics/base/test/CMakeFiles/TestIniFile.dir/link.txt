@@ -1,1 +1,0 @@
-g++      CMakeFiles/TestIniFile.dir/TestIniFile.cpp.o  -o ../../../../out/basics/base/test/TestIniFile -rdynamic ../src/libbase.a 

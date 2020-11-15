@@ -1,1 +1,0 @@
-g++      CMakeFiles/TestFlvEncoder.dir/TestFlvEncoder.cpp.o  -o ../../../../out/avcodec/flv/test/TestFlvEncoder  -L/srv/robrain/opensource/prebuild/libs/u-gxx-5 -Wl,-rpath,/srv/robrain/opensource/prebuild/libs/u-gxx-5 -rdynamic ../src/libflvcodec.a ../../../basics/base/src/libbase.a -lpthread 

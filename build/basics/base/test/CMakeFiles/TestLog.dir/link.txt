@@ -1,1 +1,0 @@
-g++      CMakeFiles/TestLog.dir/TestLog.cpp.o  -o ../../../../out/basics/base/test/TestLog -rdynamic ../src/libbase.a 

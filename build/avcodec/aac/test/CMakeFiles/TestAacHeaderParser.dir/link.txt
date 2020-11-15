@@ -1,1 +1,0 @@
-g++      CMakeFiles/TestAacHeaderParser.dir/TestAacHeaderParser.cpp.o  -o ../../../../out/avcodec/aac/test/TestAacHeaderParser  -L/srv/robrain/opensource/prebuild/libs/u-gxx-5 -Wl,-rpath,/srv/robrain/opensource/prebuild/libs/u-gxx-5 -rdynamic ../src/libaaccodec.a 

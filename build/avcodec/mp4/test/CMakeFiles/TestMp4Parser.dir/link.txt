@@ -1,1 +1,0 @@
-g++      CMakeFiles/TestMp4Parser.dir/TestMp4Parser.cpp.o  -o ../../../../out/avcodec/mp4/test/TestMp4Parser  -L/srv/robrain/opensource/prebuild/libs/u-gxx-5 -Wl,-rpath,/srv/robrain/opensource/prebuild/libs/u-gxx-5 -rdynamic ../src/libmp4codec.a -lmp4v2 ../../../basics/base/src/libbase.a -lpthread 

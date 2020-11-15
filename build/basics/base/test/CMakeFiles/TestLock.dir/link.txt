@@ -1,1 +1,0 @@
-g++      CMakeFiles/TestLock.dir/TestLock.cpp.o  -o ../../../../out/basics/base/test/TestLock -rdynamic ../src/libbase.a -lpthread 
